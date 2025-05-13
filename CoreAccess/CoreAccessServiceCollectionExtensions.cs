@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoreAccess;

@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess", "CoreAccess\CoreAccess.csproj", "{6DC1624A-90D1-400F-83E5-4ACDFBCF8A6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.SampleAPI", "CoreAccess.SampleAPI\CoreAccess.SampleAPI.csproj", "{D68FABA2-5B23-4E64-9263-C241F161CC94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{6DC1624A-90D1-400F-83E5-4ACDFBCF8A6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DC1624A-90D1-400F-83E5-4ACDFBCF8A6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DC1624A-90D1-400F-83E5-4ACDFBCF8A6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D68FABA2-5B23-4E64-9263-C241F161CC94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D68FABA2-5B23-4E64-9263-C241F161CC94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D68FABA2-5B23-4E64-9263-C241F161CC94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D68FABA2-5B23-4E64-9263-C241F161CC94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

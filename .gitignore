@@ -1,4 +1,4 @@
-## Build results
+## Build results Package project
 CoreAccess/[Dd]ebug/
 CoreAccess/[Dd]ebugPublic/
 CoreAccess/[Rr]elease/
@@ -13,6 +13,22 @@ CoreAccess/[Bb]in/
 CoreAccess/[Oo]bj/
 CoreAccess/[Ll]og/
 CoreAccess/[Ll]ogs/
+
+## Build results Sample API project
+CoreAccess.SampleAPI/[Dd]ebug/
+CoreAccess.SampleAPI/[Dd]ebugPublic/
+CoreAccess.SampleAPI/[Rr]elease/
+CoreAccess.SampleAPI/[Rr]eleases/
+CoreAccess.SampleAPI/x64/
+CoreAccess.SampleAPI/x86/
+CoreAccess.SampleAPI/[Ww][Ii][Nn]32/
+CoreAccess.SampleAPI/[Aa][Rr][Mm]/
+CoreAccess.SampleAPI/[Aa][Rr][Mm]64/
+CoreAccess.SampleAPI/bld/
+CoreAccess.SampleAPI/[Bb]in/
+CoreAccess.SampleAPI/[Oo]bj/
+CoreAccess.SampleAPI/[Ll]og/
+CoreAccess.SampleAPI/[Ll]ogs/
 
 ## .NET Core
 CoreAccess/project.lock.json
