@@ -23,20 +23,21 @@ namespace CoreAccess.SampleAPI.Services
                 _products = new List<Product>();
             }
         }
-
-        // CREATE
+        
         public Product Create(Product product)
         {
-            product.Id = Guid.NewGuid(); // Automatisch eine neue ID zuweisen
+            product.Id = Guid.NewGuid();
             _products.Add(product);
             SaveChanges();
             return product;
         }
 
-        // READ (get all products with optional search filters)
         public IEnumerable<Product> GetAll(SearchOptions searchOptions)
         {
             var query = _products.AsQueryable();
+            
+            if (searchOptions.MaxPrice.HasValue)
+                query = query.Where(p => p.Id.Equals(Guid.Parse(searchOptions.Id?? "")));
 
             if (!string.IsNullOrEmpty(searchOptions.ProductName))
                 query = query.Where(p => p.ProductName.Contains(searchOptions.ProductName, StringComparison.OrdinalIgnoreCase));
@@ -55,14 +56,7 @@ namespace CoreAccess.SampleAPI.Services
 
             return query.ToList();
         }
-
-        // READ (get a single product by ID)
-        public Product GetById(string id)
-        {
-            return _products.FirstOrDefault(p => p.Id == Guid.Parse(id));
-        }
-
-        // UPDATE
+        
         public Product Update(string id, Product updatedProduct)
         {
             var product = _products.FirstOrDefault(p => p.Id == Guid.Parse(id));
@@ -87,8 +81,7 @@ namespace CoreAccess.SampleAPI.Services
             }
             return product;
         }
-
-        // DELETE
+        
         public bool Delete(string id)
         {
             var product = _products.FirstOrDefault(p => p.Id == Guid.Parse(id));
@@ -100,18 +93,16 @@ namespace CoreAccess.SampleAPI.Services
             }
             return false;
         }
-
-        // Helper Method to save changes to the JSON file
+        
         private void SaveChanges()
         {
             var json = JsonSerializer.Serialize(_products, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "example-data.json"), json);
         }
     }
-
-    // Optional Search Options object
     public class SearchOptions
     {
+        public string? Id { get; set; }
         public string? ProductName { get; set; }
         public string? Brand { get; set; }
         public string? Color { get; set; }
