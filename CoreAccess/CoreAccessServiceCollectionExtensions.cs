@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CoreAccess.Services;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoreAccess;
@@ -23,13 +25,11 @@ public static class CoreAccessServiceCollectionExtensions
                 opt.UseNpgsql(options.ConnectionString));
         }
 
-     /**   services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IUserService, UserService>();
-        if (options.EnableRoles)
-            services.AddScoped<IRoleService, RoleService>();
-
-        services.AddControllers().PartManager.ApplicationParts.Add(
-            new AssemblyPart(typeof(CoreAccessServiceCollectionExtensions).Assembly)); **/
+       /**   services.AddScoped<IJwtTokenService, JwtTokenService>(); 
+          if (options.EnableRoles)
+              services.AddScoped<IRoleService, RoleService>();
+ **/
 
         return services;
     }
