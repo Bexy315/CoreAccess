@@ -30,6 +30,7 @@ CoreAccess.SampleAPI/[Oo]bj/
 CoreAccess.SampleAPI/[Ll]og/
 CoreAccess.SampleAPI/[Ll]ogs/
 CoreAccess.SampleAPI/data/
+CoreAccess.SampleAPI/coreaccess.db
 
 ## .NET Core
 CoreAccess/project.lock.json

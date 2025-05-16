@@ -21,4 +21,19 @@ namespace ExampleApi.Models
         public string Description { get; set; }
         public long Barcode { get; set; }
     }
+    
+    public class ProductSearchOptions
+    {
+        public Guid? Id { get; set; }
+        public string? ProductName { get; set; }
+        public string? Brand { get; set; }
+        public string? Color { get; set; }
+        public string? Description { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+    }
+
 }

@@ -1,9 +1,9 @@
 namespace CoreAccess.SampleAPI.Model;
 
-public class MockUserSearchOptions
+public class PagedResult<T>
 {
-    public string? Name { get; set; }
-    public string? Tag { get; set; }
-    public string? Company { get; set; }
-    public string? EyeColor { get; set; }
+    public List<T> Items { get; set; } = [];
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
 }

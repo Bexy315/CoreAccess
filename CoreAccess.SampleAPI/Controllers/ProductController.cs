@@ -1,3 +1,4 @@
+using CoreAccess.SampleAPI.Model;
 using CoreAccess.SampleAPI.Services;
 using ExampleApi.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace CoreAccess.SampleAPI.Controllers;
 public class ProductController(ProductService productService) : ControllerBase
 {
     [HttpGet]
-    public IActionResult GetAll([FromQuery] SearchOptions searchOptions)
+    public ActionResult<PagedResult<Product>> GetProducts([FromQuery] ProductSearchOptions searchOptions)
     {
         var products = productService.GetAll(searchOptions);
         return Ok(products);

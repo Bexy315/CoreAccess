@@ -24,13 +24,25 @@ public static class CoreAccessServiceCollectionExtensions
             services.AddDbContext<CoreAccessDbContext>(opt =>
                 opt.UseNpgsql(options.ConnectionString));
         }
+        
+        // Migrations
+        using (var serviceProvider = services.BuildServiceProvider())
+        {
+            var dbContext = serviceProvider.GetRequiredService<CoreAccessDbContext>();
+            dbContext.Database.Migrate();
+        }
 
         services.AddScoped<IUserService, UserService>();
        /**   services.AddScoped<IJwtTokenService, JwtTokenService>(); 
           if (options.EnableRoles)
               services.AddScoped<IRoleService, RoleService>();
  **/
-
+       
         return services;
+    }
+    
+    public static class ServiceProviderAccessor
+    {
+        public static IServiceProvider? ServiceProvider { get; set; }
     }
 }

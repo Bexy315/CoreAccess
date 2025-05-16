@@ -9,7 +9,7 @@ public interface IUserService
     Task<bool> UpdateUserAsync(string userId, CoreUserUpdateRequest user);
     Task<bool> DeleteUserAsync(string id);
 }
-public class UserService : IUserService
+internal class UserService : IUserService
 {
     public async Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options)
     {

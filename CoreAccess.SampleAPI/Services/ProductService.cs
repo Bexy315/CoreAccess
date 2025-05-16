@@ -1,5 +1,7 @@
 using System.Text.Json;
+using CoreAccess.SampleAPI.Model;
 using ExampleApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoreAccess.SampleAPI.Services
 {
@@ -32,29 +34,45 @@ namespace CoreAccess.SampleAPI.Services
             return product;
         }
 
-        public IEnumerable<Product> GetAll(SearchOptions searchOptions)
+        public PagedResult<Product> GetAll(ProductSearchOptions options)
         {
             var query = _products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(options.Id.ToString()))
+            {
+                query = query.Where(p => p.Id.Equals(options.Id));
+            }
+
+            if (!string.IsNullOrEmpty(options.ProductName))
+                query = query.Where(p => p.ProductName.Contains(options.ProductName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(options.Brand))
+                query = query.Where(p => p.Brand.Contains(options.Brand, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(options.Color))
+                query = query.Where(p => p.Color.Contains(options.Color, StringComparison.OrdinalIgnoreCase));
+
+            if (options.MinPrice.HasValue)
+                query = query.Where(p => (decimal)p.Price >= options.MinPrice.Value);
+
+            if (options.MaxPrice.HasValue)
+                query = query.Where(p => (decimal)p.Price <= options.MaxPrice.Value);
             
-            if (searchOptions.MaxPrice.HasValue)
-                query = query.Where(p => p.Id.Equals(Guid.Parse(searchOptions.Id?? "")));
+            var totalCount = query.Count();
 
-            if (!string.IsNullOrEmpty(searchOptions.ProductName))
-                query = query.Where(p => p.ProductName.Contains(searchOptions.ProductName, StringComparison.OrdinalIgnoreCase));
+            var items = query
+                .OrderBy(p => p.ProductName)
+                .Skip((options.Page - 1) * options.PageSize)
+                .Take(options.PageSize)
+                .ToList();
 
-            if (!string.IsNullOrEmpty(searchOptions.Brand))
-                query = query.Where(p => p.Brand.Contains(searchOptions.Brand, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(searchOptions.Color))
-                query = query.Where(p => p.Color.Contains(searchOptions.Color, StringComparison.OrdinalIgnoreCase));
-
-            if (searchOptions.MinPrice.HasValue)
-                query = query.Where(p => p.Price >= searchOptions.MinPrice.Value);
-
-            if (searchOptions.MaxPrice.HasValue)
-                query = query.Where(p => p.Price <= searchOptions.MaxPrice.Value);
-
-            return query.ToList();
+            return new PagedResult<Product>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = options.Page,
+                PageSize = options.PageSize
+            };
         }
         
         public Product Update(string id, Product updatedProduct)
@@ -99,14 +117,5 @@ namespace CoreAccess.SampleAPI.Services
             var json = JsonSerializer.Serialize(_products, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "example-data.json"), json);
         }
-    }
-    public class SearchOptions
-    {
-        public string? Id { get; set; }
-        public string? ProductName { get; set; }
-        public string? Brand { get; set; }
-        public string? Color { get; set; }
-        public double? MinPrice { get; set; }
-        public double? MaxPrice { get; set; }
     }
 }

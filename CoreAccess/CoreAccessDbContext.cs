@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoreAccess;
 
-public class CoreAccessDbContext : DbContext
+internal class CoreAccessDbContext : DbContext
 {
     public CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options)
         : base(options) { }
