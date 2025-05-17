@@ -1,4 +1,4 @@
-namespace CoreAccess.Model;
+namespace CoreAccess.WebAPI.Model;
 
 public class CoreUser
 {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace CoreAccess.Decorator;
+namespace CoreAccess.WebAPI.Decorator;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class CoreAccessAuthorizeDecorator() : Attribute, IActionFilter
