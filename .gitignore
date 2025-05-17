@@ -33,6 +33,8 @@ CoreAccess.SampleAPI/data/
 CoreAccess.SampleAPI/coreaccess.db
 
 CoreAccess.Frontend/.vscode/
+CoreAccess.Frontend/dist/
+CoreAccess.Frontend/.idea/
 
 ## .NET Core
 CoreAccess/project.lock.json
