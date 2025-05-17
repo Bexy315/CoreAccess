@@ -1,69 +1,55 @@
-## Build results Package project
-CoreAccess/[Dd]ebug/
-CoreAccess/[Dd]ebugPublic/
-CoreAccess/[Rr]elease/
-CoreAccess/[Rr]eleases/
-CoreAccess/x64/
-CoreAccess/x86/
-CoreAccess/[Ww][Ii][Nn]32/
-CoreAccess/[Aa][Rr][Mm]/
-CoreAccess/[Aa][Rr][Mm]64/
-CoreAccess/bld/
-CoreAccess/[Bb]in/
-CoreAccess/[Oo]bj/
-CoreAccess/[Ll]og/
-CoreAccess/[Ll]ogs/
-
 ## Build results Sample API project
-CoreAccess.SampleAPI/[Dd]ebug/
-CoreAccess.SampleAPI/[Dd]ebugPublic/
-CoreAccess.SampleAPI/[Rr]elease/
-CoreAccess.SampleAPI/[Rr]eleases/
-CoreAccess.SampleAPI/x64/
-CoreAccess.SampleAPI/x86/
-CoreAccess.SampleAPI/[Ww][Ii][Nn]32/
-CoreAccess.SampleAPI/[Aa][Rr][Mm]/
-CoreAccess.SampleAPI/[Aa][Rr][Mm]64/
-CoreAccess.SampleAPI/bld/
-CoreAccess.SampleAPI/[Bb]in/
-CoreAccess.SampleAPI/[Oo]bj/
-CoreAccess.SampleAPI/[Ll]og/
-CoreAccess.SampleAPI/[Ll]ogs/
-CoreAccess.SampleAPI/data/
-CoreAccess.SampleAPI/coreaccess.db
+CoreAccess.WebAPI/[Dd]ebug/
+CoreAccess.WebAPI/[Dd]ebugPublic/
+CoreAccess.WebAPI/[Rr]elease/
+CoreAccess.WebAPI/[Rr]eleases/
+CoreAccess.WebAPI/x64/
+CoreAccess.WebAPI/x86/
+CoreAccess.WebAPI/[Ww][Ii][Nn]32/
+CoreAccess.WebAPI/[Aa][Rr][Mm]/
+CoreAccess.WebAPI/[Aa][Rr][Mm]64/
+CoreAccess.WebAPI/bld/
+CoreAccess.WebAPI/[Bb]in/
+CoreAccess.WebAPI/[Oo]bj/
+CoreAccess.WebAPI/[Ll]og/
+CoreAccess.WebAPI/[Ll]ogs/
+CoreAccess.WebAPI/data/
+CoreAccess.WebAPI/coreaccess.db
+
+CoreAccess.WebAPI/obj/
 
 CoreAccess.Frontend/.vscode/
 CoreAccess.Frontend/dist/
 CoreAccess.Frontend/.idea/
 
 ## .NET Core
-CoreAccess/project.lock.json
-CoreAccess/project.fragment.lock.json
-CoreAccess/artifacts/
+CoreAccess.WebAPI/project.lock.json
+CoreAccess.WebAPI/project.fragment.lock.json
+CoreAccess.WebAPI/artifacts/
 
 ## ASP.NET Scaffolding
-CoreAccess/ScaffoldingReadMe.txt
+CoreAccess.WebAPI/ScaffoldingReadMe.txt
 
 ## NuGet Packages
-CoreAccess/*.nupkg
-CoreAccess/*.snupkg
+CoreAccess.WebAPI/*.nupkg
+CoreAccess.WebAPI/*.snupkg
 
 ## Others
-CoreAccess/~$*
-CoreAccess/*~
-CoreAccess/CodeCoverage/
+CoreAccess.WebAPI/~$*
+CoreAccess.WebAPI/*~
+CoreAccess.WebAPI/CodeCoverage/
 
 ## MSBuild Binary and Structured Log
-CoreAccess/*.binlog
+CoreAccess.WebAPI/*.binlog
 
 ## MSTest test Results
-CoreAccess/[Tt]est[Rr]esult*/
-CoreAccess/[Bb]uild[Ll]og.*
+CoreAccess.WebAPI/[Tt]est[Rr]esult*/
+CoreAccess.WebAPI/[Bb]uild[Ll]og.*
 
 ## NUnit
-CoreAccess/*.VisualState.xml
-CoreAccess/TestResult.xml
-CoreAccess/nunit-*.xml
+CoreAccess.WebAPI/*.VisualState.xml
+CoreAccess.WebAPI/TestResult.xml
+CoreAccess.WebAPI/nunit-*.xml
 
 .idea/
 ./idea/
