@@ -32,6 +32,8 @@ CoreAccess.SampleAPI/[Ll]ogs/
 CoreAccess.SampleAPI/data/
 CoreAccess.SampleAPI/coreaccess.db
 
+CoreAccess.Frontend/.vscode/
+
 ## .NET Core
 CoreAccess/project.lock.json
 CoreAccess/project.fragment.lock.json
