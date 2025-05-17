@@ -2,22 +2,18 @@ using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CoreAccess.WebAPI.Controller;
+namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
 [Route("/api/user")]
 public class UserController(IUserService userService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetUser([FromQuery]string? id, [FromQuery] string? userName)
+    public async Task<IActionResult> GetUser([FromQuery]CoreUserSearchOptions options)
     {
         try
         {
-            var user = await userService.SearchUsersAsync(new CoreUserSearchOptions()
-            {
-                Id = id,
-                Name = userName
-            });
+            var user = await userService.SearchUsersAsync(options);
 
             return Ok(user);
         }
