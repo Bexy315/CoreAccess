@@ -22,7 +22,7 @@ docker run -d \
   -v ./data:/app/data \
   -e COREACCESS_DB_TYPE=sqlite \
   --name coreaccess \
-  ghcr.io/dein-user/coreaccess:latest
+  ghcr.io/bexy315/coreaccess:latest
 ```
 
 Oder mit PostgreSQL:
@@ -33,7 +33,7 @@ docker run -d \
   -e COREACCESS_DB_TYPE=postgres \
   -e COREACCESS_DB_CONNECTION="Host=host;Port=5432;Database=db;Username=user;Password=pass" \
   --name coreaccess \
-  ghcr.io/dein-user/coreaccess:latest
+  ghcr.io/bexy315/coreaccess:latest
 ```
 
 Frontend: http://localhost:8080  
@@ -52,7 +52,7 @@ API: http://localhost:8080/api
 
 ---
 
-## 🧪 Beispiel Login mit SDK (JavaScript)
+## 🧪 Beispiel Login mit SDK (JavaScript) (---W.I.P.---)
 
 ```bash
 npm install @coreaccess/sdk
@@ -93,7 +93,7 @@ export const coreAccessConfig = {
 ## 📦 Build selbst durchführen
 
 ```bash
-git clone https://github.com/dein-user/coreaccess.git
+git clone https://github.com/bexy315/coreaccess.git
 cd coreaccess
 
 docker build -t coreaccess .
