@@ -16,11 +16,12 @@ CoreAccess.WebAPI/[Ll]ogs/
 CoreAccess.WebAPI/data/
 CoreAccess.WebAPI/coreaccess.db
 
-CoreAccess.WebAPI/obj/
+CoreAccess.WebAPI\obj\
 
 CoreAccess.Frontend/.vscode/
 CoreAccess.Frontend/dist/
 CoreAccess.Frontend/.idea/
+CoreAccess.Frontend/package-lock.json
 
 ## .NET Core
 CoreAccess.WebAPI/project.lock.json
