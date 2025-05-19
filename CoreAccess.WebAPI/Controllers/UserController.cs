@@ -56,7 +56,8 @@ public class UserController(IUserService userService) : ControllerBase
     {
         try
         {
-            return Ok(await userService.DeleteUserAsync(userId));
+            await userService.DeleteUserAsync(userId);
+            return Ok();
         }
         catch (Exception ex)
         {

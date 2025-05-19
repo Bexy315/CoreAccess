@@ -7,9 +7,11 @@ namespace CoreAccess.WebAPI.Repositories;
 public interface IUserRepository
 {
     public Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options);
+    public Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user);
+    public Task DeleteUserAsync(string id);
     
 }
-public class UserRepository(AppDbContext context) : IUserRepository
+public class UserRepository(CoreAccessDbContext context) : IUserRepository
 {
     public async Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options)
     {
@@ -79,5 +81,34 @@ public class UserRepository(AppDbContext context) : IUserRepository
         var result = query.Skip(skip).Take(options.PageSize).ToList();
 
         return result;
+    }
+    public async Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user)
+    {
+        var existingUser = await context.Users.FindAsync(user.Id);
+        if (existingUser != null)
+        {
+            context.Entry(existingUser).CurrentValues.SetValues(user);
+        }
+        else
+        {
+            await context.Users.AddAsync(user);
+        }
+        await context.SaveChangesAsync();
+        
+        return await context.Users.FindAsync(user.Id);
+    }
+
+    public async Task DeleteUserAsync(string id)
+    {
+        var user = await context.Users.FindAsync(Guid.Parse(id));
+        if (user != null)
+        {
+            context.Users.Remove(user);
+            await context.SaveChangesAsync();
+        }
+        else
+        {
+            throw new Exception("User not found");
+        }
     }
 }

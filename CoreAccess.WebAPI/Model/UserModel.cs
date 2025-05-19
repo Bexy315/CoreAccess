@@ -22,7 +22,7 @@ public class CoreUser
     public string? Zip { get; set; }
     public string? Country { get; set; }
     public CoreUserStatus Status { get; set; } = CoreUserStatus.Active;
-    public string CreatedAt { get; set; } = DateTime.UtcNow.ToLongDateString();
+    public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string UpdatedAt { get; set; } = "";
     public string PasswordHash { get; set; } = "";
 }
@@ -51,7 +51,18 @@ public class CoreUserCreateRequest
 
 public class CoreUserUpdateRequest
 {
-    public string? Username { get; set; } = "";
+    public string? Username { get; set; }
+    public string? Email { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? Phone { get; set; }
+    public string? Address { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public string? Zip { get; set; }
+    public string? Country { get; set; }
+    public CoreUserStatus? Status { get; set; }
+    public string? UpdatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 }
 
 public class CoreUserSearchOptions
