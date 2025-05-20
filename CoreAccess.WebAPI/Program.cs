@@ -14,12 +14,14 @@ builder.Services.AddOpenApi();
 #region Repositories
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 #endregion
 
 #region Services
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 #endregion
 

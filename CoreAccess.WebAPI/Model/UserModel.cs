@@ -25,6 +25,7 @@ public class CoreUser
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string UpdatedAt { get; set; } = "";
     public string PasswordHash { get; set; } = "";
+    public List<CoreRole> Roles { get; set; } = new();
 }
 
 public class CoreUserDto(CoreUser src)
@@ -41,6 +42,9 @@ public class CoreUserDto(CoreUser src)
     public string? Zip { get; set; } = src.Zip;
     public string? Country { get; set; } = src.Country;
     public CoreUserStatus Status { get; set; } = src.Status;
+    public string CreatedAt { get; set; } = src.CreatedAt;
+    public string UpdatedAt { get; set; } = src.UpdatedAt;
+    public List<CoreRole> Roles { get; set; } = src.Roles;
 }
 
 public class CoreUserCreateRequest
