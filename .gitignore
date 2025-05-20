@@ -13,8 +13,7 @@ CoreAccess.WebAPI/[Bb]in/
 CoreAccess.WebAPI/[Oo]bj/
 CoreAccess.WebAPI/[Ll]og/
 CoreAccess.WebAPI/[Ll]ogs/
-CoreAccess.WebAPI/data/
-CoreAccess.WebAPI/coreaccess.db
+CoreAccess.WebAPI/App_Data/
 
 CoreAccess.WebAPI\obj\
 
