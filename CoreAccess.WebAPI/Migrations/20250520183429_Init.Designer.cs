@@ -11,14 +11,46 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoreAccess.WebAPI.Migrations
 {
     [DbContext(typeof(CoreAccessDbContext))]
-    [Migration("20250519174741_UserInit")]
-    partial class UserInit
+    [Migration("20250520183429_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
+
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedAt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("Permissions")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UpdatedAt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
 
             modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreUser", b =>
                 {
@@ -77,6 +109,36 @@ namespace CoreAccess.WebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("CoreRoleCoreUser", b =>
+                {
+                    b.Property<Guid>("RolesId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UsersId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RolesId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("UserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("CoreRoleCoreUser", b =>
+                {
+                    b.HasOne("CoreAccess.WebAPI.Model.CoreRole", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CoreAccess.WebAPI.Model.CoreUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

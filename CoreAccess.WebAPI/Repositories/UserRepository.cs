@@ -9,7 +9,6 @@ public interface IUserRepository
     public Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options);
     public Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user);
     public Task DeleteUserAsync(string id);
-    
 }
 public class UserRepository(CoreAccessDbContext context) : IUserRepository
 {
@@ -21,20 +20,21 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
 
         if (!string.IsNullOrEmpty(options.Search))
         {
-            query = query.Where(u => u.Username.Contains(options.Search) ||
-                                     u.Email.Contains(options.Search) ||
-                                     u.FirstName.Contains(options.Search) ||
-                                     u.LastName.Contains(options.Search));
+            query = query.Where(u => u.Username.ToLower().Contains(options.Search.ToLower()) ||
+                                     u.Email.ToLower().Contains(options.Search.ToLower()) ||
+                                     u.FirstName.ToLower().Contains(options.Search.ToLower()) ||
+                                     u.LastName.ToLower().Contains(options.Search.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(options.Id))
         {
-            query = query.Where(u => u.Id.ToString() == options.Id);
+            var idLower = options.Id.ToLower();
+            query = query.Where(r => r.Id.ToString().ToLower() == idLower);
         }
 
         if (!string.IsNullOrEmpty(options.Name))
         {
-            query = query.Where(u => u.FirstName.Contains(options.Name) || u.LastName.Contains(options.Name));
+            query = query.Where(u => u.FirstName.ToLower().Contains(options.Name.ToLower()) || u.LastName.ToLower().Contains(options.Name.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(options.Email))
@@ -54,12 +54,12 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
 
         if (!string.IsNullOrEmpty(options.City))
         {
-            query = query.Where(u => u.City.Contains(options.City));
+            query = query.Where(u => u.City.ToLower().Contains(options.City.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(options.State))
         {
-            query = query.Where(u => u.State.Contains(options.State));
+            query = query.Where(u => u.State.ToLower().Contains(options.State.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(options.Zip))
@@ -69,7 +69,7 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
 
         if (!string.IsNullOrEmpty(options.Country))
         {
-            query = query.Where(u => u.Country.Contains(options.Country));
+            query = query.Where(u => u.Country.ToLower().Contains(options.Country.ToLower()));
         }
 
         if (options.Status.HasValue)

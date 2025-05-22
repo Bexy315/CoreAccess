@@ -16,34 +16,38 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
     public async Task<List<CoreRole>> SearchRolesAsync(CoreRoleSearchOptions options)
     {
         var query = context.Roles.AsQueryable();
-        
+
         if (!string.IsNullOrEmpty(options.Search))
         {
-            query = query.Where(r => r.Name.Contains(options.Search) ||
-                                     (r.Description != null && r.Description.Contains(options.Search)));
+            query = query.Where(r => r.Name.ToLower().Contains(options.Search.ToLower()) ||
+                                     (r.Description != null && r.Description.ToLower().Contains(options.Search.ToLower())));
         }
-        
+
         if (!string.IsNullOrEmpty(options.Id))
         {
-            query = query.Where(r => r.Id.ToString() == options.Id);
+            var idLower = options.Id.ToLower();
+            query = query.Where(r => r.Id.ToString().ToLower() == idLower);
         }
-        
+
         if (!string.IsNullOrEmpty(options.Name))
         {
-            query = query.Where(r => r.Name.Contains(options.Name));
+            query = query.Where(r => r.Name.ToLower().Contains(options.Name.ToLower()));
         }
-        
+
         if (!string.IsNullOrEmpty(options.Description))
         {
-            query = query.Where(r => r.Description != null && r.Description.Contains(options.Description));
+            query = query.Where(r => r.Description != null && r.Description.ToLower().Contains(options.Description.ToLower()));
         }
-        
+
         if (options.IsSystem.HasValue)
         {
             query = query.Where(r => r.IsSystem == options.IsSystem.Value);
         }
-        
-        return await query.ToListAsync();
+
+        var skip = (options.Page - 1) * options.PageSize;
+        var result = await query.Skip(skip).Take(options.PageSize).ToListAsync();
+
+        return result;
     }
 
     public async Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole user)
