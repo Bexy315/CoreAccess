@@ -7,9 +7,13 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
 {
     public DbSet<CoreUser> Users { get; set; }
     public DbSet<CoreRole> Roles { get; set; }
+    public DbSet<AppSetting> AppSettings { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("coreaccess");
+        
+        #region CoreUser
         modelBuilder.Entity<CoreUser>()
             .HasKey(u => u.Id);
         
@@ -27,7 +31,16 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
             .HasMany(u => u.Roles)
             .WithMany(r => r.Users)
             .UsingEntity(j => j.ToTable("UserRoles"));
-
+        #endregion
+        #region CoreRole
+        modelBuilder.Entity<CoreRole>()
+            .HasKey(r => r.Id);
+        #endregion
+        #region AppSetting
+        modelBuilder.Entity<AppSetting>()
+            .HasKey(s => s.Id);
+        #endregion
+        
         base.OnModelCreating(modelBuilder);
     }
 }
