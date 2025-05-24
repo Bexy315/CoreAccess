@@ -6,9 +6,12 @@ namespace CoreAccess.WebAPI.Services;
 public interface IUserService
 {
     Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options);
+    Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken);
     Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest request);
     Task<CoreUserDto> UpdateUserAsync(string userId, CoreUserUpdateRequest user);
     Task DeleteUserAsync(string id);
+    Task<bool> UsernameExistsAsync(string username);
+    Task<CoreUser> ValidateCredentialsAsync(string? username, string? email, string password);
 }
 internal class UserService(IUserRepository userRepository) : IUserService
 {
@@ -25,6 +28,30 @@ internal class UserService(IUserRepository userRepository) : IUserService
                 PageSize = options.PageSize
             };
             return dto;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken)
+    {
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            throw new ArgumentNullException(nameof(refreshToken), "Refresh token cannot be null or empty");
+        }
+
+        try
+        {
+            var users = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            {
+                Page = 1,
+                PageSize = 1000 // Assuming we want to check all users
+            });
+
+            return users.FirstOrDefault(u => u.RefreshTokens?.Any(rt => rt.Token == refreshToken) == true);
         }
         catch (Exception ex)
         {
@@ -106,6 +133,56 @@ internal class UserService(IUserRepository userRepository) : IUserService
         try
         {
             await userRepository.DeleteUserAsync(id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<bool> UsernameExistsAsync(string username)
+    {
+        try
+        {
+            var existingUsers = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            {
+                Username = username,
+                Page = 1,
+                PageSize = 1
+            });
+            return existingUsers.Any();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<CoreUser> ValidateCredentialsAsync(string? username, string? email, string password)
+    {
+        if(username == null && email == null)
+        {
+            throw new ArgumentException("Either username or email must be provided.");
+        }
+        
+        try
+        {
+            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            {
+                Username = username,
+                Email = email,
+                Page = 1,
+                PageSize = 1
+            }).ContinueWith(t => t.Result.FirstOrDefault() ?? null);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            {
+                return null;
+            }
+
+            return user;
         }
         catch (Exception ex)
         {

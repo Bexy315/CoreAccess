@@ -6,14 +6,14 @@ namespace CoreAccess.WebAPI.Repositories;
 
 public interface IAppSettingsRepository
 {
-    public Task<AppSetting?> GetSettingsAsync(AppSettingSearchOptions options);
+    public Task<AppSetting?> SearchSettingsAsync(AppSettingSearchOptions options);
     public Task<AppSetting> InsertOrUpdateSettingAsync(AppSetting setting);
     public Task DeleteSettingAsync(Guid id);
 }
 
 public class AppSettingsRepository(CoreAccessDbContext context) : IAppSettingsRepository
 {
-    public async Task<AppSetting?> GetSettingsAsync(AppSettingSearchOptions options)
+    public async Task<AppSetting?> SearchSettingsAsync(AppSettingSearchOptions options)
     {
         var query = context.AppSettings.AsQueryable();
 

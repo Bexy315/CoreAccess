@@ -31,6 +31,11 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
             var idLower = options.Id.ToLower();
             query = query.Where(r => r.Id.ToString().ToLower() == idLower);
         }
+        
+        if (!string.IsNullOrEmpty(options.Username))
+        {
+            query = query.Where(u => u.Username.ToLower().Contains(options.Username.ToLower()));
+        }
 
         if (!string.IsNullOrEmpty(options.Name))
         {

@@ -26,6 +26,7 @@ public class CoreUser
     public string UpdatedAt { get; set; } = "";
     public string PasswordHash { get; set; } = "";
     public List<CoreRole> Roles { get; set; } = new();
+    public List<RefreshToken>? RefreshTokens { get; set; } = null;
 }
 
 public class CoreUserDto(CoreUser src)
@@ -67,12 +68,14 @@ public class CoreUserUpdateRequest
     public string? Country { get; set; }
     public CoreUserStatus? Status { get; set; }
     public string? UpdatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+    public List<RefreshToken>? RefreshTokens { get; set; } = null;
 }
 
 public class CoreUserSearchOptions
 {
     public string? Search { get; set; } = "";
     public string? Id { get; set; }
+    public string? Username { get; set; }
     public string? Name { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }

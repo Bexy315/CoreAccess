@@ -33,4 +33,14 @@ public static class EncryptionKeyHelper
         File.WriteAllText(keyFilePath, base64Key);
         return base64Key;
     }
+    /// <summary>
+    /// Gibt einen zufälligen Base64-kodierten 256-Bit-Schlüssel zurück, welcher nicht gespeichert wird.
+    /// </summary>
+    /// <param name="length">Länge des Schlüssels in Bytes (Standard: 32).</param>
+    /// <returns>Ein Base64-kodierter 256-Bit-Schlüssel.</returns>
+    public static string GenerateRandomBase64Key(int length = 32)
+    {
+        var keyBytes = RandomNumberGenerator.GetBytes(length);
+        return Convert.ToBase64String(keyBytes);
+    }
 }

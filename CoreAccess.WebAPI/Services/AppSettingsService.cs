@@ -5,15 +5,17 @@ namespace CoreAccess.WebAPI.Services;
 
 public interface IAppSettingsService
 {
-    public Task<AppSettingDto?> GetSettingAsync(AppSettingSearchOptions options);
+    public Task<AppSettingDto?> SearchSettingAsync(AppSettingSearchOptions options);
     public Task<AppSettingDto> CreateAppSetting(AppSettingCreateRequest request);
     public Task<AppSettingDto> UpdateAppSetting(string id, AppSettingUpdateRequest request);
     public Task DeleteSettingAsync(string key);
+    public Task<string> GetDecrypted(string key);
+    public Task SetEncrypted(string key, string value);
 }
 
-public class AppSettingsService(AppSettingsRepository repository, AesEncryptionService encryptionService) : IAppSettingsService
+public class AppSettingsService(IAppSettingsRepository repository, IDataEncryptionService encryptionService) : IAppSettingsService
 {
-    public async Task<AppSettingDto?> GetSettingAsync(AppSettingSearchOptions options)
+    public async Task<AppSettingDto?> SearchSettingAsync(AppSettingSearchOptions options)
     {
         if (options == null)
         {
@@ -21,13 +23,8 @@ public class AppSettingsService(AppSettingsRepository repository, AesEncryptionS
         }
         try
         {
-            var setting = await repository.GetSettingsAsync(options);
-            if (setting == null)
-            {
-                return null;
-            }
-
-            return new AppSettingDto(setting);
+            var setting = await repository.SearchSettingsAsync(options);
+            return setting == null ? null : new AppSettingDto(setting);
         }
         catch (Exception e)
         {
@@ -79,7 +76,7 @@ public class AppSettingsService(AppSettingsRepository repository, AesEncryptionS
                 throw new ArgumentNullException(nameof(request), "Setting cannot be null");
             }
 
-            var existingSetting = await repository.GetSettingsAsync(new AppSettingSearchOptions { Key = id });
+            var existingSetting = await repository.SearchSettingsAsync(new AppSettingSearchOptions { Key = id });
             if (existingSetting == null)
             {
                 throw new KeyNotFoundException($"Setting with key '{id}' not found.");
@@ -113,12 +110,72 @@ public class AppSettingsService(AppSettingsRepository repository, AesEncryptionS
         }
         try
         {
-            var setting = await repository.GetSettingsAsync(new AppSettingSearchOptions { Key = key });
+            var setting = await repository.SearchSettingsAsync(new AppSettingSearchOptions { Key = key });
             if (setting == null)
             {
                 throw new KeyNotFoundException($"Setting with key '{key}' not found.");
             }
             await repository.DeleteSettingAsync(setting.Id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<string> GetDecrypted(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            throw new ArgumentNullException(nameof(key), "Setting cannot be null");
+        }
+
+        try
+        {
+            var setting = await repository.SearchSettingsAsync(new AppSettingSearchOptions { Key = key });
+            if (setting == null)
+            {
+                throw new KeyNotFoundException($"Setting with key '{key}' not found.");
+            }
+
+            if (setting.IsEncrypted)
+            {
+                setting.Value = encryptionService.Decrypt(setting.Value);
+            }
+
+            return setting.Value;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task SetEncrypted(string key, string value)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            throw new ArgumentException("Key cannot be null or empty", nameof(key));
+        }
+        if (value == null)
+        {
+            throw new ArgumentNullException(nameof(value), "Value cannot be null");
+        }
+
+        try
+        {
+            var setting = await repository.SearchSettingsAsync(new AppSettingSearchOptions { Key = key });
+            if (setting == null)
+            {
+                throw new KeyNotFoundException($"Setting with key '{key}' not found.");
+            }
+
+            setting.Value = encryptionService.Encrypt(value);
+            setting.IsEncrypted = true;
+
+            await repository.InsertOrUpdateSettingAsync(setting);
         }
         catch (Exception e)
         {

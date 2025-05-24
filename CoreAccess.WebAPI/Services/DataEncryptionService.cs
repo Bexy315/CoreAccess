@@ -2,13 +2,13 @@ using System.Security.Cryptography;
 
 namespace CoreAccess.WebAPI.Services;
 
-public interface IEncryptionService
+public interface IDataEncryptionService
 {
     string Encrypt(string plainText);
     string Decrypt(string cipherText);
 }
 
-public class AesEncryptionService : IEncryptionService
+public class AesEncryptionService : IDataEncryptionService
 {
     private readonly byte[] _key;
     private readonly byte[] _iv;
