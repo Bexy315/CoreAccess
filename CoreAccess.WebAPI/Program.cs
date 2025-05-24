@@ -26,7 +26,7 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 #region Services
 
 var encryptionKey = builder.Environment.IsDevelopment() ? Environment.GetEnvironmentVariable("COREACCESS_ENCRYPTION_KEY") : EncryptionKeyHelper.GetOrCreateKey("aes_encryption");
-builder.Services.AddSingleton<IEncryptionService>(new AesEncryptionService(encryptionKey));
+builder.Services.AddSingleton<IEncryptionService>(new AesEncryptionService(encryptionKey ?? throw new MissingFieldException("Encryption key is not set. Please set the COREACCESS_ENCRYPTION_KEY environment variable.")));
 
 builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<IUserService, UserService>();
