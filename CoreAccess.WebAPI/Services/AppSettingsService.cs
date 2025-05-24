@@ -11,7 +11,7 @@ public interface IAppSettingsService
     public Task DeleteSettingAsync(string key);
 }
 
-public class AppSettingsService(AppSettingsRepository repository) : IAppSettingsService
+public class AppSettingsService(AppSettingsRepository repository, AesEncryptionService encryptionService) : IAppSettingsService
 {
     public async Task<AppSettingDto?> GetSettingAsync(AppSettingSearchOptions options)
     {
@@ -44,6 +44,11 @@ public class AppSettingsService(AppSettingsRepository repository) : IAppSettings
         }
         try
         {
+            if(!string.IsNullOrEmpty(request.Value) && request.IsEncrypted)
+            {
+                request.Value = encryptionService.Encrypt(request.Value);
+            }
+            
             var appSetting = new AppSetting
             {
                 Key = request.Key,
@@ -78,6 +83,11 @@ public class AppSettingsService(AppSettingsRepository repository) : IAppSettings
             if (existingSetting == null)
             {
                 throw new KeyNotFoundException($"Setting with key '{id}' not found.");
+            }
+            
+            if(!string.IsNullOrEmpty(request.Value) && existingSetting.IsEncrypted)
+            {
+                request.Value = encryptionService.Encrypt(request.Value);
             }
 
             existingSetting.Key = request.Key ?? existingSetting.Key;
