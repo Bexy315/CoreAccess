@@ -43,13 +43,14 @@ API: http://localhost:8080/api
 
 ## ⚙️ Environment Variablen
 
-| Variable                    | Beschreibung                                | Default    |
-|----------------------------|---------------------------------------------|------------|
-| `COREACCESS_DB_TYPE`       | `sqlite` oder `postgres`                    | `sqlite`   |
-| `COREACCESS_DB_CONNECTION` | PostgreSQL ConnectionString (wenn nötig)    | -          |
-| `COREACCESS_ADMIN_EMAIL`   | Initialer Admin-Login (optional)            | -          |
-| `COREACCESS_ADMIN_PASSWORD`| Initiales Passwort (optional)               | -          |
-
+| Variable                    | Beschreibung                             | Default          |
+|-----------------------------|------------------------------------------|------------------|
+| `COREACCESS_DB_CONNECTION`  | PostgreSQL ConnectionString (wenn nötig) | -                |
+| `COREACCESS_ADMIN_USERNAME` | Initialer Admin-Login (optional)         | root             |
+| `COREACCESS_ADMIN_PASSWORD` | Initiales Passwort (optional)            | changeme123      |
+| `COREACCESS_SECRET`         | JWT Token Secret (optional)              | Random Generated |
+| `COREACCESS_ISSUER`         | JWT Token Issuer (optional)              | -                |
+| `COREACCESS_ADMIN_PASSWORD` | JWT Token Audience (optional)            | -                |
 ---
 
 ## 🧪 Beispiel Login mit SDK (JavaScript) (---W.I.P.---)

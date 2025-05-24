@@ -1,10 +1,14 @@
 using CoreAccess.WebAPI.DbContext;
+using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Repositories;
 using CoreAccess.WebAPI.Services;
+using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+    DotEnv.Load();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -13,6 +17,7 @@ builder.Services.AddOpenApi();
 
 #region Repositories
 
+builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
@@ -20,6 +25,10 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 #region Services
 
+var encryptionKey = builder.Environment.IsDevelopment() ? Environment.GetEnvironmentVariable("COREACCESS_ENCRYPTION_KEY") : EncryptionKeyHelper.GetOrCreateKey("aes_encryption");
+builder.Services.AddSingleton<IEncryptionService>(new AesEncryptionService(encryptionKey));
+
+builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 

@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "YVIgJmwNvJk=",
+  "dgSpecHash": "w9JvZntIhLo=",
   "success": true,
   "projectFilePath": "E:\\DEVELOPMENT\\github-nuget\\CoreAccess\\CoreAccess.WebAPI\\CoreAccess.WebAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\felix\\.nuget\\packages\\bcrypt.net\\0.1.0\\bcrypt.net.0.1.0.nupkg.sha512",
+    "C:\\Users\\felix\\.nuget\\packages\\dotenv.net\\3.2.1\\dotenv.net.3.2.1.nupkg.sha512",
     "C:\\Users\\felix\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\felix\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.5\\microsoft.aspnetcore.openapi.9.0.5.nupkg.sha512",
     "C:\\Users\\felix\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\7.0.0\\microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
