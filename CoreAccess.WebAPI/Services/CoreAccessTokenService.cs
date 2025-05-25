@@ -11,8 +11,10 @@ public interface ICoreAccessTokenService
 {
     Task<string> GenerateAccessTokenAsync(CoreUser user, string scope = "default", CancellationToken cancellationToken = default);
     Task<RefreshToken> GenerateRefreshTokenAsync(CoreUser user, string createdByIp, CancellationToken cancellationToken = default);
-    Task RecycleRefreshTokensAsync(CoreUser user, CancellationToken cancellationToken = default);
-    Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default);
+    Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default);
+    Task<CoreUser> ValidateRefreshToken(string token, CancellationToken cancellationToken = default);
+
     ClaimsPrincipal? ValidateToken(string token);
     public Claim GetClaim(ClaimsPrincipal principal, string claimType);
 }
@@ -71,40 +73,61 @@ public class CoreAccessTokenService(
         return refreshToken;
     }
     
-    public async Task RecycleRefreshTokensAsync(CoreUser user, CancellationToken cancellationToken = default)
+    public async Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default)
     {
-        if (user.RefreshTokens == null || !user.RefreshTokens.Any())
-            return;
+        var allTokens = await refreshTokenRepository.GetAllRefreshTokenAsync(cancellationToken);
 
-        var now = DateTime.UtcNow;
-        user.RefreshTokens.RemoveAll(rt => rt.Expires < now);
+        var groupedTokens = allTokens
+            .Where(t => !t.IsActive)
+            .GroupBy(t => t.CoreUser.Id);
 
-        if (user.RefreshTokens.Count > 5)
+        foreach (var group in groupedTokens)
         {
-            user.RefreshTokens = user.RefreshTokens.OrderByDescending(rt => rt.Created).Take(5).ToList();
+            var inactiveTokens = group.OrderByDescending(t => t.Created).Skip(5).ToList();
+            foreach (var token in inactiveTokens)
+            {
+                await refreshTokenRepository.DeleteRefreshTokenAsync(token.Token, cancellationToken);
+            }
         }
 
-        await userService.UpdateUserAsync(user.Id.ToString(), new CoreUserUpdateRequest()
-        {
-            RefreshTokens = user.RefreshTokens
-        }, cancellationToken);
+        await refreshTokenRepository.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(refreshToken))
-            throw new ArgumentNullException(nameof(refreshToken), "Refresh token cannot be null or empty");
+        if (string.IsNullOrEmpty(token))
+            throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");
 
-        var user = await userService.GetUserByRefreshTokenAsync(refreshToken, cancellationToken);
-        if (user == null)
-            throw new InvalidOperationException("User not found for the provided refresh token");
+        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token, cancellationToken);
+        if (refreshToken == null)
+            throw new InvalidOperationException("Refresh Token not found");
 
-        user.RefreshTokens?.RemoveAll(rt => rt.Token == refreshToken);
+        refreshToken.Revoked = DateTime.UtcNow;
+        refreshToken.RevokedByIp = revokedByIp;
         
-        await userService.UpdateUserAsync(user.Id.ToString(), new CoreUserUpdateRequest()
-        {
-            RefreshTokens = user.RefreshTokens
-        }, cancellationToken);
+        await refreshTokenRepository.UpdateOrInsertRefreshTokenAsync(refreshToken, cancellationToken);
+        await refreshTokenRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<CoreUser> ValidateRefreshToken(string token, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(token))
+            throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");
+
+        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token, cancellationToken);
+        if (refreshToken == null)
+            throw new UnauthorizedAccessException("Refresh Token not found");
+
+        if (!refreshToken.IsActive)
+            throw new UnauthorizedAccessException("Refresh Token is not active");
+
+        var user = await userService.GetUserByRefreshTokenAsync(token, cancellationToken);
+        
+        if(user == null)
+            throw new InvalidOperationException("User associated with the refresh token not found");
+        
+        
+        return user;
     }
 
     public ClaimsPrincipal? ValidateToken(string token)

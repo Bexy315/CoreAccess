@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoreAccess.WebAPI.Migrations
 {
     [DbContext(typeof(CoreAccessDbContext))]
-    [Migration("20250525175704_init")]
+    [Migration("20250525212409_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -156,9 +156,6 @@ namespace CoreAccess.WebAPI.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Expires")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ReplacedByToken")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("Revoked")

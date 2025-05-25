@@ -84,7 +84,6 @@ namespace CoreAccess.WebAPI.Migrations
                     Expires = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Created = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedByIp = table.Column<string>(type: "TEXT", nullable: false),
-                    ReplacedByToken = table.Column<string>(type: "TEXT", nullable: true),
                     Revoked = table.Column<DateTime>(type: "TEXT", nullable: true),
                     RevokedByIp = table.Column<string>(type: "TEXT", nullable: true),
                     CoreUserId = table.Column<byte[]>(type: "BLOB", nullable: false)

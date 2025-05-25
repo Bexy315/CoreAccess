@@ -7,13 +7,14 @@ public interface IUserService
 {
     Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default);
     Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<CoreUser> GetCoreUserByDto(CoreUserDto dto, CancellationToken cancellationToken = default);
     Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest request, CancellationToken cancellationToken = default);
     Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
     Task<CoreUser> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
 }
-internal class UserService(IUserRepository userRepository) : IUserService
+internal class UserService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository) : IUserService
 {
     public async Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default)
     {
@@ -45,13 +46,50 @@ internal class UserService(IUserRepository userRepository) : IUserService
 
         try
         {
-            var users = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
-            {
-                Page = 1,
-                PageSize = 1000 // Assuming we want to check all users
-            }, cancellationToken);
+            var userId = await refreshTokenRepository.GetUserIdByRefreshToken(refreshToken, cancellationToken);
 
-            return users.FirstOrDefault(u => u.RefreshTokens?.Any(rt => rt.Token == refreshToken) == true);
+            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            {
+                Id = userId,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            if(user == null)
+            {
+                throw new KeyNotFoundException("User not found for the provided refresh token.");
+            }
+
+            return user;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<CoreUser> GetCoreUserByDto(CoreUserDto dto, CancellationToken cancellationToken = default)
+    {
+        if (dto == null)
+        {
+            throw new ArgumentNullException(nameof(dto), "CoreUserDto cannot be null");
+        }
+
+        try
+        {
+            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            {
+                Id = dto.Id.ToString(),
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found for the provided CoreUserDto.");
+            }
+
+            return user;
         }
         catch (Exception ex)
         {

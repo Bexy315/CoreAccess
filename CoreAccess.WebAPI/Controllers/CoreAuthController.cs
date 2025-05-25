@@ -39,23 +39,40 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
     [HttpPost("/refresh-token")]
     public async Task<IActionResult> Refresh([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
-        var user = await userService.GetUserByRefreshTokenAsync(dto.RefreshToken, cancellationToken);
-        if (user == null)
-            return Unauthorized("Invalid refresh token.");
-
-        var newAccessToken = await tokenService.GenerateAccessTokenAsync(user, cancellationToken: cancellationToken);
-        var newRefreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
-
-        return Ok(new
+        try
         {
-            access_token = newAccessToken,
-            refresh_token = newRefreshToken
-        });
+            var user = await tokenService.ValidateRefreshToken(dto.RefreshToken, cancellationToken);
+
+            if (user == null)
+                return Unauthorized("Invalid refresh token.");
+            
+            var newAccessToken =
+                await tokenService.GenerateAccessTokenAsync(user, cancellationToken: cancellationToken);
+            var newRefreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
+
+            await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp, cancellationToken);
+
+            await tokenService.RecycleRefreshTokensAsync(cancellationToken);
+            
+            return Ok(new
+            {
+                access_token = newAccessToken,
+                refresh_token = newRefreshToken
+            });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message + " " + e.InnerException?.Message);
+        }
     }
     [HttpPost("/logout")]
     public async Task<IActionResult> Logout([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
-        await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, cancellationToken);
+        await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp, cancellationToken: cancellationToken);
         return Ok();
     }
 }

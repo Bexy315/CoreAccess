@@ -155,9 +155,6 @@ namespace CoreAccess.WebAPI.Migrations
                     b.Property<DateTime>("Expires")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ReplacedByToken")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime?>("Revoked")
                         .HasColumnType("TEXT");
 
