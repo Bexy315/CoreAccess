@@ -4,33 +4,31 @@ using CoreAccess.WebAPI.Services;
 
 namespace CoreAccess.WebAPI.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class CoreAuthController(IUserService userService, ICoreAccessTokenService tokenService)
-    : ControllerBase
+[Controller]
+[Route("api/auth")]
+public class CoreAuthController(IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
 {
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] CoreUserCreateRequest dto)
+    [HttpPost("/register")]
+    public async Task<IActionResult> Register([FromBody] CoreUserCreateRequest dto, CancellationToken cancellationToken = default)
     {
-        if (await userService.UsernameExistsAsync(dto.Username))
+        if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
             return BadRequest("Username already exists.");
 
-        var user = await userService.CreateUserAsync(dto);
+        var user = await userService.CreateUserAsync(dto, cancellationToken);
         return Ok(new { user.Id, user.Username });
     }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] CoreLoginRequest dto)
+    [HttpPost("/login")]
+    public async Task<IActionResult> Login([FromBody] CoreLoginRequest dto, CancellationToken cancellationToken = default)
     {
-        if(dto.Username == null && dto.Email == null)
-            return BadRequest("Either Username or email is required.");
+        if(dto.Username == null)
+            return BadRequest("Username or email is required.");
         
-        var user = await userService.ValidateCredentialsAsync(dto.Username, dto.Email, dto.Password);
+        var user = await userService.ValidateCredentialsByUsernameAsync(dto.Username, dto.Password, cancellationToken);
         if (user == null)
             return Unauthorized("Invalid credentials.");
 
-        var accessToken = await tokenService.GenerateAccessTokenAsync(user);
-        var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp);
+        var accessToken = await tokenService.GenerateAccessTokenAsync(user , cancellationToken: cancellationToken);
+        var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
 
         return Ok(new
         {
@@ -38,16 +36,15 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
             refresh_token = refreshToken
         });
     }
-
-    [HttpPost("refresh-token")]
-    public async Task<IActionResult> Refresh([FromBody] CoreRefreshTokenRequest dto)
+    [HttpPost("/refresh-token")]
+    public async Task<IActionResult> Refresh([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
-        var user = await userService.GetUserByRefreshTokenAsync(dto.RefreshToken);
+        var user = await userService.GetUserByRefreshTokenAsync(dto.RefreshToken, cancellationToken);
         if (user == null)
             return Unauthorized("Invalid refresh token.");
 
-        var newAccessToken = await tokenService.GenerateAccessTokenAsync(user);
-        var newRefreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp);
+        var newAccessToken = await tokenService.GenerateAccessTokenAsync(user, cancellationToken: cancellationToken);
+        var newRefreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
 
         return Ok(new
         {
@@ -55,11 +52,10 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
             refresh_token = newRefreshToken
         });
     }
-
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] CoreRefreshTokenRequest dto)
+    [HttpPost("/logout")]
+    public async Task<IActionResult> Logout([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
-        await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken);
+        await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, cancellationToken);
         return Ok();
     }
 }

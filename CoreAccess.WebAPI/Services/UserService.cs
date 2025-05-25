@@ -5,21 +5,21 @@ namespace CoreAccess.WebAPI.Services;
 
 public interface IUserService
 {
-    Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options);
-    Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken);
-    Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest request);
-    Task<CoreUserDto> UpdateUserAsync(string userId, CoreUserUpdateRequest user);
-    Task DeleteUserAsync(string id);
-    Task<bool> UsernameExistsAsync(string username);
-    Task<CoreUser> ValidateCredentialsAsync(string? username, string? email, string password);
+    Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default);
+    Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest request, CancellationToken cancellationToken = default);
+    Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default);
+    Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
+    Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
+    Task<CoreUser> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
 }
 internal class UserService(IUserRepository userRepository) : IUserService
 {
-    public async Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options)
+    public async Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await userRepository.SearchUsersAsync(options);
+            var result = await userRepository.SearchUsersAsync(options, cancellationToken);
             var dto = new PagedResult<CoreUserDto>
             {
                 Items = result.Select(x => new CoreUserDto(x)).ToList(),
@@ -36,7 +36,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
-    public async Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken)
+    public async Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(refreshToken))
         {
@@ -49,7 +49,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
             {
                 Page = 1,
                 PageSize = 1000 // Assuming we want to check all users
-            });
+            }, cancellationToken);
 
             return users.FirstOrDefault(u => u.RefreshTokens?.Any(rt => rt.Token == refreshToken) == true);
         }
@@ -60,7 +60,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
-    public async Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest user)
+    public async Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -71,7 +71,8 @@ internal class UserService(IUserRepository userRepository) : IUserService
                 UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
             };
             
-            var createdUser = await userRepository.InsertOrUpdateUserAsync(newUser);
+            var createdUser = await userRepository.InsertOrUpdateUserAsync(newUser, cancellationToken);
+            await userRepository.SaveChangesAsync(cancellationToken);
             if (createdUser == null)
             {
                 throw new Exception("Failed to create user");
@@ -85,7 +86,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
-    public async Task<CoreUserDto> UpdateUserAsync(string userId, CoreUserUpdateRequest user)
+    public async Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -94,7 +95,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
                 Id = userId,
                 Page = 1,
                 PageSize = 1
-            }).ContinueWith(t => t.Result.FirstOrDefault() ?? null);
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (existingUser == null)
             {
@@ -114,12 +115,15 @@ internal class UserService(IUserRepository userRepository) : IUserService
             existingUser.Status = user.Status ?? existingUser.Status;
             existingUser.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
-            var updatedUser = await userRepository.InsertOrUpdateUserAsync(existingUser);
+            var updatedUser = await userRepository.InsertOrUpdateUserAsync(existingUser, cancellationToken);
+            await userRepository.SaveChangesAsync(cancellationToken);
+            
             if (updatedUser == null)
             {
                 throw new Exception("Failed to update user. Updated user not found");
             }
-            return new CoreUserDto(updatedUser);
+            
+            return updatedUser;
         }
         catch (Exception ex)
         {
@@ -128,11 +132,11 @@ internal class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
-    public async Task DeleteUserAsync(string id)
+    public async Task DeleteUserAsync(string id, CancellationToken cancellationToken = default)
     {
         try
         {
-            await userRepository.DeleteUserAsync(id);
+            await userRepository.DeleteUserAsync(id, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -141,7 +145,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
-    public async Task<bool> UsernameExistsAsync(string username)
+    public async Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -150,7 +154,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
                 Username = username,
                 Page = 1,
                 PageSize = 1
-            });
+            }, cancellationToken);
             return existingUsers.Any();
         }
         catch (Exception e)
@@ -160,11 +164,11 @@ internal class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
-    public async Task<CoreUser> ValidateCredentialsAsync(string? username, string? email, string password)
+    public async Task<CoreUser> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default)
     {
-        if(username == null && email == null)
+        if(username == null || password == null)
         {
-            throw new ArgumentException("Either username or email must be provided.");
+            throw new ArgumentException("Username and Password must be provided.");
         }
         
         try
@@ -172,10 +176,9 @@ internal class UserService(IUserRepository userRepository) : IUserService
             var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
             {
                 Username = username,
-                Email = email,
                 Page = 1,
                 PageSize = 1
-            }).ContinueWith(t => t.Result.FirstOrDefault() ?? null);
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {

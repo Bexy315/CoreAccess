@@ -20,15 +20,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 #endregion
 
 #region Services
 
-var encryptionKey = builder.Environment.IsDevelopment() ? Environment.GetEnvironmentVariable("COREACCESS_ENCRYPTION_KEY") : EncryptionKeyHelper.GetOrCreateKey("aes_encryption");
-builder.Services.AddSingleton<IDataEncryptionService>(new AesEncryptionService(encryptionKey ?? throw new MissingFieldException("Encryption key is not set. Please set the COREACCESS_ENCRYPTION_KEY environment variable.")));
-
 builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
+builder.Services.AddScoped<ICoreAccessTokenService, CoreAccessTokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 

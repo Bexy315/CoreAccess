@@ -161,3 +161,9 @@ E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Micros
 E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
 E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
 E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\.env
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\DataJuggler.Cryptography.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\DataJuggler.UltimateHelper.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Konscious.Security.Cryptography.Argon2.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Konscious.Security.Cryptography.Blake2.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\System.Configuration.ConfigurationManager.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\System.Security.Cryptography.ProtectedData.dll

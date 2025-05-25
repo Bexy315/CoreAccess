@@ -42,25 +42,18 @@ public class AppSettingsRepository(CoreAccessDbContext context) : IAppSettingsRe
 
     public async Task<AppSetting> InsertOrUpdateSettingAsync(AppSetting setting)
     {
-        var existingSetting = await context.AppSettings
-            .FirstOrDefaultAsync(s => s.Id == setting.Id);
-
-        if (existingSetting != null)
+        var existingSetting = await context.Set<AppSetting>().FirstOrDefaultAsync(s => s.Id == setting.Id);
+        if (existingSetting == null)
         {
-            existingSetting.Value = setting.Value;
-            existingSetting.IsEncrypted = setting.IsEncrypted;
-            existingSetting.IsSystem = setting.IsSystem;
-
-            context.AppSettings.Update(existingSetting);
-            await context.SaveChangesAsync();
-            return existingSetting;
+            context.Set<AppSetting>().Add(setting);
         }
         else
         {
-            context.AppSettings.Add(setting);
-            await context.SaveChangesAsync();
-            return setting;
+            context.Entry(existingSetting).CurrentValues.SetValues(setting);
         }
+        
+        await context.SaveChangesAsync();
+        return setting;
     }
 
     public async Task DeleteSettingAsync(Guid id)

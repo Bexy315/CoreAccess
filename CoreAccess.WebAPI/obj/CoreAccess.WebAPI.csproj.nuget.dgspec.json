@@ -56,6 +56,10 @@
               "target": "Package",
               "version": "[0.1.0, )"
             },
+            "DataJuggler.Cryptography": {
+              "target": "Package",
+              "version": "[9.0.1, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[9.0.5, )"

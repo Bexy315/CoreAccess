@@ -6,15 +6,16 @@ namespace CoreAccess.WebAPI.Repositories;
 
 public interface IUserRepository
 {
-    public Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options);
-    public Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user);
-    public Task DeleteUserAsync(string id);
+    public Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user, CancellationToken cancellationToken = default);
+    public Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 public class UserRepository(CoreAccessDbContext context) : IUserRepository
 {
-    public async Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options)
+    public async Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default)
     {
-        var users = await context.Users.ToListAsync();
+        var users = await context.Users.ToListAsync(cancellationToken);
             
         var query = users.AsQueryable();
 
@@ -84,36 +85,40 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
 
         var skip = (options.Page - 1) * options.PageSize;
         var result = query.Skip(skip).Take(options.PageSize).ToList();
-
+        
         return result;
     }
-    public async Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user)
+    public async Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user, CancellationToken cancellationToken = default)
     {
-        var existingUser = await context.Users.FindAsync(user.Id);
-        if (existingUser != null)
-        {
-            context.Entry(existingUser).CurrentValues.SetValues(user);
-        }
-        else
-        {
-            await context.Users.AddAsync(user);
-        }
-        await context.SaveChangesAsync();
+        var existingUser = await context.Set<CoreUser>().FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
         
-        return await context.Users.FindAsync(user.Id);
+        if (existingUser == null)
+        {
+            await context.Set<CoreUser>().AddAsync(user, cancellationToken);
+            return user;
+        }
+
+        context.Entry(existingUser).CurrentValues.SetValues(user);
+        context.Entry(existingUser).State = EntityState.Modified;
+        return existingUser;
     }
 
-    public async Task DeleteUserAsync(string id)
+    public async Task DeleteUserAsync(string id, CancellationToken cancellationToken = default)
     {
-        var user = await context.Users.FindAsync(Guid.Parse(id));
+        var user = await context.Users.FindAsync(Guid.Parse(id), cancellationToken);
         if (user != null)
         {
             context.Users.Remove(user);
-            await context.SaveChangesAsync();
+            context.Entry(user).State = EntityState.Deleted;
         }
         else
         {
             throw new Exception("User not found");
         }
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -50,20 +50,21 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         return result;
     }
 
-    public async Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole user)
+    public async Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole role)
     {
-        var existingRole = await context.Roles.FindAsync(user.Id);
-        if (existingRole != null)
+        var existingRole = await context.Set<CoreRole>().FirstOrDefaultAsync(r => r.Id == role.Id);
+        
+        if (existingRole == null)
         {
-            context.Entry(existingRole).CurrentValues.SetValues(user);
+            context.Set<CoreRole>().Add(role);
         }
         else
         {
-            await context.Roles.AddAsync(user);
+            context.Entry(existingRole).CurrentValues.SetValues(role);
         }
 
         await context.SaveChangesAsync();
-        return user;
+        return role;
     }
 
     public async Task DeleteRoleAsync(string id)

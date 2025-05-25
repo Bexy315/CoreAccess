@@ -9,11 +9,11 @@ namespace CoreAccess.WebAPI.Controllers;
 public class UserController(IUserService userService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetUser([FromQuery]CoreUserSearchOptions options)
+    public async Task<IActionResult> GetUser([FromQuery]CoreUserSearchOptions options, CancellationToken cancellationToken = default)
     {
         try
         {
-            var user = await userService.SearchUsersAsync(options);
+            var user = await userService.SearchUsersAsync(options, cancellationToken);
 
             return Ok(user);
         }
@@ -24,11 +24,11 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> CreateUser([FromBody]CoreUserCreateRequest request)
+    public async Task<IActionResult> CreateUser([FromBody]CoreUserCreateRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
-            return Ok(await userService.CreateUserAsync(request));
+            return Ok(await userService.CreateUserAsync(request, cancellationToken));
         }
         catch (Exception ex)
         {
@@ -37,12 +37,12 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPost]
-    [Route("/{userId}")]
-    public async Task<IActionResult> UpdateUser([FromRoute]string userId, [FromBody]CoreUserUpdateRequest request)
+    [Route("/api/user/{userId}")]
+    public async Task<IActionResult> UpdateUser([FromRoute]string userId, [FromBody]CoreUserUpdateRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
-            return Ok(await userService.UpdateUserAsync(userId, request));
+            return Ok(await userService.UpdateUserAsync(userId, request, cancellationToken));
         }
         catch (Exception ex)
         {
@@ -51,12 +51,12 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpDelete]
-    [Route("/{userId}")]
-    public async Task<IActionResult> DeleteUser([FromRoute]string userId)
+    [Route("/api/user/{userId}")]
+    public async Task<IActionResult> DeleteUser([FromRoute]string userId, CancellationToken cancellationToken = default)
     {
         try
         {
-            await userService.DeleteUserAsync(userId);
+            await userService.DeleteUserAsync(userId, cancellationToken);
             return Ok();
         }
         catch (Exception ex)

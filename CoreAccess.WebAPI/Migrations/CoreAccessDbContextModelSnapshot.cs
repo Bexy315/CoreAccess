@@ -15,13 +15,40 @@ namespace CoreAccess.WebAPI.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
+            modelBuilder
+                .HasDefaultSchema("coreaccess")
+                .HasAnnotation("ProductVersion", "9.0.5");
+
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.AppSetting", b =>
+                {
+                    b.Property<byte[]>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BLOB");
+
+                    b.Property<bool>("IsEncrypted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppSettings", "coreaccess");
+                });
 
             modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreRole", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<byte[]>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("CreatedAt")
                         .IsRequired()
@@ -46,14 +73,14 @@ namespace CoreAccess.WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", "coreaccess");
                 });
 
             modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreUser", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<byte[]>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("Address")
                         .HasColumnType("TEXT");
@@ -105,22 +132,73 @@ namespace CoreAccess.WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", "coreaccess");
+                });
+
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.RefreshToken", b =>
+                {
+                    b.Property<byte[]>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BLOB");
+
+                    b.Property<byte[]>("CoreUserId")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedByIp")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Revoked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RevokedByIp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CoreUserId");
+
+                    b.ToTable("RefreshTokens", "coreaccess");
                 });
 
             modelBuilder.Entity("CoreRoleCoreUser", b =>
                 {
-                    b.Property<Guid>("RolesId")
-                        .HasColumnType("TEXT");
+                    b.Property<byte[]>("RolesId")
+                        .HasColumnType("BLOB");
 
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("TEXT");
+                    b.Property<byte[]>("UsersId")
+                        .HasColumnType("BLOB");
 
                     b.HasKey("RolesId", "UsersId");
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles", "coreaccess");
+                });
+
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.RefreshToken", b =>
+                {
+                    b.HasOne("CoreAccess.WebAPI.Model.CoreUser", "CoreUser")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("CoreUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CoreUser");
                 });
 
             modelBuilder.Entity("CoreRoleCoreUser", b =>
@@ -136,6 +214,11 @@ namespace CoreAccess.WebAPI.Migrations
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreUser", b =>
+                {
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

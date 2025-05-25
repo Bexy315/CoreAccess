@@ -11,7 +11,7 @@ public static class EncryptionKeyHelper
     /// </summary>
     /// <param name="keyName">Name des Schlüssels (Dateiname ohne Endung).</param>
     /// <returns>Ein Base64-kodierter 256-Bit-Schlüssel.</returns>
-    public static string GetOrCreateKey(string keyName)
+    public static string GetOrCreateBase64Key(string keyName)
     {
         var keyFilePath = Path.Combine(KeyPath, $"{keyName}.key");
 

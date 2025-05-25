@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CoreAccess.WebAPI.Controllers;
 
+[Controller]
+[Route("api/role")]
 public class RoleController(IRoleService roleService) : ControllerBase
 {
     [HttpGet]
-    [Route("api/roles")]
     public async Task<IActionResult> GetRoles([FromQuery] CoreRoleSearchOptions options)
     {
         try
@@ -23,7 +24,6 @@ public class RoleController(IRoleService roleService) : ControllerBase
     }
     
     [HttpPost]
-    [Route("api/roles")]
     public async Task<IActionResult> CreateRole([FromBody] CoreRoleCreateRequest request)
     {
         try
@@ -39,7 +39,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     }
     
     [HttpPut]
-    [Route("api/roles/{id}")]
+    [Route("/api/role/{id}")]
     public async Task<IActionResult> UpdateRole(string id, [FromBody] CoreRoleUpdateRequest request)
     {
         try
@@ -55,7 +55,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     }
     
     [HttpDelete]
-    [Route("api/roles/{id}")]
+    [Route("/api/role/{id}")]
     public async Task<IActionResult> DeleteRole(string id)
     {
         try

@@ -6,16 +6,36 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreAccess.WebAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "coreaccess");
+
             migrationBuilder.CreateTable(
-                name: "Roles",
+                name: "AppSettings",
+                schema: "coreaccess",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    Value = table.Column<string>(type: "TEXT", nullable: false),
+                    IsEncrypted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppSettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
@@ -30,9 +50,10 @@ namespace CoreAccess.WebAPI.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Users",
+                schema: "coreaccess",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
                     Username = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: true),
                     FirstName = table.Column<string>(type: "TEXT", nullable: true),
@@ -54,11 +75,39 @@ namespace CoreAccess.WebAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "RefreshTokens",
+                schema: "coreaccess",
                 columns: table => new
                 {
-                    RolesId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UsersId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Token = table.Column<string>(type: "TEXT", nullable: false),
+                    Expires = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedByIp = table.Column<string>(type: "TEXT", nullable: false),
+                    ReplacedByToken = table.Column<string>(type: "TEXT", nullable: true),
+                    Revoked = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    RevokedByIp = table.Column<string>(type: "TEXT", nullable: true),
+                    CoreUserId = table.Column<byte[]>(type: "BLOB", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_Users_CoreUserId",
+                        column: x => x.CoreUserId,
+                        principalSchema: "coreaccess",
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserRoles",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    RolesId = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    UsersId = table.Column<byte[]>(type: "BLOB", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -66,19 +115,28 @@ namespace CoreAccess.WebAPI.Migrations
                     table.ForeignKey(
                         name: "FK_UserRoles_Roles_RolesId",
                         column: x => x.RolesId,
+                        principalSchema: "coreaccess",
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserRoles_Users_UsersId",
                         column: x => x.UsersId,
+                        principalSchema: "coreaccess",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_CoreUserId",
+                schema: "coreaccess",
+                table: "RefreshTokens",
+                column: "CoreUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_UsersId",
+                schema: "coreaccess",
                 table: "UserRoles",
                 column: "UsersId");
         }
@@ -87,13 +145,24 @@ namespace CoreAccess.WebAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UserRoles");
+                name: "AppSettings",
+                schema: "coreaccess");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "RefreshTokens",
+                schema: "coreaccess");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "UserRoles",
+                schema: "coreaccess");
+
+            migrationBuilder.DropTable(
+                name: "Roles",
+                schema: "coreaccess");
+
+            migrationBuilder.DropTable(
+                name: "Users",
+                schema: "coreaccess");
         }
     }
 }
