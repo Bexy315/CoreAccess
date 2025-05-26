@@ -48,6 +48,7 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
             };
 
             var createdRole = await roleRepository.InsertOrUpdateRoleAsync(newRole);
+            await roleRepository.SaveChangesAsync();
             if (createdRole == null)
             {
                 throw new Exception("Failed to create role");
@@ -83,6 +84,7 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
             existingRole.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
             var role = await roleRepository.InsertOrUpdateRoleAsync(existingRole);
+            await roleRepository.SaveChangesAsync();
             if (role == null)
             {
                 throw new Exception("Failed to update role");
@@ -101,6 +103,7 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
         try
         {
             await roleRepository.DeleteRoleAsync(id);
+            await roleRepository.SaveChangesAsync();
         }
         catch (Exception ex)
         {

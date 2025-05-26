@@ -6,16 +6,19 @@ namespace CoreAccess.WebAPI.Repositories;
 
 public interface IRoleRepository
 {
-    public Task<List<CoreRole>> SearchRolesAsync(CoreRoleSearchOptions options);
-    public Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole user);
-    public Task DeleteRoleAsync(string id); 
+    public Task<List<CoreRole>> SearchRolesAsync(CoreRoleSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole user, CancellationToken cancellationToken = default);
+    public Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default);
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
 public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
 {
-    public async Task<List<CoreRole>> SearchRolesAsync(CoreRoleSearchOptions options)
+    public async Task<List<CoreRole>> SearchRolesAsync(CoreRoleSearchOptions options, CancellationToken cancellationToken = default)
     {
-        var query = context.Roles.AsQueryable();
+        var users = await context.Roles.ToListAsync(cancellationToken);
+        
+        var query = users.AsQueryable();
 
         if (!string.IsNullOrEmpty(options.Search))
         {
@@ -45,14 +48,14 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         }
 
         var skip = (options.Page - 1) * options.PageSize;
-        var result = await query.Skip(skip).Take(options.PageSize).ToListAsync();
-
+        var result = query.Skip(skip).Take(options.PageSize).ToList();
+        
         return result;
     }
 
-    public async Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole role)
+    public async Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole role, CancellationToken cancellationToken = default)
     {
-        var existingRole = await context.Set<CoreRole>().FirstOrDefaultAsync(r => r.Id == role.Id);
+        var existingRole = await context.Set<CoreRole>().FirstOrDefaultAsync(r => r.Id == role.Id, cancellationToken);
         
         if (existingRole == null)
         {
@@ -63,21 +66,24 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
             context.Entry(existingRole).CurrentValues.SetValues(role);
         }
 
-        await context.SaveChangesAsync();
         return role;
     }
 
-    public async Task DeleteRoleAsync(string id)
+    public async Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default)
     {
-        var role = await context.Roles.FindAsync(id);
+        var role = await context.Roles.FindAsync(id, cancellationToken);
         if (role != null)
         {
             context.Roles.Remove(role);
-            await context.SaveChangesAsync();
         }
         else
         {
             throw new Exception("Role not found");
         }
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace CoreAccess.WebAPI.Model;
 
 public class CoreRole
@@ -9,6 +11,7 @@ public class CoreRole
     public string UpdatedAt { get; set; } = "";
     public bool IsSystem { get; set; } = false;
     public List<string>? Permissions { get; set; }
+    [JsonIgnore]
     public List<CoreUser> Users { get; set; } = new();
 }
 

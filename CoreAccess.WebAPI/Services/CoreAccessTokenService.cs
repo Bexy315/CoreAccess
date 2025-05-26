@@ -38,10 +38,24 @@ public class CoreAccessTokenService(
             new(CoreAccessClaimType.TokenId, Guid.NewGuid().ToString())
         };
 
+        string roles = "";
+        string permissions = "";
+        
         foreach (var role in user.Roles)
         {
-            claims.Add(new Claim(CoreAccessClaimType.Role, role.Name));
+            roles += $"{role.Name},";
+
+            if (role.Permissions != null && role.Permissions.Any())
+            {
+                foreach (var permission in role.Permissions)
+                {
+                    
+                    permissions += $"{permission},";
+                }   
+            }
         }
+        claims.Add(new Claim(CoreAccessClaimType.Roles, roles));
+        claims.Add(new Claim(CoreAccessClaimType.Permissions, permissions));
 
         var token = new JwtSecurityToken(
             issuer,
@@ -58,7 +72,7 @@ public class CoreAccessTokenService(
     {
         var refreshToken = new RefreshToken
         {
-            Token = EncryptionKeyHelper.GenerateRandomBase64Key(),
+            Token = SecureKeyHelper.GenerateRandomBase64Key(),
             Expires = DateTime.UtcNow.AddDays(7),
             Created = DateTime.UtcNow,
             CreatedByIp = createdByIp,
@@ -180,7 +194,7 @@ public class CoreAccessTokenService(
     {
         if (string.IsNullOrWhiteSpace(await appSettingsService.GetDecrypted("Jwt:Secret")))
         {
-            var secret = EncryptionKeyHelper.GenerateRandomBase64Key();
+            var secret = SecureKeyHelper.GenerateRandomBase64Key();
             await appSettingsService.SetEncrypted("Jwt:Secret", secret);
         }
 

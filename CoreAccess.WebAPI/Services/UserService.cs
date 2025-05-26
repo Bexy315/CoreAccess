@@ -6,15 +6,17 @@ namespace CoreAccess.WebAPI.Services;
 public interface IUserService
 {
     Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default);
+    Task<CoreUser> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
     Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
     Task<CoreUser> GetCoreUserByDto(CoreUserDto dto, CancellationToken cancellationToken = default);
     Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest request, CancellationToken cancellationToken = default);
     Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default);
+    Task<CoreUser> AddRoleToUserAsync(string userName, string roleId, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
     Task<CoreUser> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
 }
-internal class UserService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository) : IUserService
+internal class UserService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IRoleRepository roleRepository, IRoleService roleService) : IUserService
 {
     public async Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default)
     {
@@ -29,6 +31,36 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
                 PageSize = options.PageSize
             };
             return dto;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<CoreUser> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty");
+        }
+
+        try
+        {
+            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            {
+                Id = userId,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found for the provided ID.");
+            }
+
+            return user;
         }
         catch (Exception ex)
         {
@@ -161,6 +193,40 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
                 throw new Exception("Failed to update user. Updated user not found");
             }
             
+            return updatedUser;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<CoreUser> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleName))
+        {
+            throw new ArgumentException("User ID and Role Name must be provided.");
+        }
+
+        try
+        {
+            var user = await GetUserByIdAsync(userId, cancellationToken);
+            var role = await roleRepository.SearchRolesAsync(new CoreRoleSearchOptions{
+                Name = roleName,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            
+            if (user == null || role == null)
+            {
+                throw new KeyNotFoundException("User or Role not found for the provided IDs.");
+            }
+
+            user.Roles.Add(role);
+            var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
+            await userRepository.SaveChangesAsync(cancellationToken);
+
             return updatedUser;
         }
         catch (Exception ex)

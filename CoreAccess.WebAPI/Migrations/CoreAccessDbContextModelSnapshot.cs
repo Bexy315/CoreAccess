@@ -74,6 +74,26 @@ namespace CoreAccess.WebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles", "coreaccess");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new byte[] { 93, 231, 62, 246, 153, 248, 229, 79, 174, 109, 160, 112, 22, 77, 1, 253 },
+                            CreatedAt = "2025-01-01T00:00:00Z",
+                            Description = "Admin role for Administrators",
+                            IsSystem = true,
+                            Name = "Admin",
+                            UpdatedAt = "2025-01-01T00:00:00Z"
+                        },
+                        new
+                        {
+                            Id = new byte[] { 205, 25, 215, 123, 204, 253, 99, 68, 182, 51, 42, 239, 114, 8, 186, 56 },
+                            CreatedAt = "2025-01-01T00:00:00Z",
+                            Description = "User role for Default Users",
+                            IsSystem = true,
+                            Name = "User",
+                            UpdatedAt = "2025-01-01T00:00:00Z"
+                        });
                 });
 
             modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreUser", b =>
@@ -100,6 +120,9 @@ namespace CoreAccess.WebAPI.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastName")
                         .HasColumnType("TEXT");

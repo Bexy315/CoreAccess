@@ -167,3 +167,6 @@ E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Konsci
 E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Konscious.Security.Cryptography.Blake2.dll
 E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\System.Configuration.ConfigurationManager.dll
 E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\System.Security.Cryptography.ProtectedData.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+E:\DEVELOPMENT\github-nuget\CoreAccess\CoreAccess.WebAPI\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll

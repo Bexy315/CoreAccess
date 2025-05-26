@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace CoreAccess.WebAPI.Migrations
 {
     /// <inheritdoc />
@@ -65,6 +67,7 @@ namespace CoreAccess.WebAPI.Migrations
                     Zip = table.Column<string>(type: "TEXT", nullable: true),
                     Country = table.Column<string>(type: "TEXT", nullable: true),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<string>(type: "TEXT", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false)
@@ -125,6 +128,16 @@ namespace CoreAccess.WebAPI.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                schema: "coreaccess",
+                table: "Roles",
+                columns: new[] { "Id", "CreatedAt", "Description", "IsSystem", "Name", "Permissions", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new byte[] { 93, 231, 62, 246, 153, 248, 229, 79, 174, 109, 160, 112, 22, 77, 1, 253 }, "2025-01-01T00:00:00Z", "Admin role for Administrators", true, "Admin", null, "2025-01-01T00:00:00Z" },
+                    { new byte[] { 205, 25, 215, 123, 204, 253, 99, 68, 182, 51, 42, 239, 114, 8, 186, 56 }, "2025-01-01T00:00:00Z", "User role for Default Users", true, "User", null, "2025-01-01T00:00:00Z" }
                 });
 
             migrationBuilder.CreateIndex(

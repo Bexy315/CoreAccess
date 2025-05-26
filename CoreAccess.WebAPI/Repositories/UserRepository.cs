@@ -15,7 +15,7 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
 {
     public async Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default)
     {
-        var users = await context.Users.ToListAsync(cancellationToken);
+        var users = await context.Users.Include(u => u.Roles).ToListAsync(cancellationToken);
             
         var query = users.AsQueryable();
 
@@ -106,8 +106,13 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
     public async Task DeleteUserAsync(string id, CancellationToken cancellationToken = default)
     {
         var user = await context.Users.FindAsync(Guid.Parse(id), cancellationToken);
+        
+        
         if (user != null)
         {
+            if (user.IsSystem)
+                throw new InvalidOperationException("Systembenutzer dürfen nicht gelöscht werden.");
+            
             context.Users.Remove(user);
             context.Entry(user).State = EntityState.Deleted;
         }

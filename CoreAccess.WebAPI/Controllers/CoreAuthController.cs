@@ -1,3 +1,4 @@
+using CoreAccess.WebAPI.Decorator;
 using Microsoft.AspNetCore.Mvc;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
@@ -9,6 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 public class CoreAuthController(IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
 {
     [HttpPost("/register")]
+    [CoreAuthorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] CoreUserCreateRequest dto, CancellationToken cancellationToken = default)
     {
         if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))

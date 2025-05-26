@@ -22,6 +22,7 @@ public class CoreUser
     public string? Zip { get; set; }
     public string? Country { get; set; }
     public CoreUserStatus Status { get; set; } = CoreUserStatus.Active;
+    public bool IsSystem { get; set; } = false;
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string UpdatedAt { get; set; } = "";
     public string PasswordHash { get; set; } = "";

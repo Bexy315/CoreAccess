@@ -23,7 +23,7 @@ public class AppSettingsService : IAppSettingsService
     public AppSettingsService(IAppSettingsRepository repository)
     {
         _repository = repository;
-        _encryptionKey = EncryptionKeyHelper.GetOrCreateBase64Key("encryption");
+        _encryptionKey = SecureKeyHelper.GetOrCreateBase64Key("encryption");
     }
     public async Task<AppSettingDto?> SearchSettingAsync(AppSettingSearchOptions options)
     {

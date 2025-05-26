@@ -36,6 +36,7 @@ public static class CoreAccessClaimType
 {
     public const string UserId = "coreaccess:user_id";
     public const string UserName = "coreaccess:username";
-    public const string Role = "coreaccess:role";
+    public const string Roles = "coreaccess:roles";
     public const string TokenId = "coreaccess:token_id";
+    public const string Permissions = "coreaccess:permissions";
 }

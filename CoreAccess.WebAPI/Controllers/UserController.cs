@@ -49,6 +49,21 @@ public class UserController(IUserService userService) : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    
+    [HttpPost]
+    [Route("/api/user/{userId}/role/{roleName}")]
+    public async Task<IActionResult> AddRoleToUser([FromRoute]string userId, [FromRoute]string roleName, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await userService.AddRoleToUserAsync(userId, roleName, cancellationToken);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
     [HttpDelete]
     [Route("/api/user/{userId}")]
