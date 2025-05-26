@@ -1,3 +1,4 @@
+using CoreAccess.WebAPI.Decorator;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 public class RoleController(IRoleService roleService) : ControllerBase
 {
     [HttpGet]
+    [CoreAuthorize]
     public async Task<IActionResult> GetRoles([FromQuery] CoreRoleSearchOptions options)
     {
         try
@@ -24,6 +26,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     }
     
     [HttpPost]
+    [CoreAuthorize]
     public async Task<IActionResult> CreateRole([FromBody] CoreRoleCreateRequest request)
     {
         try
@@ -40,6 +43,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     
     [HttpPut]
     [Route("/api/role/{id}")]
+    [CoreAuthorize]
     public async Task<IActionResult> UpdateRole(string id, [FromBody] CoreRoleUpdateRequest request)
     {
         try
@@ -56,6 +60,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     
     [HttpDelete]
     [Route("/api/role/{id}")]
+    [CoreAuthorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteRole(string id)
     {
         try

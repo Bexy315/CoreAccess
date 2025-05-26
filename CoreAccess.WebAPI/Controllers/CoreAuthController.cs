@@ -9,16 +9,6 @@ namespace CoreAccess.WebAPI.Controllers;
 [Route("api/auth")]
 public class CoreAuthController(IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
 {
-    [HttpPost("/register")]
-    [CoreAuthorize(Roles = "Admin")]
-    public async Task<IActionResult> Register([FromBody] CoreUserCreateRequest dto, CancellationToken cancellationToken = default)
-    {
-        if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
-            return BadRequest("Username already exists.");
-
-        var user = await userService.CreateUserAsync(dto, cancellationToken);
-        return Ok(new { user.Id, user.Username });
-    }
     [HttpPost("/login")]
     public async Task<IActionResult> Login([FromBody] CoreLoginRequest dto, CancellationToken cancellationToken = default)
     {
@@ -76,5 +66,15 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
     {
         await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp, cancellationToken: cancellationToken);
         return Ok();
+    }
+    [HttpPost("/register")]
+    [CoreAuthorize(Roles = "Admin")]
+    public async Task<IActionResult> Register([FromBody] CoreUserCreateRequest dto, CancellationToken cancellationToken = default)
+    {
+        if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
+            return BadRequest("Username already exists.");
+
+        var user = await userService.CreateUserAsync(dto, cancellationToken);
+        return Ok(new { user.Id, user.Username });
     }
 }

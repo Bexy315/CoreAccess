@@ -1,3 +1,4 @@
+using CoreAccess.WebAPI.Decorator;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 public class UserController(IUserService userService) : ControllerBase
 {
     [HttpGet]
+    [CoreAuthorize]
     public async Task<IActionResult> GetUser([FromQuery]CoreUserSearchOptions options, CancellationToken cancellationToken = default)
     {
         try
@@ -24,6 +26,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPut]
+    [CoreAuthorize]
     public async Task<IActionResult> CreateUser([FromBody]CoreUserCreateRequest request, CancellationToken cancellationToken = default)
     {
         try
@@ -38,6 +41,7 @@ public class UserController(IUserService userService) : ControllerBase
 
     [HttpPost]
     [Route("/api/user/{userId}")]
+    [CoreAuthorize]
     public async Task<IActionResult> UpdateUser([FromRoute]string userId, [FromBody]CoreUserUpdateRequest request, CancellationToken cancellationToken = default)
     {
         try
@@ -52,6 +56,7 @@ public class UserController(IUserService userService) : ControllerBase
     
     [HttpPost]
     [Route("/api/user/{userId}/role/{roleName}")]
+    [CoreAuthorize]
     public async Task<IActionResult> AddRoleToUser([FromRoute]string userId, [FromRoute]string roleName, CancellationToken cancellationToken = default)
     {
         try
@@ -67,6 +72,7 @@ public class UserController(IUserService userService) : ControllerBase
 
     [HttpDelete]
     [Route("/api/user/{userId}")]
+    [CoreAuthorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser([FromRoute]string userId, CancellationToken cancellationToken = default)
     {
         try
