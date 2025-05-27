@@ -1,55 +1,94 @@
-## Build results Sample API project
-CoreAccess.WebAPI/[Dd]ebug/
-CoreAccess.WebAPI/[Dd]ebugPublic/
-CoreAccess.WebAPI/[Rr]elease/
-CoreAccess.WebAPI/[Rr]eleases/
-CoreAccess.WebAPI/x64/
-CoreAccess.WebAPI/x86/
-CoreAccess.WebAPI/[Ww][Ii][Nn]32/
-CoreAccess.WebAPI/[Aa][Rr][Mm]/
-CoreAccess.WebAPI/[Aa][Rr][Mm]64/
-CoreAccess.WebAPI/bld/
-CoreAccess.WebAPI/[Bb]in/
-CoreAccess.WebAPI/[Oo]bj/
-CoreAccess.WebAPI/[Ll]og/
-CoreAccess.WebAPI/[Ll]ogs/
-CoreAccess.WebAPI/App_Data/
+#############################################
+# Global ignores
+#############################################
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 
-CoreAccess.WebAPI\obj\
+#############################################
+# Node / Frontend (coreaccess-webui, client)
+#############################################
+node_modules/
+dist/
+build/
+.vite/
+pnpm-lock.yaml
+yarn.lock
+*.tsbuildinfo
+.env
+.env.*.local
+*.local
 
-CoreAccess.Frontend/.vscode/
-CoreAccess.Frontend/dist/
-CoreAccess.Frontend/.idea/
-CoreAccess.Frontend/package-lock.json
-
-## .NET Core
-CoreAccess.WebAPI/project.lock.json
-CoreAccess.WebAPI/project.fragment.lock.json
-CoreAccess.WebAPI/artifacts/
-
-## ASP.NET Scaffolding
-CoreAccess.WebAPI/ScaffoldingReadMe.txt
-
-## NuGet Packages
-CoreAccess.WebAPI/*.nupkg
-CoreAccess.WebAPI/*.snupkg
-
-## Others
-CoreAccess.WebAPI/~$*
-CoreAccess.WebAPI/*~
-CoreAccess.WebAPI/CodeCoverage/
-
-## MSBuild Binary and Structured Log
-CoreAccess.WebAPI/*.binlog
-
-## MSTest test Results
-CoreAccess.WebAPI/[Tt]est[Rr]esult*/
-CoreAccess.WebAPI/[Bb]uild[Ll]og.*
-
-## NUnit
-CoreAccess.WebAPI/*.VisualState.xml
-CoreAccess.WebAPI/TestResult.xml
-CoreAccess.WebAPI/nunit-*.xml
-
+# IDEs/Editors
+.vscode/
 .idea/
-./idea/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+#############################################
+# .NET
+#############################################
+# Build results
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.mdb
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider & VS
+*.sln.iml
+.idea/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish output
+wwwroot/dist/
+
+# Configuration
+appsettings.*.json
+secrets.json
+
+#############################################
+# Tests
+#############################################
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.testsettings
+*.vsmdi
+
+#############################################
+# Others
+#############################################
+# Resharper
+_ReSharper*/
+*.ReSharper
+*.DotSettings.user
+
+# VS Code workspace storage
+.vscode-test/
+
+# Local packages
+*.tgz
+
+# NPM linked packages
+*.npmrc
