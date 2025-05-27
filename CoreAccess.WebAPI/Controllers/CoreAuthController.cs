@@ -19,7 +19,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
         if (user == null)
             return Unauthorized("Invalid credentials.");
 
-        var accessToken = await tokenService.GenerateAccessTokenAsync(user , cancellationToken: cancellationToken);
+        var accessToken = tokenService.GenerateAccessToken(user , cancellationToken: cancellationToken);
         var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
 
         return Ok(new
@@ -39,7 +39,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
                 return Unauthorized("Invalid refresh token.");
             
             var newAccessToken =
-                await tokenService.GenerateAccessTokenAsync(user, cancellationToken: cancellationToken);
+                tokenService.GenerateAccessToken(user, cancellationToken: cancellationToken);
             var newRefreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
 
             await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp, cancellationToken);
@@ -68,7 +68,6 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
         return Ok();
     }
     [HttpPost("/register")]
-    [CoreAuthorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] CoreUserCreateRequest dto, CancellationToken cancellationToken = default)
     {
         if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))

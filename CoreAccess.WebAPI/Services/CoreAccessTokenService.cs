@@ -9,7 +9,7 @@ namespace CoreAccess.WebAPI.Services;
 
 public interface ICoreAccessTokenService
 {
-    Task<string> GenerateAccessTokenAsync(CoreUser user, string scope = "default", CancellationToken cancellationToken = default);
+    string GenerateAccessToken(CoreUser user, string scope = "default", CancellationToken cancellationToken = default);
     Task<RefreshToken> GenerateRefreshTokenAsync(CoreUser user, string createdByIp, CancellationToken cancellationToken = default);
     Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default);
     Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default);
@@ -19,14 +19,13 @@ public interface ICoreAccessTokenService
     public Claim GetClaim(ClaimsPrincipal principal, string claimType);
 }
 public class CoreAccessTokenService(
-    IAppSettingsService appSettingsService,
     IUserService userService,
     IRefreshTokenRepository refreshTokenRepository)
     : ICoreAccessTokenService
 {
-    public async Task<string> GenerateAccessTokenAsync(CoreUser user, string scope = "default", CancellationToken cancellationToken = default)
+    public string GenerateAccessToken(CoreUser user, string scope = "default", CancellationToken cancellationToken = default)
     {
-        var (secret, issuer, audience, expiresIn) = await LoadSettingsAsync(cancellationToken);
+        var (secret, issuer, audience, expiresIn) = LoadSettingsAsync(cancellationToken);
 
         var key = new SymmetricSecurityKey(Convert.FromBase64String(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -81,8 +80,6 @@ public class CoreAccessTokenService(
         
         await refreshTokenRepository.UpdateOrInsertRefreshTokenAsync(refreshToken, cancellationToken);
         await refreshTokenRepository.SaveChangesAsync(cancellationToken);
-        
-      //  await RecycleRefreshTokensAsync(updatedUser, cancellationToken);
         
         return refreshToken;
     }
@@ -146,7 +143,7 @@ public class CoreAccessTokenService(
 
     public ClaimsPrincipal? ValidateToken(string token)
     {
-        var secret = appSettingsService.GetDecrypted("Jwt:Secret").Result;
+        var secret = AppSettingsHelper.Get("Jwt:Secret", decryptIfNeeded: true);
         if (string.IsNullOrEmpty(secret)) return null;
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -178,33 +175,32 @@ public class CoreAccessTokenService(
         return principal.Claims.FirstOrDefault(c => c.Type == claimType) ?? throw new InvalidOperationException($"Claim '{claimType}' not found in the principal.");
     }
     
-    private async Task<(string Secret, string Issuer, string Audience, int ExpiresIn)> LoadSettingsAsync(CancellationToken cancellationToken = default)
+    private (string Secret, string Issuer, string Audience, int ExpiresIn) LoadSettingsAsync(CancellationToken cancellationToken = default)
     {
-        await EnsureJwtSettingsInitializedAsync(cancellationToken);
+        EnsureJwtSettingsInitializedAsync();
         
-        var secret = await appSettingsService.GetDecrypted("Jwt:Secret");
-        var issuer = await appSettingsService.GetDecrypted("Jwt:Issuer");
-        var audience = await appSettingsService.GetDecrypted("Jwt:Audience");
-        var expiresIn = int.TryParse(await appSettingsService.GetDecrypted("Jwt:ExpiresIn"), out var val) ? val : 60;
+        var secret = AppSettingsHelper.Get("Jwt:Secret", decryptIfNeeded: true)?? throw new InvalidOperationException("JWT Secret is not set in AppSettings.");
+        var issuer = AppSettingsHelper.Get("Jwt:Issuer", decryptIfNeeded: true)?? throw new InvalidOperationException("JWT Issuer is not set in AppSettings.");;
+        var audience = AppSettingsHelper.Get("Jwt:Audience", decryptIfNeeded: true)?? throw new InvalidOperationException("JWT Audience is not set in AppSettings.");;
+        var expiresIn = int.TryParse(AppSettingsHelper.Get("Jwt:ExpiresIn", decryptIfNeeded: true), out var val) ? val : 60;
 
         return (secret, issuer, audience, expiresIn);
     }
 
-    private async Task EnsureJwtSettingsInitializedAsync(CancellationToken cancellationToken = default)
+    private void EnsureJwtSettingsInitializedAsync()
     {
-        if (string.IsNullOrWhiteSpace(await appSettingsService.GetDecrypted("Jwt:Secret")))
+        if (AppSettingsHelper.TryGet("Jwt:Secret", out string? secret, decryptIfNeeded: true))
         {
-            var secret = SecureKeyHelper.GenerateRandomBase64Key();
-            await appSettingsService.SetEncrypted("Jwt:Secret", secret);
+            var newSecret = SecureKeyHelper.GenerateRandomBase64Key();
+            AppSettingsHelper.Set("Jwt:Secret", newSecret, true, true);
         }
+        if (AppSettingsHelper.TryGet("Jwt:Issuer", out string? issuer, decryptIfNeeded: true))
+            AppSettingsHelper.Set("Jwt:Issuer", "coreaccess", true, true);
 
-        if (await appSettingsService.GetDecrypted("Jwt:Issuer") == null)
-            await appSettingsService.SetEncrypted("Jwt:Issuer", "coreaccess");
+        if (AppSettingsHelper.TryGet("Jwt:Audience",out string? audience, decryptIfNeeded: true))
+            AppSettingsHelper.Set("Jwt:Audience", "coreaccess-client", true, true);
 
-        if (await appSettingsService.GetDecrypted("Jwt:Audience") == null)
-            await appSettingsService.SetEncrypted("Jwt:Audience", "coreaccess-client");
-
-        if (await appSettingsService.GetDecrypted("Jwt:ExpiresIn") == null)
-            await appSettingsService.SetEncrypted("Jwt:ExpiresIn", "60");
+        if (AppSettingsHelper.TryGet("Jwt:ExpiresIn", out string? expiresIn, decryptIfNeeded: true))
+            AppSettingsHelper.Set("Jwt:ExpiresIn", "60", true, true);
     }
 }
