@@ -1,5 +1,3 @@
-// src/coreAuth.ts
-
 import type { CoreAccessConfig } from './types';
 
 interface CoreAuthState {
@@ -28,7 +26,6 @@ class CoreAuth {
 
     logout() {
         console.debug('[CoreAccess] logout() called');
-
         // TODO: Logout-Logik mit HTTP
         this.state.isAuthenticated = false;
         this.state.user = null;
