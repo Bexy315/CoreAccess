@@ -21,4 +21,10 @@ public class DebugController(IConfiguration configuration) : ControllerBase
             return StatusCode(500, $"Error starting debug mode: {ex.Message}");
         }
     }
+    [HttpGet]
+    [Route("ping")]
+    public IActionResult Ping()
+    {
+        return Ok("Pong");
+    }
 }

@@ -1,14 +1,52 @@
-import { setupCoreAccess, coreAuth } from '@coreaccess/client';
+// src/services/authService.ts
+import { ref } from 'vue'
+import { coreAuth } from '@coreaccess/client'
+import {router} from "../router";
 
-setupCoreAccess({
-    baseUrl: 'https://auth.myapp.com/api',
-    onLogout: () => console.log('User logged out'),
+export const isAuthenticated = ref(false)
+export const currentUser = ref<any>(null)
+
+coreAuth.configure({
+    baseUrl: import.meta.env.VITE_API_BASE_URL || '/api'
+})
+
+coreAuth.onAuthChange((val) => {
+    isAuthenticated.value = val
+})
+coreAuth.onLogin(() => {
+    currentUser.value = coreAuth.getCurrentUser();
+
+    const redirect = router.currentRoute.value.query.redirect;
+    if (typeof redirect === 'string') {
+        router.push(redirect);
+    } else if (Array.isArray(redirect)) {
+        router.push(redirect.join('')); // Convert array to string
+    } else if (typeof redirect === 'object' && redirect !== null) {
+        router.push(redirect);
+    } else {
+        router.push({ name: 'Dashboard' });
+    }
 });
+coreAuth.onLogout(() => {
+    currentUser.value = null
+    router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+})
 
-export function login(username: string, password: string) {
-    return coreAuth.login({ username, password });
+export async function login(credentials: { username: string; password: string }) {
+    await coreAuth.login(credentials)
 }
 
 export function logout() {
-    return coreAuth.logout();
+    coreAuth.logout()
+}
+
+export function getUser() {
+    return currentUser.value
+}
+
+export function restoreAuth() {
+    if (coreAuth.isLoggedIn()) {
+        isAuthenticated.value = true
+        currentUser.value = coreAuth.getCurrentUser()
+    }
 }

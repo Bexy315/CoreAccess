@@ -9,6 +9,13 @@ public class CoreLoginRequest
     public string LoginIp { get; set; } = "0.0.0.0";
 }
 
+
+public class CoreRegisterRequest
+{
+    public string Username { get; set; } = "";
+    public string Password { get; set; } = "";
+}
+
 public class CoreRefreshTokenRequest
 {
     public string RefreshToken { get; set; } = null!;

@@ -14,7 +14,6 @@ public interface ICoreAccessTokenService
     Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default);
     Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default);
     Task<CoreUser> ValidateRefreshToken(string token, CancellationToken cancellationToken = default);
-
     ClaimsPrincipal? ValidateToken(string token);
     public Claim GetClaim(ClaimsPrincipal principal, string claimType);
 }
@@ -25,8 +24,9 @@ public class CoreAccessTokenService(
 {
     public string GenerateAccessToken(CoreUser user, string scope = "default", CancellationToken cancellationToken = default)
     {
-        var (secret, issuer, audience, expiresIn) = LoadSettingsAsync(cancellationToken);
-
+        if (!AppSettingsHelper.TryGet("Jwt:Secret", out string? secret, decryptIfNeeded: true))
+            throw new InvalidOperationException("JWT Secret is not set in AppSettings.");
+        
         var key = new SymmetricSecurityKey(Convert.FromBase64String(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -55,12 +55,21 @@ public class CoreAccessTokenService(
         }
         claims.Add(new Claim(CoreAccessClaimType.Roles, roles));
         claims.Add(new Claim(CoreAccessClaimType.Permissions, permissions));
-
+        
+        if (!AppSettingsHelper.TryGet("Jwt:Issuer", out string? issuer, decryptIfNeeded: true))
+            throw new InvalidOperationException("JWT Issuer is not set in AppSettings.");
+        
+        if (!AppSettingsHelper.TryGet("Jwt:Audience", out string? audience, decryptIfNeeded: true))
+            throw new InvalidOperationException("JWT Audience is not set in AppSettings.");
+        
+        if (!AppSettingsHelper.TryGet("Jwt:ExpiresIn", out string? expiresIn, decryptIfNeeded: true))
+            throw new InvalidOperationException("JWT ExpiresIn is not set in AppSettings.");
+        
         var token = new JwtSecurityToken(
             issuer,
             audience,
             claims,
-            expires: DateTime.UtcNow.AddMinutes(expiresIn),
+            expires: DateTime.UtcNow.AddMinutes(int.TryParse(expiresIn, out var minutes) ? minutes : 60),
             signingCredentials: creds
         );
 
@@ -173,34 +182,5 @@ public class CoreAccessTokenService(
             throw new ArgumentNullException(nameof(principal), "ClaimsPrincipal cannot be null"); 
         
         return principal.Claims.FirstOrDefault(c => c.Type == claimType) ?? throw new InvalidOperationException($"Claim '{claimType}' not found in the principal.");
-    }
-    
-    private (string Secret, string Issuer, string Audience, int ExpiresIn) LoadSettingsAsync(CancellationToken cancellationToken = default)
-    {
-        EnsureJwtSettingsInitializedAsync();
-        
-        var secret = AppSettingsHelper.Get("Jwt:Secret", decryptIfNeeded: true)?? throw new InvalidOperationException("JWT Secret is not set in AppSettings.");
-        var issuer = AppSettingsHelper.Get("Jwt:Issuer", decryptIfNeeded: true)?? throw new InvalidOperationException("JWT Issuer is not set in AppSettings.");;
-        var audience = AppSettingsHelper.Get("Jwt:Audience", decryptIfNeeded: true)?? throw new InvalidOperationException("JWT Audience is not set in AppSettings.");;
-        var expiresIn = int.TryParse(AppSettingsHelper.Get("Jwt:ExpiresIn", decryptIfNeeded: true), out var val) ? val : 60;
-
-        return (secret, issuer, audience, expiresIn);
-    }
-
-    private void EnsureJwtSettingsInitializedAsync()
-    {
-        if (AppSettingsHelper.TryGet("Jwt:Secret", out string? secret, decryptIfNeeded: true))
-        {
-            var newSecret = SecureKeyHelper.GenerateRandomBase64Key();
-            AppSettingsHelper.Set("Jwt:Secret", newSecret, true, true);
-        }
-        if (AppSettingsHelper.TryGet("Jwt:Issuer", out string? issuer, decryptIfNeeded: true))
-            AppSettingsHelper.Set("Jwt:Issuer", "coreaccess", true, true);
-
-        if (AppSettingsHelper.TryGet("Jwt:Audience",out string? audience, decryptIfNeeded: true))
-            AppSettingsHelper.Set("Jwt:Audience", "coreaccess-client", true, true);
-
-        if (AppSettingsHelper.TryGet("Jwt:ExpiresIn", out string? expiresIn, decryptIfNeeded: true))
-            AppSettingsHelper.Set("Jwt:ExpiresIn", "60", true, true);
     }
 }

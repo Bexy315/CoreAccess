@@ -57,27 +57,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
         var roleBuilder = modelBuilder.Entity<CoreRole>();
         roleBuilder.HasKey(r => r.Id);
         if (isSqlite) ConfigureGuidAsBlob(roleBuilder, r => r.Id);
-        
-        roleBuilder.HasData(
-            new CoreRole
-            {
-                Id = Guid.Parse("f63ee75d-f899-4fe5-ae6d-a070164d01fd"),
-                Name = "Admin",
-                Description = "Admin role for Administrators",
-                CreatedAt = "2025-01-01T00:00:00Z",
-                UpdatedAt = "2025-01-01T00:00:00Z",
-                IsSystem = true
-            },
-            new CoreRole
-            {
-                Id = Guid.Parse("7bd719cd-fdcc-4463-b633-2aef7208ba38"),
-                Name = "User",
-                Description = "User role for Default Users",
-                CreatedAt = "2025-01-01T00:00:00Z",
-                UpdatedAt = "2025-01-01T00:00:00Z",
-                IsSystem = true
-            }
-        );
         #endregion
 
         #region AppSetting

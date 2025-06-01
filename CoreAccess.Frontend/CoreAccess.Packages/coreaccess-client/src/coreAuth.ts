@@ -1,44 +1,97 @@
 import type { CoreAccessConfig } from './types';
+import {
+    LocalStorageTokenStorage,
+    type TokenStorage
+} from './core/tokenStorage';
 
-interface CoreAuthState {
-    isAuthenticated: boolean;
-    user: any | null;  //TODO: Define a proper user type
-    config?: CoreAccessConfig;
-}
+type AuthChangeCallback = (isAuthenticated: boolean) => void;
+type VoidCallback = () => void;
 
 class CoreAuth {
-    private state: CoreAuthState = {
-        isAuthenticated: false,
-        user: null
-    };
+    private isAuthenticated = false;
+    private user: any = null;
+    private config?: CoreAccessConfig;
+
+    private tokenStorage: TokenStorage = new LocalStorageTokenStorage();
+
+    private loginListeners = new Set<VoidCallback>();
+    private logoutListeners = new Set<VoidCallback>();
+    private authChangeListeners = new Set<AuthChangeCallback>();
 
     configure(config: CoreAccessConfig) {
-        this.state.config = config;
+        this.config = config;
+
+        this.restoreFromStorage();
+
         console.debug('[CoreAccess] Configured', config);
     }
 
+    restoreFromStorage() {
+        const access = this.tokenStorage.getAccessToken();
+
+        if (access) {
+            this.isAuthenticated = true;
+
+            this.notifyLogin();
+        } else {
+            this.isAuthenticated = false;
+            this.user = null;
+
+            this.notifyLogout();
+        }
+    }
+
+    onLogin(callback: VoidCallback) {
+        this.loginListeners.add(callback);
+    }
+
+    onLogout(callback: VoidCallback) {
+        this.logoutListeners.add(callback);
+    }
+
+    onAuthChange(callback: AuthChangeCallback) {
+        this.authChangeListeners.add(callback);
+    }
+
+    private notifyLogin() {
+        this.loginListeners.forEach(cb => cb());
+        this.authChangeListeners.forEach(cb => cb(true));
+    }
+
+    private notifyLogout() {
+        this.logoutListeners.forEach(cb => cb());
+        this.authChangeListeners.forEach(cb => cb(false));
+    }
+
     async login(credentials: { username: string; password: string }) {
-        // TODO: Login-Logik mit HTTP
-        console.debug('[CoreAccess] login() called', credentials);
-        this.state.isAuthenticated = true;
-        this.state.user = { username: credentials.username };
+        // TODO: Ersetze durch HTTP-Aufruf
+        const fakeAccessToken = 'mock_access_token';
+        const fakeRefreshToken = 'mock_refresh_token';
+        const fakeUser = { username: credentials.username };
+
+        this.tokenStorage.setTokens(fakeAccessToken, fakeRefreshToken);
+
+        this.isAuthenticated = true;
+        this.user = fakeUser;
+
+        this.notifyLogin();
     }
 
     logout() {
-        console.debug('[CoreAccess] logout() called');
-        // TODO: Logout-Logik mit HTTP
-        this.state.isAuthenticated = false;
-        this.state.user = null;
+        this.tokenStorage.clearTokens();
 
-        this.state.config?.onLogout?.();
+        this.isAuthenticated = false;
+        this.user = null;
+
+        this.notifyLogout();
     }
 
-    isAuthenticated(): boolean {
-        return this.state.isAuthenticated;
+    isLoggedIn(): boolean {
+        return this.isAuthenticated;
     }
 
     getCurrentUser(): any | null {
-        return this.state.user;
+        return this.user;
     }
 }
 

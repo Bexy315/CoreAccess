@@ -9,8 +9,9 @@ public interface IUserService
     Task<CoreUser> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
     Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
     Task<CoreUser> GetCoreUserByDto(CoreUserDto dto, CancellationToken cancellationToken = default);
-    Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest request, CancellationToken cancellationToken = default);
+    Task<CoreUser> CreateUserAsync(CoreUserCreateRequest request, CancellationToken cancellationToken = default);
     Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default);
+    Task<CoreUser> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
     Task<CoreUser> AddRoleToUserAsync(string userName, string roleId, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
@@ -130,7 +131,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUserDto> CreateUserAsync(CoreUserCreateRequest user, CancellationToken cancellationToken = default)
+    public async Task<CoreUser> CreateUserAsync(CoreUserCreateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -147,7 +148,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
             {
                 throw new Exception("Failed to create user");
             }
-            return new CoreUserDto(createdUser);
+            return createdUser;
         }
         catch (Exception ex)
         {
@@ -193,6 +194,39 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
                 throw new Exception("Failed to update user. Updated user not found");
             }
             
+            return updatedUser;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<CoreUser> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty");
+        }
+
+        if (profilePicture == null || profilePicture.Length == 0)
+        {
+            throw new ArgumentException("Profile picture cannot be null or empty", nameof(profilePicture));
+        }
+
+        try
+        {
+            var user = await GetUserByIdAsync(userId, cancellationToken);
+            using var memoryStream = new MemoryStream();
+            await profilePicture.CopyToAsync(memoryStream, cancellationToken);
+            user.ProfilePicture = memoryStream.ToArray();
+            user.ProfilePictureContentType = profilePicture.ContentType;
+            user.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+
+            var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
+            await userRepository.SaveChangesAsync(cancellationToken);
+
             return updatedUser;
         }
         catch (Exception ex)

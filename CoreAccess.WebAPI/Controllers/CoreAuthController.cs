@@ -1,7 +1,9 @@
 using CoreAccess.WebAPI.Decorator;
+using CoreAccess.WebAPI.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CoreAccess.WebAPI.Controllers;
 
@@ -9,25 +11,40 @@ namespace CoreAccess.WebAPI.Controllers;
 [Route("api/auth")]
 public class CoreAuthController(IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
 {
+    
     [HttpPost("/login")]
     public async Task<IActionResult> Login([FromBody] CoreLoginRequest dto, CancellationToken cancellationToken = default)
     {
-        if(dto.Username == null)
-            return BadRequest("Username or email is required.");
-        
-        var user = await userService.ValidateCredentialsByUsernameAsync(dto.Username, dto.Password, cancellationToken);
-        if (user == null)
-            return Unauthorized("Invalid credentials.");
-
-        var accessToken = tokenService.GenerateAccessToken(user , cancellationToken: cancellationToken);
-        var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
-
-        return Ok(new
+        try
         {
-            access_token = accessToken,
-            refresh_token = refreshToken
-        });
+            if(dto.Username == null)
+                return BadRequest("Username is required.");
+            
+            var user = await userService.ValidateCredentialsByUsernameAsync(dto.Username, dto.Password, cancellationToken);
+            if (user == null)
+                return Unauthorized("Invalid credentials.");
+
+            var accessToken = tokenService.GenerateAccessToken(user , cancellationToken: cancellationToken);
+            var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
+
+            return Ok(new
+            {
+                access_token = accessToken,
+                refresh_token = refreshToken,
+                userId = user.Id
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, ex.Message);
+        }
     }
+    
     [HttpPost("/refresh-token")]
     public async Task<IActionResult> Refresh([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
@@ -49,31 +66,67 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
             return Ok(new
             {
                 access_token = newAccessToken,
-                refresh_token = newRefreshToken
+                refresh_token = newRefreshToken,
+                userId = user.Id
             });
         }
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(ex.Message);
         }
-        catch (Exception e)
+        catch (ArgumentException ex)
         {
-            return BadRequest(e.Message + " " + e.InnerException?.Message);
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, ex.Message);
         }
     }
+    
     [HttpPost("/logout")]
     public async Task<IActionResult> Logout([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
-        await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp, cancellationToken: cancellationToken);
-        return Ok();
+        try
+        {
+            await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp,
+                cancellationToken: cancellationToken);
+            return Ok();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, ex.Message);
+        }
     }
+    
     [HttpPost("/register")]
-    public async Task<IActionResult> Register([FromBody] CoreUserCreateRequest dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Register([FromBody] CoreRegisterRequest dto, CancellationToken cancellationToken = default)
     {
-        if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
-            return BadRequest("Username already exists.");
+        try
+        {
+            if (AppSettingsHelper.Get("CoreAccess:DisableRegistration", false) == "true")
+                return Forbid();
+            
+            if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
+                return BadRequest("Username already exists.");
 
-        var user = await userService.CreateUserAsync(dto, cancellationToken);
-        return Ok(new { user.Id, user.Username });
+            var user = await userService.CreateUserAsync(new CoreUserCreateRequest(){Password = dto.Password, Username = dto.Username}, cancellationToken);
+            return Ok(user.Id);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, ex.Message);
+        }
     }
 }

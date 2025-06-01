@@ -21,6 +21,8 @@ public class CoreUser
     public string? State { get; set; }
     public string? Zip { get; set; }
     public string? Country { get; set; }
+    public byte[]? ProfilePicture { get; set; } 
+    public string? ProfilePictureContentType { get; set; }
     public CoreUserStatus Status { get; set; } = CoreUserStatus.Active;
     public bool IsSystem { get; set; } = false;
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
@@ -43,6 +45,8 @@ public class CoreUserDto(CoreUser src)
     public string? State { get; set; } = src.State;
     public string? Zip { get; set; } = src.Zip;
     public string? Country { get; set; } = src.Country;
+    public byte[]? ProfilePicture { get; set; } = src.ProfilePicture;
+    public string? ProfilePictureContentType { get; set; } = src.ProfilePictureContentType;
     public CoreUserStatus Status { get; set; } = src.Status;
     public string CreatedAt { get; set; } = src.CreatedAt;
     public string UpdatedAt { get; set; } = src.UpdatedAt;

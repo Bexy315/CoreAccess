@@ -12,7 +12,20 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())
+{
     DotEnv.Load();
+    
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("DevCors", policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:8080", "http://localhost:8081", "http://localhost:8082")
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+    });
+}
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -124,6 +137,13 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+if (!builder.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
+    dbContext.Database.Migrate();
+}
+
 AppSettingsHelper.Initialize(app.Services);
 
 using (var scope = app.Services.CreateScope())
@@ -137,17 +157,19 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwagger();            
     app.UseSwaggerUI();
+    app.UseCors("DevCors");
+}
+else
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();   
+    
+    // Fallback für SPA-Routing
+    app.MapFallbackToFile("index.html");
 }
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-if (!builder.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
-    dbContext.Database.Migrate();
-}
 
 app.Run();
