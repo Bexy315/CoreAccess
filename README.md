@@ -20,7 +20,6 @@ Ein schlanker, containerisierter User- & Rollenmanager mit REST-API, Vue-Fronten
 docker run -d \
   -p 8080:80 \
   -v ./data:/app/data \
-  -e COREACCESS_DB_TYPE=sqlite \
   --name coreaccess \
   ghcr.io/bexy315/coreaccess:latest
 ```
@@ -30,7 +29,6 @@ Oder mit PostgreSQL:
 ```bash
 docker run -d \
   -p 8080:80 \
-  -e COREACCESS_DB_TYPE=postgres \
   -e COREACCESS_DB_CONNECTION="Host=host;Port=5432;Database=db;Username=user;Password=pass" \
   --name coreaccess \
   ghcr.io/bexy315/coreaccess:latest
