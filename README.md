@@ -1,16 +1,16 @@
 # CoreAccess User Manager
 
-Ein schlanker, containerisierter User- & Rollenmanager mit REST-API, Vue-Frontend und pluggable Datenbank (SQLite oder PostgreSQL). Ideal für Projekte, die User-Verwaltung, Login und Rechteverwaltung benötigen.
+Ein schlanker, containerisierter User- & Rollenmanager mit REST-API, Vue-Frontend und pluggable Datenbank (SQLite oder PostgreSQL). Ideal für Projekte, die Benutzerverwaltung, Login und Rechteverwaltung benötigen.
 
 ## 🚀 Features
 
-- 🧑‍💼 Benutzerverwaltung mit JWT-Auth
-- 🔐 Rollen & Rechte (optional erweiterbar)
-- 🧩 SQLite oder PostgreSQL per ENV wählbar
-- 📦 Als einzelner Docker-Container deploybar
-- 🎨 Modernes Vue 3 + PrimeVue Admin-Frontend
-- ⚙️ REST API unter `/api`
-- 🧰 JavaScript/TypeScript SDK für einfache Integration
+- 🧑‍💼 Benutzerverwaltung mit JWT-Authentifizierung  
+- 🔐 Rollen & Rechte (optional erweiterbar)  
+- 🧩 SQLite oder PostgreSQL per ENV wählbar  
+- 📦 Als einzelner Docker-Container deploybar  
+- 🎨 Modernes Vue 3 + PrimeVue Admin-Frontend  
+- ⚙️ REST API unter `/api`  
+- 🧰 JavaScript/TypeScript SDK für einfache Integration  
 
 ---
 
@@ -43,17 +43,19 @@ API: http://localhost:8080/api
 
 ## ⚙️ Environment Variablen
 
-| Variable                    | Beschreibung                             | Default          |
-|-----------------------------|------------------------------------------|------------------|
-| `COREACCESS_DB_CONNECTION`  | PostgreSQL ConnectionString (wenn nötig) | -                |
-| `COREACCESS_ADMIN_USERNAME` | Initialer Admin-Login (optional)         | root             |
-| `COREACCESS_ADMIN_PASSWORD` | Initiales Passwort (optional)            | changeme123      |
-| `COREACCESS_SECRET`         | JWT Token Secret (optional)              | Random Generated |
-| `COREACCESS_ISSUER`         | JWT Token Issuer (optional)              | -                |
-| `COREACCESS_ADMIN_PASSWORD` | JWT Token Audience (optional)            | -                |
+| Variable                   | Beschreibung                               | Default          |
+|----------------------------|--------------------------------------------|------------------|
+| `COREACCESS_DB_TYPE`       | Datenbanktyp (`sqlite` oder `postgres`)    | `sqlite`         |
+| `COREACCESS_DB_CONNECTION` | PostgreSQL ConnectionString (wenn nötig)   | -                |
+| `COREACCESS_ADMIN_USERNAME`| Initialer Admin-Benutzername (optional)    | `root`           |
+| `COREACCESS_ADMIN_PASSWORD`| Initiales Admin-Passwort (optional)        | `changeme123`    |
+| `COREACCESS_SECRET`        | JWT Token Secret (optional)                | Zufällig generiert |
+| `COREACCESS_ISSUER`        | JWT Token Issuer (optional)                | -                |
+| `COREACCESS_AUDIENCE`      | JWT Token Audience (option)                | -                |
+
 ---
 
-## 🧪 Beispiel Login mit SDK (JavaScript) (---W.I.P.---)
+## 🧪 Beispiel Login mit SDK (JavaScript) (--- W.I.P. ---)
 
 ```bash
 npm install @coreaccess/sdk
@@ -84,14 +86,14 @@ export const coreAccessConfig = {
 
 Über das integrierte Vue-Frontend kannst du:
 
-- Benutzer anlegen, bearbeiten, löschen
-- Rollen definieren (optional)
-- API-Keys & Projekte verwalten
-- SDK-Konfig generieren für andere Projekte
+- Benutzer anlegen, bearbeiten, löschen  
+- Rollen definieren (optional)  
+- API-Keys & Projekte verwalten  
+- SDK-Konfiguration für andere Projekte generieren  
 
 ---
 
-## 📦 Build selbst durchführen
+## 📦 Selbst bauen
 
 ```bash
 git clone https://github.com/bexy315/coreaccess.git
@@ -104,7 +106,16 @@ docker build -t coreaccess .
 
 ## 📚 API Referenz
 
-Die API ist unter `/api` verfügbar. Eine OpenAPI/Swagger-Doku folgt.
+Die API ist unter `/api` verfügbar. Eine OpenAPI/Swagger-Dokumentation folgt.
+
+---
+
+## 📖 Wiki / Dokumentation (optional)
+
+- [Getting Started](Getting-Started)  
+- [CoreAuthController](CoreAuthController)  
+- [User Management](User-Management)  
+- [Roles & Permissions](Roles-Permissions)  
 
 ---
 
@@ -116,6 +127,6 @@ MIT License – Feel free to use and contribute.
 
 ## 🧠 Inspiration / Ziele
 
-- Firebase-ähnliche Login-Integration via SDK
-- "Plug & Play"-Userverwaltung für Microservices
-- Vollständig eigenständig lauffähiger Container
+- Firebase-ähnliche Login-Integration via SDK  
+- "Plug & Play"-Userverwaltung für Microservices  
+- Vollständig eigenständig lauffähiger Container  
