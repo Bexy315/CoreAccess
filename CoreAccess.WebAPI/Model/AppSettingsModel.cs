@@ -50,3 +50,13 @@ public class AppSettingUpdateRequest
     public bool? IsEncrypted { get; set; }
     public bool? IsSystem { get; set; }
 }
+
+public static class AppSettingsKeys
+{
+    public const string JwtSecretKey = "CoreAccess:Jwt:Secret";
+    public const string JwtIssuer = "CoreAccess:Jwt:Issuer";
+    public const string JwtAudience = "CoreAccess:Jwt:Audience";
+    public const string JwtExpiresIn = "CoreAccess:Jwt:ExpiresIn";
+    public const string DisableRegistration = "CoreAccess:Common:DisableRegistration";
+    public const string SystemLogLevel = "CoreAccess:Logging:SystemLogLevel";
+}

@@ -110,7 +110,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
     {
         try
         {
-            if (AppSettingsHelper.Get("CoreAccess:DisableRegistration", false) == "true")
+            if (AppSettingsHelper.Get("CoreAccess:DisableRegistration") == "true")
                 return Forbid();
             
             if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))

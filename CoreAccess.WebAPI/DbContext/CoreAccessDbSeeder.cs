@@ -104,22 +104,41 @@ public static class CoreAccessDbSeeder
         
         // AppSettings initialisieren
         
-        if (AppSettingsHelper.TryGet("Jwt:Secret", out string? secret, decryptIfNeeded: true) ||
-                AppSettingsHelper.TryGet("Jwt:Issuer", out string? issuer, decryptIfNeeded: true) ||
-                AppSettingsHelper.TryGet("Jwt:Audience", out string? audience, decryptIfNeeded: true) ||
-                AppSettingsHelper.TryGet("Jwt:ExpiresIn", out string? expiresIn, decryptIfNeeded: true) ||
-                AppSettingsHelper.TryGet("CoreAccess:DisableRegistration", out string? disableRegistration))
-            {
-                Console.WriteLine("Initialising default application settings...");
-            
-                AppSettingsHelper.Set("Jwt:Secret", SecureKeyHelper.GenerateRandomBase64Key(), true, true);
-                AppSettingsHelper.Set("Jwt:Issuer", "coreaccess", true, true);
-                AppSettingsHelper.Set("Jwt:Audience", "coreaccess-client", true, true);
-                AppSettingsHelper.Set("Jwt:ExpiresIn", "60", true, true);
-                AppSettingsHelper.Set("CoreAccess:DisableRegistration", "false", false, true);
-            
-                Console.WriteLine("Application settings successfully initialized.");
-            }
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtSecretKey, out string? secret, decryptIfNeeded: true))
+        {
+            Console.WriteLine("Initialisiere JwtSecretKey...");
+            AppSettingsHelper.Set(AppSettingsKeys.JwtSecretKey, SecureKeyHelper.GenerateRandomBase64Key(), true, true);
+        }
+
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtIssuer, out string? issuer, decryptIfNeeded: true))
+        {
+            Console.WriteLine("Initialisiere JwtIssuer...");
+            AppSettingsHelper.Set(AppSettingsKeys.JwtIssuer, "coreaccess", true, true);
+        }
+
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtAudience, out string? audience, decryptIfNeeded: true))
+        {
+            Console.WriteLine("Initialisiere JwtAudience...");
+            AppSettingsHelper.Set(AppSettingsKeys.JwtAudience, "coreaccess-client", true, true);
+        }
+
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtExpiresIn, out string? expiresIn, decryptIfNeeded: true))
+        {
+            Console.WriteLine("Initialisiere JwtExpiresIn...");
+            AppSettingsHelper.Set(AppSettingsKeys.JwtExpiresIn, "60", true, true);
+        }
+
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.DisableRegistration, out string? disableRegistration))
+        {
+            Console.WriteLine("Initialisiere DisableRegistration...");
+            AppSettingsHelper.Set(AppSettingsKeys.DisableRegistration, "false", false, true);
+        }
+        
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel))
+        {
+            Console.WriteLine("Initialisiere SystemLogLevel...");
+            AppSettingsHelper.Set(AppSettingsKeys.SystemLogLevel, "Information", false, true);
+        }
         
         #endregion
         

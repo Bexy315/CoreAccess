@@ -18,10 +18,15 @@ public class RoleController(IRoleService roleService) : ControllerBase
             var result = await roleService.SearchRolesAsync(options);
             return Ok(result);
         }
+        catch(ArgumentException ex)
+        {
+            Console.WriteLine(ex);
+            return BadRequest(ex.Message);
+        }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return StatusCode(500, "Internal server error");
+            return StatusCode(500, ex.Message);
         }
     }
     
@@ -31,13 +36,22 @@ public class RoleController(IRoleService roleService) : ControllerBase
     {
         try
         {
+            if(request == null)
+                return BadRequest("Role request cannot be null.");
+            
+            
             var result = await roleService.CreateRoleAsync(request);
             return Ok(result);
+        }
+        catch(ArgumentException ex)
+        {
+            Console.WriteLine(ex);
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return StatusCode(500, "Internal server error");
+            return StatusCode(500, ex.Message);
         }
     }
     
@@ -48,13 +62,22 @@ public class RoleController(IRoleService roleService) : ControllerBase
     {
         try
         {
+            if(string.IsNullOrEmpty(id))
+                return BadRequest("Role ID cannot be null or empty.");
+            
+            
             var result = await roleService.UpdateRoleAsync(id, request);
             return Ok(result);
+        }
+        catch(ArgumentException ex)
+        {
+            Console.WriteLine(ex);
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return StatusCode(500, "Internal server error");
+            return StatusCode(500, ex.Message);
         }
     }
     
@@ -65,13 +88,21 @@ public class RoleController(IRoleService roleService) : ControllerBase
     {
         try
         {
+            if(string.IsNullOrEmpty(id))
+                return BadRequest("Role ID cannot be null or empty.");
+            
             await roleService.DeleteRoleAsync(id);
             return Ok();
+        }
+        catch(ArgumentException ex)
+        {
+            Console.WriteLine(ex);
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return StatusCode(500, "Internal server error");
+            return StatusCode(500, ex.Message);
         }
     }
 }

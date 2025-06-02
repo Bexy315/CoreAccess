@@ -63,7 +63,15 @@ public class UserController(IUserService userService) : ControllerBase
     {
         try
         {
-            return Ok(await userService.CreateUserAsync(request, cancellationToken));
+            var user = await userService.CreateUserAsync(request, cancellationToken);
+            
+            if (user == null)
+                return BadRequest("User creation failed.");
+            
+            return Ok(new
+            {
+                userId = user.Id,
+            });
         }
         catch(ArgumentException ex)
         {
@@ -84,7 +92,10 @@ public class UserController(IUserService userService) : ControllerBase
     {
         try
         {
-            return Ok(await userService.UpdateUserAsync(userId, request, cancellationToken));
+            if(string.IsNullOrWhiteSpace(userId))
+                return BadRequest("User ID is required.");
+            
+            return Ok(new CoreUserDto(await userService.UpdateUserAsync(userId, request, cancellationToken)));
         }
         catch(ArgumentException ex)
         {
