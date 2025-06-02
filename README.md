@@ -6,7 +6,7 @@ Ein schlanker, containerisierter User- & Rollenmanager mit REST-API, Vue-Fronten
 
 - 🧑‍💼 Benutzerverwaltung mit JWT-Auth
 - 🔐 Rollen & Rechte (optional erweiterbar)
-- 🧩 SQLite oder PostgreSQL per ENV wählbar
+- 🧩 SQLite oder PostgreSQL automatisch wählbar
 - 📦 Als einzelner Docker-Container deploybar
 - 🎨 Modernes Vue 3 + PrimeVue Admin-Frontend
 - ⚙️ REST API unter `/api`
@@ -20,17 +20,6 @@ Ein schlanker, containerisierter User- & Rollenmanager mit REST-API, Vue-Fronten
 docker run -d \
   -p 8080:80 \
   -v ./data:/app/data \
-  -e COREACCESS_DB_TYPE=sqlite \
-  --name coreaccess \
-  ghcr.io/bexy315/coreaccess:latest
-```
-
-Oder mit PostgreSQL:
-
-```bash
-docker run -d \
-  -p 8080:80 \
-  -e COREACCESS_DB_TYPE=postgres \
   -e COREACCESS_DB_CONNECTION="Host=host;Port=5432;Database=db;Username=user;Password=pass" \
   --name coreaccess \
   ghcr.io/bexy315/coreaccess:latest
@@ -48,9 +37,9 @@ API: http://localhost:8080/api
 | `COREACCESS_DB_CONNECTION`  | PostgreSQL ConnectionString (wenn nötig) | -                |
 | `COREACCESS_ADMIN_USERNAME` | Initialer Admin-Login (optional)         | root             |
 | `COREACCESS_ADMIN_PASSWORD` | Initiales Passwort (optional)            | changeme123      |
-| `COREACCESS_SECRET`         | JWT Token Secret (optional)              | Random Generated |
-| `COREACCESS_ISSUER`         | JWT Token Issuer (optional)              | -                |
-| `COREACCESS_ADMIN_PASSWORD` | JWT Token Audience (optional)            | -                |
+
+Wenn keine `COREACCESS_DB_CONNECTION`-Variable gesetzt ist, wird automatisch SQLite verwendet.
+
 ---
 
 ## 🧪 Beispiel Login mit SDK (JavaScript) (---W.I.P.---)
@@ -104,7 +93,7 @@ docker build -t coreaccess .
 
 ## 📚 API Referenz
 
-Die API ist unter `/api` verfügbar. Eine OpenAPI/Swagger-Doku folgt.
+Die API ist unter `/api` verfügbar. Eine API-Doku gibt es im WIKI bereich.
 
 ---
 
