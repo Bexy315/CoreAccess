@@ -48,11 +48,10 @@ public static class CoreAccessDbSeeder
 
             context.Roles.AddRange(roles);
             
-            Console.WriteLine("Roles successfully initialized.");
+            Console.WriteLine("Default roles successfully initialized.");
         }else
         {
             roles = context.Roles.ToArray();
-            Console.WriteLine("Roles already exist, skipping initialization.");
         }
         
         #endregion
@@ -95,7 +94,7 @@ public static class CoreAccessDbSeeder
 
             context.Users.Add(user);
 
-            Console.WriteLine("User successfully initialized with username: {0}", username);
+            Console.WriteLine("Default user successfully initialized with username: {0}", username);
         }
 
         #endregion

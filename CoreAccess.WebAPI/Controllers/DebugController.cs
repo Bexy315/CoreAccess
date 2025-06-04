@@ -1,4 +1,6 @@
 using CoreAccess.WebAPI.Helpers;
+using CoreAccess.WebAPI.Logger;
+using CoreAccess.WebAPI.Logger.Model;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +18,9 @@ public class DebugController() : ControllerBase
         try
         {
             AppSettingsHelper.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel);
+            
+            CoreLogger.LogSystem(CoreLogLevel.Information,nameof(DebugController), "Cool Debug message!!!", new Exception("Test exception"));
+            
             return Ok(systemLogLevel);
         }
         catch(ArgumentException ex)

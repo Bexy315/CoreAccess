@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using CoreAccess.WebAPI.Helpers;
+using CoreAccess.WebAPI.Logger;
+using CoreAccess.WebAPI.Logger.Sinks;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,9 +55,6 @@ builder.Services.AddDbContext<CoreAccessDbContext>(options =>
 
         var sqliteConn = $"Data Source={sqlitePath};";
         options.UseSqlite(sqliteConn);
-        Console.WriteLine(builder.Environment.IsDevelopment()
-            ? "Verwende SQLite als lokale Datenbank in Entwicklungsumgebung."
-            : "Verwende SQLite als lokale Datenbank.");
     }
 });
 
@@ -148,6 +147,11 @@ if (!builder.Environment.IsDevelopment())
 
 AppSettingsHelper.Initialize(app.Services);
 
+CoreLogger.Initialize(new List<ILogSink>
+{
+    new ConsoleSink()
+});
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
@@ -166,7 +170,6 @@ else
     app.UseDefaultFiles();
     app.UseStaticFiles();   
     
-    // Fallback für SPA-Routing
     app.MapFallbackToFile("index.html");
 }
 
