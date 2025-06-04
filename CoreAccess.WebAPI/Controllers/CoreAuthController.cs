@@ -17,14 +17,10 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
     {
         try
         {
-            if(dto.Username == null)
-                return BadRequest("Username is required.");
-            
-            var user = await userService.ValidateCredentialsByUsernameAsync(dto.Username, dto.Password, cancellationToken);
-            if (user == null)
-                return Unauthorized("Invalid credentials.");
+            var user = await userService.ValidateCredentialsByUsernameAsync(dto.Username, dto.Password,
+                cancellationToken);
 
-            var accessToken = tokenService.GenerateAccessToken(user , cancellationToken: cancellationToken);
+            var accessToken = tokenService.GenerateAccessToken(user, cancellationToken: cancellationToken);
             var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
 
             return Ok(new
@@ -38,9 +34,12 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
         {
             return BadRequest(ex.Message);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
             return StatusCode(500, ex.Message);
         }
     }
@@ -50,25 +49,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
     {
         try
         {
-            var user = await tokenService.ValidateRefreshToken(dto.RefreshToken, cancellationToken);
-
-            if (user == null)
-                return Unauthorized("Invalid refresh token.");
-            
-            var newAccessToken =
-                tokenService.GenerateAccessToken(user, cancellationToken: cancellationToken);
-            var newRefreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
-
-            await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp, cancellationToken);
-
-            await tokenService.RecycleRefreshTokensAsync(cancellationToken);
-            
-            return Ok(new
-            {
-                access_token = newAccessToken,
-                refresh_token = newRefreshToken,
-                userId = user.Id
-            });
+           return Ok(await tokenService.RefreshTokenAsync(dto, cancellationToken));
         }
         catch (UnauthorizedAccessException ex)
         {

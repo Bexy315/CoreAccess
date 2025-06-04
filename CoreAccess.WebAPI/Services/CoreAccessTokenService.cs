@@ -10,6 +10,8 @@ namespace CoreAccess.WebAPI.Services;
 public interface ICoreAccessTokenService
 {
     string GenerateAccessToken(CoreUser user, string scope = "default", CancellationToken cancellationToken = default);
+
+    Task<RefreshTokenResponse> RefreshTokenAsync(CoreRefreshTokenRequest request, CancellationToken cancellationToken = default);
     Task<RefreshToken> GenerateRefreshTokenAsync(CoreUser user, string createdByIp, CancellationToken cancellationToken = default);
     Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default);
     Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default);
@@ -74,6 +76,24 @@ public class CoreAccessTokenService(
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public async Task<RefreshTokenResponse> RefreshTokenAsync(CoreRefreshTokenRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await ValidateRefreshToken(request.RefreshToken, cancellationToken);
+        
+        var newAccessToken = GenerateAccessToken(user, cancellationToken: cancellationToken);
+        var newRefreshToken = await GenerateRefreshTokenAsync(user, request.LoginIp, cancellationToken);
+
+        await RevokeRefreshTokenAsync(request.RefreshToken, request.LoginIp, cancellationToken);
+        await RecycleRefreshTokensAsync(cancellationToken);
+
+        return new RefreshTokenResponse
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken.Token,
+            UserId = user.Id
+        };
     }
 
     public async Task<RefreshToken> GenerateRefreshTokenAsync(CoreUser user, string createdByIp, CancellationToken cancellationToken = default)

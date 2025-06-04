@@ -39,6 +39,13 @@ public class RefreshToken
     public CoreUser CoreUser { get; set; } = null!;
 }
 
+public class RefreshTokenResponse
+{
+    public string AccessToken { get; set; } = null!;
+    public string RefreshToken { get; set; } = null!;
+    public Guid UserId { get; set; }
+}
+
 public static class CoreAccessClaimType
 {
     public const string UserId = "coreaccess:user_id";

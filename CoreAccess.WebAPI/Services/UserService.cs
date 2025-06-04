@@ -320,7 +320,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
-                return null;
+                throw new UnauthorizedAccessException("Invalid username or password.");;
             }
 
             return user;
