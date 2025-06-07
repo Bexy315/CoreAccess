@@ -12,7 +12,7 @@ namespace CoreAccess.WebAPI.Controllers;
 public class CoreAuthController(IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
 {
     
-    [HttpPost("/login")]
+    [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] CoreLoginRequest dto, CancellationToken cancellationToken = default)
     {
         try
@@ -44,7 +44,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
         }
     }
     
-    [HttpPost("/refresh-token")]
+    [HttpPost("refresh-token")]
     public async Task<IActionResult> Refresh([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
         try
@@ -66,7 +66,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
         }
     }
     
-    [HttpPost("/logout")]
+    [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
         try
@@ -86,12 +86,12 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
         }
     }
     
-    [HttpPost("/register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] CoreRegisterRequest dto, CancellationToken cancellationToken = default)
     {
         try
         {
-            if (AppSettingsHelper.Get("CoreAccess:DisableRegistration") == "true")
+            if (AppSettingsHelper.Get(AppSettingsKeys.DisableRegistration) == "true")
                 return Forbid();
             
             if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))

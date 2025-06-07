@@ -1,4 +1,6 @@
 using CoreAccess.WebAPI.Decorator;
+using CoreAccess.WebAPI.Logger;
+using CoreAccess.WebAPI.Logger.Model;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
-[Route("/api/user")]
+[Route("api/user")]
 public class UserController(IUserService userService) : ControllerBase
 {
     [HttpGet]
@@ -21,18 +23,18 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while getting user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while getting user", ex);
             return StatusCode(500, ex.Message);
         }
     }
     
     [HttpGet]
-    [Route("api/users/{userId}/profile-picture")]
+    [Route("{userId}/profile-picture")]
     [CoreAuthorize]
     public async Task<IActionResult> GetProfilePicture([FromRoute]string userId)
     {
@@ -47,12 +49,12 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while getting profile picture", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while getting profile picture", ex);
             return StatusCode(500, ex.Message);
         }
     }
@@ -75,18 +77,18 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while creating user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while creating user", ex);
             return StatusCode(500, ex.Message);
         }
     }
 
     [HttpPost]
-    [Route("/api/user/{userId}")]
+    [Route("{userId}")]
     [CoreAuthorize]
     public async Task<IActionResult> UpdateUser([FromRoute]string userId, [FromBody]CoreUserUpdateRequest request, CancellationToken cancellationToken = default)
     {
@@ -99,18 +101,18 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while updating user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while updating user", ex);
             return StatusCode(500, ex.Message);
         }
     }
     
     [HttpPost]
-    [Route("api/users/{userId}/profile-picture")]
+    [Route("{userId}/profile-picture")]
     [CoreAuthorize]
     public async Task<IActionResult> UploadProfilePicture([FromRoute]string userId, IFormFile file)
     {
@@ -127,18 +129,18 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while uploading profile picture", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while uploading profile picture", ex);
             return StatusCode(500, ex.Message);
         }
     }
     
     [HttpPost]
-    [Route("/api/user/{userId}/role/{roleName}")]
+    [Route("{userId}/role/{roleName}")]
     [CoreAuthorize]
     public async Task<IActionResult> AddRoleToUser([FromRoute]string userId, [FromRoute]string roleName, CancellationToken cancellationToken = default)
     {
@@ -149,19 +151,19 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while adding role to user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while adding role to user", ex);
             return StatusCode(500, ex.Message);
         }
     }
 
     [HttpDelete]
-    [Route("/api/user/{userId}")]
-    [CoreAuthorize(Roles = "Admin")]
+    [Route("{userId}")]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> DeleteUser([FromRoute]string userId, CancellationToken cancellationToken = default)
     {
         try
@@ -171,12 +173,12 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while deleting user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while deleting user", ex);
             return StatusCode(500, ex.Message);
         }
     }

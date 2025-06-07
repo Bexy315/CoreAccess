@@ -56,7 +56,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     }
     
     [HttpPut]
-    [Route("/api/role/{id}")]
+    [Route("{id}")]
     [CoreAuthorize]
     public async Task<IActionResult> UpdateRole(string id, [FromBody] CoreRoleUpdateRequest request)
     {
@@ -82,7 +82,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     }
     
     [HttpDelete]
-    [Route("/api/role/{id}")]
+    [Route("{id}")]
     [CoreAuthorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteRole(string id)
     {

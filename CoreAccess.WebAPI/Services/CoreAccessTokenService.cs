@@ -26,7 +26,7 @@ public class CoreAccessTokenService(
 {
     public string GenerateAccessToken(CoreUser user, string scope = "default", CancellationToken cancellationToken = default)
     {
-        if (!AppSettingsHelper.TryGet("Jwt:Secret", out string? secret, decryptIfNeeded: true))
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtSecretKey, out string? secret, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT Secret is not set in AppSettings.");
         
         var key = new SymmetricSecurityKey(Convert.FromBase64String(secret));
@@ -58,13 +58,13 @@ public class CoreAccessTokenService(
         claims.Add(new Claim(CoreAccessClaimType.Roles, roles));
         claims.Add(new Claim(CoreAccessClaimType.Permissions, permissions));
         
-        if (!AppSettingsHelper.TryGet("Jwt:Issuer", out string? issuer, decryptIfNeeded: true))
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtIssuer, out string? issuer, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT Issuer is not set in AppSettings.");
         
-        if (!AppSettingsHelper.TryGet("Jwt:Audience", out string? audience, decryptIfNeeded: true))
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtAudience, out string? audience, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT Audience is not set in AppSettings.");
         
-        if (!AppSettingsHelper.TryGet("Jwt:ExpiresIn", out string? expiresIn, decryptIfNeeded: true))
+        if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtExpiresIn, out string? expiresIn, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT ExpiresIn is not set in AppSettings.");
         
         var token = new JwtSecurityToken(
@@ -172,7 +172,7 @@ public class CoreAccessTokenService(
 
     public ClaimsPrincipal? ValidateToken(string token)
     {
-        var secret = AppSettingsHelper.Get("Jwt:Secret", decryptIfNeeded: true);
+        var secret = AppSettingsHelper.Get(AppSettingsKeys.JwtSecretKey, decryptIfNeeded: true);
         if (string.IsNullOrEmpty(secret)) return null;
 
         var tokenHandler = new JwtSecurityTokenHandler();

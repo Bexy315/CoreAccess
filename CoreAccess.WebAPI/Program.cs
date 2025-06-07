@@ -158,11 +158,12 @@ using (var scope = app.Services.CreateScope())
     await CoreAccessDbSeeder.SeedInitialDataAsync(db);
 }
 
+app.MapOpenApi();
+app.UseSwagger();            
+app.UseSwaggerUI();
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwagger();            
-    app.UseSwaggerUI();
     app.UseCors("DevCors");
 }
 else
