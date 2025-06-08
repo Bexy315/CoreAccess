@@ -3,6 +3,7 @@ import {
     LocalStorageTokenStorage,
     type TokenStorage
 } from './core/tokenStorage';
+import httpClient from './core/httpClient';
 
 type AuthChangeCallback = (isAuthenticated: boolean) => void;
 type VoidCallback = () => void;
@@ -20,10 +21,9 @@ class CoreAuth {
 
     configure(config: CoreAccessConfig) {
         this.config = config;
+        httpClient.defaults.baseURL = config.baseUrl;
 
         this.restoreFromStorage();
-
-        console.debug('[CoreAccess] Configured', config);
     }
 
     restoreFromStorage() {
@@ -31,6 +31,7 @@ class CoreAuth {
 
         if (access) {
             this.isAuthenticated = true;
+            this.user = localStorage.getItem('coreaccess_userId')?? '';
 
             this.notifyLogin();
         } else {
@@ -64,17 +65,35 @@ class CoreAuth {
     }
 
     async login(credentials: { username: string; password: string }) {
-        // TODO: Ersetze durch HTTP-Aufruf
-        const fakeAccessToken = 'mock_access_token';
-        const fakeRefreshToken = 'mock_refresh_token';
-        const fakeUser = { username: credentials.username };
+        try {
+            const response = await httpClient.post('/auth/login', {
+                username: credentials.username,
+                password: credentials.password
+            });
 
-        this.tokenStorage.setTokens(fakeAccessToken, fakeRefreshToken);
+            const data = response.data;
 
-        this.isAuthenticated = true;
-        this.user = fakeUser;
+            if (!data?.access_token || !data?.refresh_token) {
+                throw new Error('Invalid response: tokens missing');
+            }
 
-        this.notifyLogin();
+            this.tokenStorage.setTokens(data.access_token, data.refresh_token);
+            this.user = response.userId;
+            localStorage.setItem('coreaccess_userId', this.user);
+            this.isAuthenticated = true;
+
+            this.notifyLogin();
+        } catch (error: any) {
+            this.tokenStorage.clearTokens();
+            this.user = null;
+            localStorage.removeItem('coreaccess_userId');
+            this.isAuthenticated = false;
+
+            this.notifyLogout();
+
+            const msg = error.response?.data?.message || error.message || 'Login failed';
+            throw new Error(msg);
+        }
     }
 
     logout() {

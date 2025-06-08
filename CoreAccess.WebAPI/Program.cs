@@ -24,7 +24,8 @@ if (builder.Environment.IsDevelopment())
             policy
                 .WithOrigins("http://localhost:8080", "http://localhost:8081", "http://localhost:8082")
                 .AllowAnyMethod()
-                .AllowAnyHeader();
+                .AllowAnyHeader()
+                .AllowCredentials();
         });
     });
 }

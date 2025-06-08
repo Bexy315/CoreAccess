@@ -26,7 +26,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
             return Ok(new
             {
                 access_token = accessToken,
-                refresh_token = refreshToken,
+                refresh_token = refreshToken.Token,
                 userId = user.Id
             });
         }

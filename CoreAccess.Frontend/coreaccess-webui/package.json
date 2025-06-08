@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@coreaccess/client": "file:libs/coreaccess-client-0.1.0.tgz",
+    "@coreaccess/client": "file:../CoreAccess.Packages/coreaccess-client",
     "@primeuix/themes": "^1.1.1",
     "@primevue/forms": "^4.3.4",
     "@primevue/themes": "^4.3.4",

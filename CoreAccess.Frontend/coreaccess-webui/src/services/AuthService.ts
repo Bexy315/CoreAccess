@@ -29,7 +29,9 @@ coreAuth.onLogin(() => {
 });
 coreAuth.onLogout(() => {
     currentUser.value = null
-    router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+    if(router.currentRoute.value.name !== 'Login') {
+        router.push({name: 'Login', query: {redirect: router.currentRoute.value.fullPath}})
+    }
 })
 
 export async function login(credentials: { username: string; password: string }) {

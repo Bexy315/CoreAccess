@@ -21,8 +21,8 @@ const routes: RouteRecordRaw[] = [
     { path: '/metrics', name: 'MetricsHub', component: MetricsHub, meta: { requiresAuth: true }, },
     { path: '/metrics/logs/system', name: 'SystemLogs', component: SystemLogs, meta: { requiresAuth: true }, },
     { path: '/metrics/logs/audit', name: 'AuditLogs', component: AuditLogs, meta: { requiresAuth: true }, },
-    { path: '/dashboard', redirect: '/' }, // Redirect to the main dashboard
-    { path: '/:pathMatch(.*)*', redirect: '/' } // Fallback route
+    { path: '/dashboard', redirect: '/' },
+    { path: '/:pathMatch(.*)*', redirect: '/' }
 ];
 
 export const router = createRouter({
