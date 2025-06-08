@@ -60,7 +60,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { login } from '../services/AuthService'
-import { showSuccess } from "../utils/toast.ts"
 
 const email = ref('')
 const password = ref('')
