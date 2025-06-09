@@ -139,9 +139,9 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-if (!builder.Environment.IsDevelopment())
+
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
     dbContext.Database.Migrate();
 }

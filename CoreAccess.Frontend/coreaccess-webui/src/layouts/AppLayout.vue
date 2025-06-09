@@ -1,11 +1,11 @@
 <template>
-  <div class="h-screen flex flex-col overflow-hidden">
+  <div class="h-screen flex flex-col">
     <div v-if="isLoggedIn">
       <Topbar />
     </div>
 
     <!-- Main Layout -->
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1">
       <div v-if="isLoggedIn">
         <Sidebar />
       </div>

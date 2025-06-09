@@ -24,6 +24,7 @@ import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Breadcrumb from "primevue/breadcrumb";
 import Tooltip from "primevue/tooltip";
+import Skeleton from "primevue/skeleton";
 
 import CoreAccessPreset from "./assets/theme.ts";
 
@@ -56,6 +57,7 @@ app.component('Toast', Toast);
 app.component('Card', Card);
 app.component('InputText', InputText);
 app.component('Breadcrumb', Breadcrumb);
+app.component('Skeleton', Skeleton);
 app.directive('Tooltip', Tooltip);
 
 app.component('Sidebar', Sidebar);
