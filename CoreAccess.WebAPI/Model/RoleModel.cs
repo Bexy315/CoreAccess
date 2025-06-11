@@ -10,7 +10,7 @@ public class CoreRole
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string UpdatedAt { get; set; } = "";
     public bool IsSystem { get; set; } = false;
-    public List<string>? Permissions { get; set; }
+    public List<CorePermission> Permissions { get; set; } = new();
     [JsonIgnore]
     public List<CoreUser> Users { get; set; } = new();
 }
@@ -23,19 +23,16 @@ public class CoreRoleDto(CoreRole src)
     public string CreatedAt { get; set; } = src.CreatedAt;
     public string UpdatedAt { get; set; } = src.UpdatedAt;
     public bool IsSystem { get; set; } = src.IsSystem;
-    public List<string>? Permissions { get; set; } = src.Permissions;
 }
 public class CoreRoleCreateRequest
 {
     public string Name { get; set; } = "";
     public string? Description { get; set; }
-    public List<string>? Permissions { get; set; }
 }
 public class CoreRoleUpdateRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }
-    public List<string>? Permissions { get; set; }
 }
 public class CoreRoleSearchOptions
 {

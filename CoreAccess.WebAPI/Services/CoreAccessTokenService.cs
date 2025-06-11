@@ -40,23 +40,13 @@ public class CoreAccessTokenService(
         };
 
         string roles = "";
-        string permissions = "";
         
         foreach (var role in user.Roles)
         {
             roles += $"{role.Name},";
-
-            if (role.Permissions != null && role.Permissions.Any())
-            {
-                foreach (var permission in role.Permissions)
-                {
-                    
-                    permissions += $"{permission},";
-                }   
-            }
         }
+        
         claims.Add(new Claim(CoreAccessClaimType.Roles, roles));
-        claims.Add(new Claim(CoreAccessClaimType.Permissions, permissions));
         
         if (!AppSettingsHelper.TryGet(AppSettingsKeys.JwtIssuer, out string? issuer, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT Issuer is not set in AppSettings.");

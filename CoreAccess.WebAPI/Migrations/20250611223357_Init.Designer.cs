@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoreAccess.WebAPI.Migrations
 {
     [DbContext(typeof(CoreAccessDbContext))]
-    [Migration("20250601032045_Init")]
+    [Migration("20250611223357_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -44,7 +44,39 @@ namespace CoreAccess.WebAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Key")
+                        .IsUnique();
+
                     b.ToTable("AppSettings", "coreaccess");
+                });
+
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.CorePermission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedAt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UpdatedAt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permissions", "coreaccess");
                 });
 
             modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreRole", b =>
@@ -65,9 +97,6 @@ namespace CoreAccess.WebAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.PrimitiveCollection<string>("Permissions")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UpdatedAt")
@@ -144,6 +173,9 @@ namespace CoreAccess.WebAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users", "coreaccess");
                 });
 
@@ -181,20 +213,38 @@ namespace CoreAccess.WebAPI.Migrations
 
                     b.HasIndex("CoreUserId");
 
+                    b.HasIndex("Token")
+                        .IsUnique();
+
                     b.ToTable("RefreshTokens", "coreaccess");
                 });
 
-            modelBuilder.Entity("CoreRoleCoreUser", b =>
+            modelBuilder.Entity("RolePermissions", b =>
                 {
-                    b.Property<byte[]>("RolesId")
+                    b.Property<byte[]>("RoleId")
                         .HasColumnType("BLOB");
 
-                    b.Property<byte[]>("UsersId")
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions", "coreaccess");
+                });
+
+            modelBuilder.Entity("UserRoles", b =>
+                {
+                    b.Property<byte[]>("UserId")
                         .HasColumnType("BLOB");
 
-                    b.HasKey("RolesId", "UsersId");
+                    b.Property<byte[]>("RoleId")
+                        .HasColumnType("BLOB");
 
-                    b.HasIndex("UsersId");
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles", "coreaccess");
                 });
@@ -210,17 +260,32 @@ namespace CoreAccess.WebAPI.Migrations
                     b.Navigation("CoreUser");
                 });
 
-            modelBuilder.Entity("CoreRoleCoreUser", b =>
+            modelBuilder.Entity("RolePermissions", b =>
+                {
+                    b.HasOne("CoreAccess.WebAPI.Model.CorePermission", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CoreAccess.WebAPI.Model.CoreRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UserRoles", b =>
                 {
                     b.HasOne("CoreAccess.WebAPI.Model.CoreRole", null)
                         .WithMany()
-                        .HasForeignKey("RolesId")
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CoreAccess.WebAPI.Model.CoreUser", null)
                         .WithMany()
-                        .HasForeignKey("UsersId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

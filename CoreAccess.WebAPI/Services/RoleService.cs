@@ -42,7 +42,6 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
             {
                 Name = request.Name,
                 Description = request.Description,
-                Permissions = request.Permissions,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
                 UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
             };
@@ -80,7 +79,6 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
             
             existingRole.Name = user.Name ?? existingRole.Name;
             existingRole.Description = user.Description ?? existingRole.Description;
-            existingRole.Permissions = user.Permissions ?? existingRole.Permissions;
             existingRole.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
             var role = await roleRepository.InsertOrUpdateRoleAsync(existingRole);
