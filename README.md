@@ -1,3 +1,5 @@
+# WORK IN PROGRESS - Not yet functional
+
 # CoreAccess User Manager
 
 Ein schlanker, containerisierter User- & Rollenmanager mit REST-API, Vue-Frontend und pluggable Datenbank (SQLite oder PostgreSQL). Ideal für Projekte, die User-Verwaltung, Login und Rechteverwaltung benötigen.
