@@ -1,22 +1,32 @@
 using System.Collections.Concurrent;
 using CoreAccess.WebAPI.DbContext;
+using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Model;
 using DataJuggler.Cryptography;
 
-namespace CoreAccess.WebAPI.Helpers;
+namespace CoreAccess.WebAPI.Services;
 
-public static class AppSettingsHelper
+public interface IAppSettingsService
 {
-    private static readonly ConcurrentDictionary<string, AppSetting> _buffer = new();
-    private static IServiceProvider _serviceProvider;
+    string? Get(string key, bool decryptIfNeeded = false);
+    bool TryGet<T>(string key, out T? value, bool decryptIfNeeded = false);
+    void Reload();
+    void Set(string key, string value, bool encrypt = false, bool isSystem = false);
+    IReadOnlyCollection<AppSetting> All();
+}
 
-    public static void Initialize(IServiceProvider serviceProvider)
+public class AppSettingsService : IAppSettingsService
+{
+    private readonly ConcurrentDictionary<string, AppSetting> _buffer = new();
+    private readonly CoreAccessDbContext _db;
+
+    public AppSettingsService(CoreAccessDbContext dbContext)
     {
-        _serviceProvider = serviceProvider;
+        _db = dbContext;
         Reload();
     }
 
-    public static string? Get(string key, bool decryptIfNeeded = false)
+    public string? Get(string key, bool decryptIfNeeded = false)
     {
         if (!_buffer.TryGetValue(key, out var entry)) return null;
 
@@ -25,7 +35,7 @@ public static class AppSettingsHelper
             : entry.Value;
     }
 
-    public static bool TryGet<T>(string key, out T? value, bool decryptIfNeeded = false)
+    public bool TryGet<T>(string key, out T? value, bool decryptIfNeeded = false)
     {
         value = default;
         if (!_buffer.TryGetValue(key, out var entry)) return false;
@@ -45,13 +55,9 @@ public static class AppSettingsHelper
         }
     }
 
-    public static void Reload()
+    public void Reload()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
-
-        var fresh = db.AppSettings
-            .ToList();
+        var fresh = _db.AppSettings.ToList();
 
         _buffer.Clear();
         foreach (var entry in fresh)
@@ -67,14 +73,11 @@ public static class AppSettingsHelper
         }
     }
 
-    public static void Set(string key, string value, bool encrypt = false, bool isSystem = false)
+    public void Set(string key, string value, bool encrypt = false, bool isSystem = false)
     {
         var encryptedValue = encrypt ? CryptographyHelper.EncryptString(value, SecureKeyHelper.GetOrCreateBase64Key("settings_encryption")) : value;
 
-        using var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
-
-        var setting = db.AppSettings.FirstOrDefault(x => x.Key == key);
+        var setting = _db.AppSettings.FirstOrDefault(x => x.Key == key);
         if (setting is null)
         {
             setting = new AppSetting
@@ -85,7 +88,7 @@ public static class AppSettingsHelper
                 IsEncrypted = encrypt,
                 IsSystem = isSystem
             };
-            db.AppSettings.Add(setting);
+            _db.AppSettings.Add(setting);
         }
         else
         {
@@ -96,9 +99,9 @@ public static class AppSettingsHelper
             setting.IsEncrypted = encrypt;
         }
 
-        db.SaveChanges();
+        _db.SaveChanges();
         Reload();
     }
 
-    public static IReadOnlyCollection<AppSetting> All() => _buffer.Values.ToList();
+    public IReadOnlyCollection<AppSetting> All() => _buffer.Values.ToList();
 }

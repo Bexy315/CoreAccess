@@ -140,11 +140,11 @@ public static class CoreAccessDbSeeder
 
     private static void EnsureSetting(string key, string value, bool encrypted, bool system)
     {
-        if (!AppSettingsHelper.TryGet(key, out string _, decryptIfNeeded: true))
+    /*    if (!AppSettingsHelper.TryGet(key, out string _, decryptIfNeeded: true))
         {
             Console.WriteLine($"➕ Initializing setting: {key}");
             AppSettingsHelper.Set(key, value, encrypted, system);
-        }
+        } */
     }
 
     private static void PrintWarning(string message)

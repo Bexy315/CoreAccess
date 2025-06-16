@@ -9,7 +9,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
 [Route("api/auth")]
-public class CoreAuthController(IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
+public class CoreAuthController(IAppSettingsService appSettingsService, IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
 {
     
     [HttpPost("login")]
@@ -91,7 +91,7 @@ public class CoreAuthController(IUserService userService, ICoreAccessTokenServic
     {
         try
         {
-            if (AppSettingsHelper.Get(AppSettingsKeys.DisableRegistration) == "true")
+            if (appSettingsService.Get(AppSettingsKeys.DisableRegistration) == "true")
                 return Forbid();
             
             if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))

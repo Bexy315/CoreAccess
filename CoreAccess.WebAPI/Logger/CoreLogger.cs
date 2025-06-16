@@ -31,7 +31,8 @@ public static class CoreLogger
             throw new ArgumentOutOfRangeException(nameof(level), "Invalid log level.");
         }
         
-        AppSettingsHelper.TryGet(AppSettingsKeys.SystemLogLevel, out string? currentLogLevel);
+        //TODO: Implement a way to get the current log level from configuration or environment
+        string currentLogLevel = "Information";
         
         if (!Enum.TryParse(currentLogLevel, out CoreLogLevel parsedLogLevel))
         {

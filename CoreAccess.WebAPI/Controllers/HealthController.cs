@@ -3,6 +3,7 @@ using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
 using CoreAccess.WebAPI.Model;
+using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class HealthController(CoreAccessDbContext db) : ControllerBase
+public class HealthController(IAppSettingsService appSettingsService, CoreAccessDbContext db) : ControllerBase
 {
     [HttpGet("health")]
     public async Task<IActionResult> GetHealth()
@@ -27,7 +28,7 @@ public class HealthController(CoreAccessDbContext db) : ControllerBase
             result["Database"] = $"ERROR: {ex.Message}";
         }
 
-        var tokenKey = AppSettingsHelper.Get(AppSettingsKeys.JwtSecretKey, decryptIfNeeded: true);
+        var tokenKey = appSettingsService.Get(AppSettingsKeys.JwtSecretKey, decryptIfNeeded: true);
         result["JwtSecretKey"] = string.IsNullOrWhiteSpace(tokenKey) ? "MISSING" : "OK";
 
         var overallStatus = result.All(kv => kv.Value?.ToString() == "OK") ? "Healthy" : "Unhealthy";
@@ -46,7 +47,7 @@ public class HealthController(CoreAccessDbContext db) : ControllerBase
     {
         try
         {
-            AppSettingsHelper.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel);
+            appSettingsService.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel);
             
             CoreLogger.LogSystem(CoreLogLevel.Information,nameof(HealthController), "Cool Debug message!!!", new Exception("Test exception"));
             

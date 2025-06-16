@@ -106,6 +106,7 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 #region Services
 
+builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<ICoreAccessTokenService, CoreAccessTokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
@@ -145,8 +146,6 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
     dbContext.Database.Migrate();
 }
-
-AppSettingsHelper.Initialize(app.Services);
 
 CoreLogger.Initialize(new List<ILogSink>
 {
