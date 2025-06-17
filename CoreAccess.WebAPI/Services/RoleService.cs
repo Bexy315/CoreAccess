@@ -1,3 +1,5 @@
+using CoreAccess.WebAPI.Logger;
+using CoreAccess.WebAPI.Logger.Model;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Repositories;
 
@@ -8,10 +10,11 @@ public interface IRoleService
     Task<PagedResult<CoreRoleDto>> SearchRolesAsync(CoreRoleSearchOptions options);
     Task<CoreRoleDto> CreateRoleAsync(CoreRoleCreateRequest request);
     Task<CoreRoleDto> UpdateRoleAsync(string userId, CoreRoleUpdateRequest user);
+    Task AddPermissionToRoleAsync(string roleName, string permissionName);
     Task DeleteRoleAsync(string id);
 }
 
-public class RoleService(IRoleRepository roleRepository) : IRoleService
+public class RoleService(IRoleRepository roleRepository, IPermissionRepository permissionRepository) : IRoleService
 {
     public async Task<PagedResult<CoreRoleDto>> SearchRolesAsync(CoreRoleSearchOptions options)
     {
@@ -29,7 +32,7 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error searching Roles", ex);
             throw;
         }
     }
@@ -56,7 +59,7 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error creating Role", ex);
             throw;
         }
     }
@@ -91,7 +94,42 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error updating Role", ex);
+            throw;
+        }
+    }
+
+    public async Task AddPermissionToRoleAsync(string roleName, string permissionName)
+    {
+        try
+        {
+            var role = await roleRepository.SearchRolesAsync(new CoreRoleSearchOptions()
+            {
+                Name = roleName,
+                Page = 1,
+                PageSize = 1
+            }).ContinueWith(t => t.Result.FirstOrDefault() ?? null);
+            
+            if (role == null)
+            {
+                throw new Exception($"Role '{roleName}' not found");
+            }
+
+            var permission = await permissionRepository.GetPermissionByNameAsync(permissionName);
+            if (permission == null)
+            {
+                throw new Exception($"Permission '{permissionName}' not found");
+            }
+
+            if (role.Permissions.All(p => p.Name != permission.Name))
+            {
+                role.Permissions.Add(permission);
+                await roleRepository.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error adding Permission to Role",ex);
             throw;
         }
     }
@@ -105,7 +143,7 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error deleting Role", ex);
             throw;
         }
     }

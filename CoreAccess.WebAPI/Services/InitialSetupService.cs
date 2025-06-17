@@ -2,13 +2,16 @@ using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
 using CoreAccess.WebAPI.Model;
+using CoreAccess.WebAPI.Repositories;
 
 namespace CoreAccess.WebAPI.Services;
 
 public class InitialSetupService(
     ILogger<InitialSetupService> logger,
     IAppSettingsService appSettingsService,
-    IUserService userService)
+    IUserService userService,
+    IRoleService roleService,
+    IPermissionRepository permissionRepository)
 {
     public async Task RunSetupAsync(InitialSetupRequest request)
     {
@@ -16,6 +19,41 @@ public class InitialSetupService(
         {
             logger.LogError("Initial setup request cannot be null.");
             throw new ArgumentNullException(nameof(request), "Initial setup request cannot be null.");
+        }
+
+        var adminRole = await roleService.CreateRoleAsync(new CoreRoleCreateRequest()
+        {
+            Name = "CoreAccess.Admin",
+            Description = "CoreAccess Admin role for administrative access to CoreAccess"
+        });
+        
+        await roleService.CreateRoleAsync(new CoreRoleCreateRequest()
+        {
+            Name = "User",
+            Description = "User role for default users"
+        });
+        
+        var permissions = new List<CreatePermissionRequest>
+        {
+            new() { Name = "user.read", Description = "Read users" },
+            new() { Name = "user.write", Description = "Create/update/delete users" },
+            new() { Name = "role.read", Description = "Read roles" },
+            new() { Name = "role.write", Description = "Create/update/delete roles" },
+            new() { Name = "permission.read", Description = "Read permissions" },
+            new() { Name = "permission.write", Description = "Manage permissions" },
+            new() { Name = "settings.read", Description = "Read system settings" },
+            new() { Name = "settings.write", Description = "Update system settings" }
+        };
+        
+        foreach (var permission in permissions)
+        {
+            var createdPermission = await permissionRepository.AddPermissionAsync(permission);
+            if (createdPermission == null)
+            {
+                logger.LogError($"Failed to create permission: {permission.Name}");
+                throw new Exception($"Failed to create permission: {permission.Name}");
+            }
+            await roleService.AddPermissionToRoleAsync(adminRole.Name, createdPermission.Name);
         }
 
         if (request.Admin == null)
@@ -56,7 +94,7 @@ public class InitialSetupService(
     
     private async Task SaveCompleted()
     {
-        var filePath = "/var/data/etc/init_setup_completed.txt";
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "/data/etc/init_setup_completed.txt");
 
         if (File.Exists(filePath))
         {
@@ -72,4 +110,6 @@ public class InitialSetupService(
 
         await File.WriteAllTextAsync(filePath, "true");
     }
+    
+    private static string Now() => DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 }

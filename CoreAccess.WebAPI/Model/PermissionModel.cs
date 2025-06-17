@@ -13,3 +13,10 @@ public class CorePermission
     [JsonIgnore]
     public List<CoreRole> Roles { get; set; } = new();
 }
+
+public class CreatePermissionRequest
+{
+    public string Name { get; set; } = "";
+    public string? Description { get; set; }
+    public bool IsSystem { get; set; } = false;
+}

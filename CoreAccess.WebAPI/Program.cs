@@ -100,6 +100,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 #endregion
 
@@ -145,12 +146,6 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
     dbContext.Database.Migrate();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
-    await CoreAccessDbSeeder.SeedInitialDataAsync(db);
 }
 
 CoreLogger.Initialize(new List<ILogSink>

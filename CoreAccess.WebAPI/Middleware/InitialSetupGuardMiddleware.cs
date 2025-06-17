@@ -23,7 +23,7 @@ public class InitialSetupGuardMiddleware(RequestDelegate next)
     
     private static bool IsSetupCompleted()
     {
-        var filePath = "/var/data/etc/init_setup_completed.txt";
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "/data/etc/init_setup_completed.txt");
 
         if (File.Exists(filePath))
         {

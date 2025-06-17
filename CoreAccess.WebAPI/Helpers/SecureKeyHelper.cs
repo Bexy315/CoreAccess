@@ -14,7 +14,7 @@ public static class SecureKeyHelper
     /// <returns>Ein Base64-kodierter 256-Bit-Schlüssel.</returns>
     public static string GetOrCreateBase64Key(string keyName)
     {
-        var keyFilePath = Path.Combine(KeyPath, $"{keyName}.key");
+        var keyFilePath = Path.Combine(Directory.GetCurrentDirectory(), KeyPath, $"{keyName}.key");
 
         if (File.Exists(keyFilePath))
         {
