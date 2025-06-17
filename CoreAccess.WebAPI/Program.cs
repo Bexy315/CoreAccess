@@ -9,6 +9,8 @@ using System.Text;
 using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Sinks;
+using CoreAccess.WebAPI.Services.CoreAuth;
+using CoreAccess.WebAPI.Services.InitialSetup;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,8 +34,6 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
-
 
 #region DbContext
 
@@ -110,6 +110,12 @@ builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<ICoreAccessTokenService, CoreAccessTokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+
+#endregion
+
+#region Singletons
+
+builder.Services.AddSingleton<SetupStatusService>();
 
 #endregion
 

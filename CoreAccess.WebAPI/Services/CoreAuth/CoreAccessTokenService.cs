@@ -5,7 +5,7 @@ using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Repositories;
 using Microsoft.IdentityModel.Tokens;
 
-namespace CoreAccess.WebAPI.Services;
+namespace CoreAccess.WebAPI.Services.CoreAuth;
 
 public interface ICoreAccessTokenService
 {

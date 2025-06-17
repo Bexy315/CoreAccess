@@ -3,6 +3,7 @@ using CoreAccess.WebAPI.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
+using CoreAccess.WebAPI.Services.CoreAuth;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CoreAccess.WebAPI.Controllers;
