@@ -40,7 +40,9 @@ pnpm-debug.log*
 #############################################
 # Build results
 bin/
+CoreAccess.WebAPI/bin/
 obj/
+CoreAccess.WebAPI/obj/
 *.dll
 *.exe
 *.pdb
