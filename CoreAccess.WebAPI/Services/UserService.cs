@@ -12,7 +12,7 @@ public interface IUserService
     Task<CoreUser> CreateUserAsync(CoreUserCreateRequest request, CancellationToken cancellationToken = default);
     Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default);
     Task<CoreUser> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
-    Task<CoreUser> AddRoleToUserAsync(string userName, string roleId, CancellationToken cancellationToken = default);
+    Task<CoreUser> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
     Task<CoreUser> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);

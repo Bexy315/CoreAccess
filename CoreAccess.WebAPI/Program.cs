@@ -6,11 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Sinks;
+using CoreAccess.WebAPI.Middleware;
 using CoreAccess.WebAPI.Services.CoreAuth;
-using CoreAccess.WebAPI.Services.InitialSetup;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -111,11 +110,7 @@ builder.Services.AddScoped<ICoreAccessTokenService, CoreAccessTokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
-#endregion
-
-#region Singletons
-
-builder.Services.AddSingleton<SetupStatusService>();
+builder.Services.AddScoped<InitialSetupService>();
 
 #endregion
 
@@ -146,23 +141,22 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
     dbContext.Database.Migrate();
 }
 
-CoreLogger.Initialize(new List<ILogSink>
-{
-    new ConsoleSink()
-});
-
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
     await CoreAccessDbSeeder.SeedInitialDataAsync(db);
 }
+
+CoreLogger.Initialize(new List<ILogSink>
+{
+    new ConsoleSink()
+});
 
 app.MapOpenApi();
 app.UseSwagger();            
@@ -179,6 +173,8 @@ else
     
     app.MapFallbackToFile("index.html");
 }
+
+app.UseMiddleware<InitialSetupGuardMiddleware>();
 
 app.UseAuthorization();
 

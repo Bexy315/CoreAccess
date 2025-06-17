@@ -59,17 +59,4 @@ public static class SecureKeyHelper
         rng.GetBytes(bytes);
         return new string(bytes.Select(b => chars[b % chars.Length]).ToArray());
     }
-    /// <summary>
-    /// Decrypts a given ciphertext using the specified key.
-    /// 
-    public static string GetDecrypted(string cypherText, string key)
-    {
-        if (string.IsNullOrWhiteSpace(cypherText))
-            throw new ArgumentNullException(nameof(cypherText), "Ciphertext cannot be null or empty.");
-        
-        if (string.IsNullOrWhiteSpace(key))
-            throw new ArgumentNullException(nameof(key), "Key cannot be null or empty.");
-
-        return CryptographyHelper.DecryptString(cypherText, key);
-    }
 }

@@ -16,10 +16,6 @@ public static class CoreAccessDbSeeder
 
         Console.WriteLine("Starting CoreAccess database seeding...");
 
-        var adminRoleId = Guid.Parse("f63ee75d-f899-4fe5-ae6d-a070164d01fd");
-        var userRoleId = Guid.Parse("7bd719cd-fdcc-4463-b633-2aef7208ba38");
-        var adminUserId = Guid.Parse("ed82e48e-3686-4ca9-ae06-9a2885e801e0");
-
         #region Roles
 
         CoreRole? adminRole = null;
@@ -30,7 +26,7 @@ public static class CoreAccessDbSeeder
 
             adminRole = new CoreRole
             {
-                Id = adminRoleId,
+                Id = Guid.Parse("f63ee75d-f899-4fe5-ae6d-a070164d01fd"),
                 Name = "CoreAccess.Admin",
                 Description = "CoreAccess Admin role for administrative access to CoreAccess",
                 CreatedAt = Now(),
@@ -40,7 +36,7 @@ public static class CoreAccessDbSeeder
 
             var userRole = new CoreRole
             {
-                Id = userRoleId,
+                Id = Guid.Parse("7bd719cd-fdcc-4463-b633-2aef7208ba38"),
                 Name = "User",
                 Description = "User role for default users",
                 CreatedAt = Now(),
@@ -53,7 +49,7 @@ public static class CoreAccessDbSeeder
         }
         else
         {
-            adminRole = await context.Roles.FirstAsync(r => r.Id == adminRoleId);
+            adminRole = await context.Roles.FirstAsync(r => r.Id == Guid.Parse("f63ee75d-f899-4fe5-ae6d-a070164d01fd"));
         }
 
         #endregion
@@ -84,74 +80,10 @@ public static class CoreAccessDbSeeder
 
         #endregion
 
-        #region User
-
-        if (!context.Users.Any())
-        {
-            Console.WriteLine("Creating default admin user...");
-
-            string username = Environment.GetEnvironmentVariable("COREACCESS_USERNAME") ?? "root";
-            string? password = Environment.GetEnvironmentVariable("COREACCESS_PASSWORD");
-
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                password = SecureKeyHelper.GenerateSecurePassword();
-                PrintWarning($"No COREACCESS_PASSWORD provided. Generated password: {password}");
-            }
-
-            var user = new CoreUser
-            {
-                Id = adminUserId,
-                Username = username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                CreatedAt = Now(),
-                UpdatedAt = Now(),
-                IsSystem = true,
-                Status = CoreUserStatus.Active
-            };
-
-            user.Roles.Add(adminRole!);
-            context.Users.Add(user);
-
-            Console.WriteLine($"Default user created with username: {username}");
-        }
-
-        #endregion
-
-        #region AppSettings
-
-        Console.WriteLine("Ensuring required app settings...");
-
-        EnsureSetting(AppSettingsKeys.JwtSecretKey, SecureKeyHelper.GenerateRandomBase64Key(), encrypted: true, system: true);
-        EnsureSetting(AppSettingsKeys.JwtIssuer, "coreaccess", encrypted: true, system: true);
-        EnsureSetting(AppSettingsKeys.JwtAudience, "coreaccess-client", encrypted: true, system: true);
-        EnsureSetting(AppSettingsKeys.JwtExpiresIn, "60", encrypted: true, system: true);
-        EnsureSetting(AppSettingsKeys.DisableRegistration, "false", encrypted: false, system: true);
-        EnsureSetting(AppSettingsKeys.SystemLogLevel, "Information", encrypted: false, system: true);
-
-        #endregion
-
         await context.SaveChangesAsync();
 
         Console.WriteLine("🎉 CoreAccess seeding complete.");
     }
 
     private static string Now() => DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
-
-    private static void EnsureSetting(string key, string value, bool encrypted, bool system)
-    {
-    /*    if (!AppSettingsHelper.TryGet(key, out string _, decryptIfNeeded: true))
-        {
-            Console.WriteLine($"➕ Initializing setting: {key}");
-            AppSettingsHelper.Set(key, value, encrypted, system);
-        } */
-    }
-
-    private static void PrintWarning(string message)
-    {
-        var previousColor = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("⚠️  " + message);
-        Console.ForegroundColor = previousColor;
-    }
 }
