@@ -1,24 +1,25 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { getHealthStatus } from '../services/DashboardService.ts';
-
-interface HealthStatus {
-  status: string;
-  uptime: string;
-  checks: Record<string, string>;
-}
+import {getDashboardMetrics, getHealthStatus, type HealthStatus} from '../services/DashboardService.ts';
 
 const health = ref<HealthStatus | null>(null);
 const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const result = await getHealthStatus();
-    health.value = {
-      status: result.status,
-      uptime: result.uptime,
-      checks: result.checks,
-    };
+    loading.value = true;
+    await getHealthStatus().then(res =>
+        health.value = {
+      status: res.status,
+      uptime: res.uptime,
+      checks: res.checks,
+    });
+
+    await getDashboardMetrics().then(res => {
+      totalUsers.value = res.totalUsers;
+      totalRoles.value = res.totalRoles;
+    });
+    loading.value = false;
   } catch {
     health.value = null;
   } finally {
@@ -26,8 +27,7 @@ onMounted(async () => {
   }
 });
 
-function formatUptime(uptime: string): string {
-  const seconds = parseInt(uptime.replace('s', ''), 10);
+function formatUptime(seconds: number): string {
   if (isNaN(seconds)) return 'Invalid uptime';
 
   const weeks = Math.floor(seconds / (7 * 24 * 60 * 60));
@@ -47,8 +47,8 @@ function formatUptime(uptime: string): string {
 }
 
 // Dummy stats
-const totalUsers = 128;
-const totalRoles = 12;
+const totalUsers = ref(0);
+const totalRoles = ref(0);
 const activeSessions = 37;
 const failedLoginsToday = 3;
 </script>
@@ -63,28 +63,48 @@ const failedLoginsToday = 3;
     <Card class="bg-white shadow rounded-2xl p-4">
       <template #title>Total Users</template>
       <template #content>
+        <div v-if="loading">
+          <Skeleton height="2rem" class="mb-2" />
+        </div>
+        <div v-else>
         <p class="text-3xl font-bold text-primary">{{ totalUsers }}</p>
+        </div>
       </template>
     </Card>
 
     <Card class="bg-white shadow rounded-2xl p-4">
       <template #title>Roles</template>
       <template #content>
+        <div v-if="loading">
+          <Skeleton height="2rem" class="mb-2" />
+        </div>
+        <div v-else>
         <p class="text-3xl font-bold text-primary">{{ totalRoles }}</p>
+        </div>
       </template>
     </Card>
 
     <Card class="bg-white shadow rounded-2xl p-4">
       <template #title>Active Sessions</template>
       <template #content>
+        <div v-if="loading">
+          <Skeleton height="2rem" class="mb-2" />
+        </div>
+        <div v-else>
         <p class="text-3xl font-bold text-green-600">{{ activeSessions }}</p>
+        </div>
       </template>
     </Card>
 
     <Card class="bg-white shadow rounded-2xl p-4">
       <template #title>Failed Logins (Today)</template>
       <template #content>
+        <div v-if="loading">
+          <Skeleton height="2rem" class="mb-2" />
+        </div>
+        <div v-else>
         <p class="text-3xl font-bold text-red-500">{{ failedLoginsToday }}</p>
+        </div>
       </template>
     </Card>
   </div>

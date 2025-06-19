@@ -2,6 +2,7 @@ namespace CoreAccess.WebAPI.Model;
 
 public class InitialSetupRequest 
 {
+    public string Hostname { get; set; } = String.Empty;
     public CoreUserCreateRequest? Admin { get; set; } = new();
     public string JwtSecret { get; set; } = string.Empty;
     public string Issuer { get; set; } = "CoreAccess";

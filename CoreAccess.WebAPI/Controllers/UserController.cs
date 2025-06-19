@@ -12,28 +12,6 @@ namespace CoreAccess.WebAPI.Controllers;
 public class UserController(IUserService userService) : ControllerBase
 {
     [HttpGet]
-    [CoreAuthorize]
-    public async Task<IActionResult> GetUser([FromQuery]CoreUserSearchOptions options, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var user = await userService.SearchUsersAsync(options, cancellationToken);
-
-            return Ok(user);
-        }
-        catch(ArgumentException ex)
-        {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while getting user", ex);
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while getting user", ex);
-            return StatusCode(500, ex.Message);
-        }
-    }
-    
-    [HttpGet]
     [Route("{userId}/profile-picture")]
     [CoreAuthorize]
     public async Task<IActionResult> GetProfilePicture([FromRoute]string userId)
@@ -157,28 +135,6 @@ public class UserController(IUserService userService) : ControllerBase
         catch (Exception ex)
         {
             CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while adding role to user", ex);
-            return StatusCode(500, ex.Message);
-        }
-    }
-
-    [HttpDelete]
-    [Route("{userId}")]
-    [CoreAuthorize(Roles = "CoreAccess.Admin")]
-    public async Task<IActionResult> DeleteUser([FromRoute]string userId, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            await userService.DeleteUserAsync(userId, cancellationToken);
-            return Ok();
-        }
-        catch(ArgumentException ex)
-        {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while deleting user", ex);
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(UserController), "Error while deleting user", ex);
             return StatusCode(500, ex.Message);
         }
     }

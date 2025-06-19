@@ -45,6 +45,10 @@ export function getUser() {
     return currentUser.value
 }
 
+export function getAccessToken() {
+    return coreAuth.getAccessToken();
+}
+
 export function restoreAuth() {
     if (coreAuth.isLoggedIn()) {
         isAuthenticated.value = true

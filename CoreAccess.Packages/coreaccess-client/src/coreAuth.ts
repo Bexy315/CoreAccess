@@ -112,6 +112,35 @@ class CoreAuth {
     getCurrentUser(): any | null {
         return this.user;
     }
+
+    getAccessToken(): string | null {
+        return this.tokenStorage.getAccessToken();
+    }
+
+    refreshAccessToken(): Promise<string | null> {
+        return new Promise((resolve, reject) => {
+            httpClient.post('/auth/refresh-token', {
+                refreshToken: this.tokenStorage.getRefreshToken()
+            })
+                .then((response: { data: { accessToken: string; refreshToken: string; userId: string } }) => {
+                    const data = response.data;
+                    if (data?.accessToken) {
+                        this.tokenStorage.setTokens(data.accessToken, data.refreshToken);
+                        this.user = data.userId;
+                        resolve(data.accessToken);
+                    } else {
+                        reject(new Error('Invalid response: access token missing'));
+                    }
+                })
+                .catch((error: unknown) => {
+                    this.tokenStorage.clearTokens();
+                    this.isAuthenticated = false;
+                    this.user = null;
+                    this.notifyLogout();
+                    reject(error);
+                });
+        });
+    }
 }
 
 export const coreAuth = new CoreAuth();

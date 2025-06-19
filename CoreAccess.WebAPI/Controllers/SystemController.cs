@@ -11,7 +11,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class HealthController(IAppSettingsService appSettingsService, CoreAccessDbContext db) : ControllerBase
+public class SystemController(IAppSettingsService appSettingsService, CoreAccessDbContext db) : ControllerBase
 {
     [HttpGet("health")]
     public async Task<IActionResult> GetHealth()
@@ -36,7 +36,7 @@ public class HealthController(IAppSettingsService appSettingsService, CoreAccess
         return Ok(new
         {
             Status = overallStatus,
-            Uptime = Environment.TickCount64 / 1000 + "s",
+            Uptime = Environment.TickCount64 / 1000,
             Checks = result
         });
     }
@@ -49,7 +49,7 @@ public class HealthController(IAppSettingsService appSettingsService, CoreAccess
         {
             appSettingsService.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel);
             
-            CoreLogger.LogSystem(CoreLogLevel.Information,nameof(HealthController), "Cool Debug message!!!", new Exception("Test exception"));
+            CoreLogger.LogSystem(CoreLogLevel.Information,nameof(SystemController), "Cool Debug message!!!", new Exception("Test exception"));
             
             return Ok(systemLogLevel);
         }

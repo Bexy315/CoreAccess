@@ -15,11 +15,25 @@ public class InitialSetupService(
 {
     public async Task RunSetupAsync(InitialSetupRequest request)
     {
+        if(await IsSetupCompletedAsync())
+        {
+            logger.LogError("Initial setup already completed.");
+            throw new ArgumentException("Initial setup already completed.");
+        }
+        
         if (request == null)
         {
             logger.LogError("Initial setup request cannot be null.");
-            throw new ArgumentNullException(nameof(request), "Initial setup request cannot be null.");
+            throw new ArgumentException(nameof(request), "Initial setup request cannot be null.");
         }
+        
+        if (string.IsNullOrWhiteSpace(request.Hostname))
+        {
+            logger.LogError("Hostname is required for initial setup.");
+            throw new ArgumentException(nameof(request.Hostname), "Hostname is required for initial setup.");
+        }
+        
+        appSettingsService.Set(AppSettingsKeys.Hostname, request.Hostname);
 
         var adminRole = await roleService.CreateRoleAsync(new CoreRoleCreateRequest()
         {
@@ -85,17 +99,17 @@ public class InitialSetupService(
         
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "JWT settings configured successfully.");
 
-        await SaveCompleted();
+        await SaveCompletedAsync();
         
         appSettingsService.Reload();
                 
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "Initial setup completed successfully.");
     }
     
-    private async Task SaveCompleted()
+    private async Task SaveCompletedAsync()
     {
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "/data/etc/init_setup_completed.txt");
-
+        
         if (File.Exists(filePath))
         {
             await File.WriteAllTextAsync(filePath, "true");
@@ -109,6 +123,12 @@ public class InitialSetupService(
         }
 
         await File.WriteAllTextAsync(filePath, "true");
+    }
+    
+    private async Task <bool> IsSetupCompletedAsync()
+    {
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "/data/etc/init_setup_completed.txt");
+        return (await File.ReadAllTextAsync(filePath)).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
     }
     
     private static string Now() => DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");

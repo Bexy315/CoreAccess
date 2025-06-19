@@ -1,6 +1,6 @@
 {
   "name": "@coreaccess/client",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "CoreAccess Client package for interacting with CoreAccess API",
   "author": "Felix Zieten <felixzieten16@gmail.com>",
   "main": "./dist/index.js",

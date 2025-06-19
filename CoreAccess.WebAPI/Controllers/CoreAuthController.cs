@@ -93,7 +93,7 @@ public class CoreAuthController(IAppSettingsService appSettingsService, IUserSer
         try
         {
             if (appSettingsService.Get(AppSettingsKeys.DisableRegistration) == "true")
-                return Forbid();
+                return StatusCode(403, "Registration is disabled.");
             
             if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
                 return BadRequest("Username already exists.");

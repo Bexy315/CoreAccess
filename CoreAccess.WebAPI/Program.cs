@@ -116,7 +116,7 @@ builder.Services.AddScoped<InitialSetupService>();
 #endregion
 
 #region Auth
-
+/**
 var jwtSecret = Environment.GetEnvironmentVariable("COREACCESS_JWT_SECRET") ?? "default_secret_key_change_me";
 var key = Encoding.ASCII.GetBytes(jwtSecret);
 
@@ -137,8 +137,8 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = false
         };
     });
-
-#endregion
+**/
+#endregion 
 
 var app = builder.Build();
 
