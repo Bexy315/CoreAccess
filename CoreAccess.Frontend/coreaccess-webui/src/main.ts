@@ -25,6 +25,12 @@ import InputText from 'primevue/inputtext'
 import Breadcrumb from "primevue/breadcrumb";
 import Tooltip from "primevue/tooltip";
 import Skeleton from "primevue/skeleton";
+import Stepper from 'primevue/stepper';
+import StepList from 'primevue/steplist';
+import StepPanels from 'primevue/steppanels';
+import StepItem from 'primevue/stepitem';
+import Step from 'primevue/step';
+import StepPanel from 'primevue/steppanel';
 
 import CoreAccessPreset from "./assets/theme.ts";
 
@@ -58,6 +64,12 @@ app.component('Card', Card);
 app.component('InputText', InputText);
 app.component('Breadcrumb', Breadcrumb);
 app.component('Skeleton', Skeleton);
+app.component('Stepper', Stepper);
+app.component('StepList', StepList);
+app.component('StepPanels', StepPanels);
+app.component('StepItem', StepItem);
+app.component('Step', Step);
+app.component('StepPanel', StepPanel);
 app.directive('Tooltip', Tooltip);
 
 app.component('Sidebar', Sidebar);

@@ -4,17 +4,29 @@ import {onMounted, ref} from "vue";
 import {restoreAuth} from "./services/AuthService.ts";
 import { registerGlobalToast } from './utils/toast';
 import {useToast} from "primevue/usetoast";
+import {getAppConfig} from "./services/AppConfigService.cs.ts";
+import {useAppStateStore} from "./stores/AppStateStore.ts";
+import {useRouter} from "vue-router";
 
 const toastRef = ref(useToast());
 const loading = ref(true)
+const appStateStore = useAppStateStore();
+const router = useRouter();
 
-onMounted(() => {
+onMounted(async () => {
   if (toastRef.value) {
     registerGlobalToast(toastRef.value);
   }
-  restoreAuth()
-  loading.value = false
-})
+  restoreAuth();
+  const appConfigResponse = await getAppConfig();
+  appStateStore.setInitiated(appConfigResponse.data.isSetupComplete);
+
+  if (!appStateStore.isInitiated && router.currentRoute.value.path !== '/initial-setup') {
+    router.push('/initial-setup');
+  }
+
+  loading.value = false;
+});
 </script>
 
 <template>

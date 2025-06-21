@@ -10,6 +10,7 @@ import AuditLogs from "../pages/AuditLogs.vue";
 import AppSettings from "../pages/AppSettings.vue";
 import {isAuthenticated} from "../services/AuthService.ts";
 import MetricsHub from "../pages/MetricsHub.vue";
+import InitialSetup from "../pages/InitialSetup/InitialSetup.vue";
 
 const routes: RouteRecordRaw[] = [
     { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
@@ -21,9 +22,11 @@ const routes: RouteRecordRaw[] = [
     { path: '/metrics', name: 'MetricsHub', component: MetricsHub, meta: { requiresAuth: true }, },
     { path: '/metrics/logs/system', name: 'SystemLogs', component: SystemLogs, meta: { requiresAuth: true }, },
     { path: '/metrics/logs/audit', name: 'AuditLogs', component: AuditLogs, meta: { requiresAuth: true }, },
+    { path: '/initial-setup', name: 'InitialSetup', component: InitialSetup, meta: { public: true } },
     { path: '/dashboard', redirect: '/' },
     { path: '/:pathMatch(.*)*', redirect: '/' }
 ];
+
 
 export const router = createRouter({
     history: createWebHistory(),

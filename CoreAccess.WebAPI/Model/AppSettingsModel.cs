@@ -53,7 +53,7 @@ public class AppSettingUpdateRequest
 
 public static class AppSettingsKeys
 {
-    public const string Hostname = "CoreAccess:Hostname";
+    public const string BaseUri = "CoreAccess:BaseUri";
     public const string InitSetupCompleted = "CoreAccess:InitSetupCompleted";
     public const string JwtSecretKey = "CoreAccess:Jwt:Secret";
     public const string JwtIssuer = "CoreAccess:Jwt:Issuer";

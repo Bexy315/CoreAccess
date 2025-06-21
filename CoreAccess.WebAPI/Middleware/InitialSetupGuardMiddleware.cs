@@ -5,7 +5,7 @@ namespace CoreAccess.WebAPI.Middleware;
 
 public class InitialSetupGuardMiddleware(RequestDelegate next)
 {
-    private readonly string[] _allowedPaths = ["/api/setup"];
+    private readonly string[] _allowedPaths = ["/api/setup", "/api/admin/config"];
 
     public async Task InvokeAsync(HttpContext context, IAppSettingsService appSettingsService)
     {

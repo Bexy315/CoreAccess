@@ -27,19 +27,22 @@ public class InitialSetupService(
             throw new ArgumentException(nameof(request), "Initial setup request cannot be null.");
         }
         
-        if (string.IsNullOrWhiteSpace(request.Hostname))
+        if (string.IsNullOrWhiteSpace(request.GeneralInitialSettings.BaseUri))
         {
-            logger.LogError("Hostname is required for initial setup.");
-            throw new ArgumentException(nameof(request.Hostname), "Hostname is required for initial setup.");
+            logger.LogError("BaseUri is required for initial setup.");
+            throw new ArgumentException(nameof(request.GeneralInitialSettings.BaseUri), "BaseUri is required for initial setup.");
         }
         
-        appSettingsService.Set(AppSettingsKeys.Hostname, request.Hostname);
+        appSettingsService.Set(AppSettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri);
 
         var adminRole = await roleService.CreateRoleAsync(new CoreRoleCreateRequest()
         {
             Name = "CoreAccess.Admin",
             Description = "CoreAccess Admin role for administrative access to CoreAccess"
         });
+        
+        appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, isSystem: true);
         
         await roleService.CreateRoleAsync(new CoreRoleCreateRequest()
         {
@@ -70,10 +73,10 @@ public class InitialSetupService(
             await roleService.AddPermissionToRoleAsync(adminRole.Name, createdPermission.Name);
         }
 
-        if (request.Admin == null)
+        if (request.UserInitialSettings.Admin == null)
         {
             string password = SecureKeyHelper.GenerateSecurePassword();
-            request.Admin = new CoreUserCreateRequest
+            request.UserInitialSettings.Admin = new CoreUserCreateRequest
             {
                 Username = "root",
                 Email = "root@coreaccess.com",
@@ -82,20 +85,18 @@ public class InitialSetupService(
             CoreLogger.LogSystem(CoreLogLevel.Warning, nameof(InitialSetupService), "Admin user not provided, using default root user with a generated password. Please change it after setup. Password: "+ password);
         }
         
-        var newUser = await userService.CreateUserAsync(request.Admin);
+        var newUser = await userService.CreateUserAsync(request.UserInitialSettings.Admin);
         await userService.AddRoleToUserAsync(newUser.Id.ToString(), "CoreAccess.Admin");
         
-        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "User '" + request.Admin.Username + "' created successfully.");
+        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "User '" + request.UserInitialSettings.Admin.Username + "' created successfully.");
         
-        if (string.IsNullOrWhiteSpace(request.JwtSecret))
-            request.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
+        if (string.IsNullOrWhiteSpace(request.JwtInitialSettings.JwtSecret))
+            request.JwtInitialSettings.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
         
-        appSettingsService.Set(AppSettingsKeys.JwtSecretKey, request.JwtSecret, true, true);
-        appSettingsService.Set(AppSettingsKeys.JwtIssuer, request.Issuer, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.JwtAudience, request.Audience, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.JwtExpiresIn, request.ExpiresIn, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.SystemLogLevel, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.DisableRegistration, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.JwtSecretKey, request.JwtInitialSettings.JwtSecret, true, true);
+        appSettingsService.Set(AppSettingsKeys.JwtIssuer, request.JwtInitialSettings.Issuer, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.JwtAudience, request.JwtInitialSettings.Audience, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, isSystem: true);
         
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "JWT settings configured successfully.");
 
@@ -108,7 +109,7 @@ public class InitialSetupService(
     
     private async Task SaveCompletedAsync()
     {
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "/data/etc/init_setup_completed.txt");
+        var filePath = Path.Combine(AppContext.BaseDirectory, "/data/etc/init_setup_completed.txt");
         
         if (File.Exists(filePath))
         {
@@ -125,10 +126,10 @@ public class InitialSetupService(
         await File.WriteAllTextAsync(filePath, "true");
     }
     
-    private async Task <bool> IsSetupCompletedAsync()
+    public async Task <bool> IsSetupCompletedAsync(CancellationToken cancellationToken = default)
     {
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "/data/etc/init_setup_completed.txt");
-        return (await File.ReadAllTextAsync(filePath)).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+        var filePath = Path.Combine(AppContext.BaseDirectory, "/data/etc/init_setup_completed.txt");
+        return (await File.ReadAllTextAsync(filePath, cancellationToken)).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
     }
     
     private static string Now() => DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
