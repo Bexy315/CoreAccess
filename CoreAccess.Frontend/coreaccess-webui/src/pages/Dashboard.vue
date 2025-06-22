@@ -60,7 +60,7 @@ const failedLoginsToday = 3;
 
   <div class="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
     <!-- Quick Stats -->
-    <Card class="bg-white shadow rounded-2xl p-4">
+    <Card class="bg-white shadow rounded-2xl p-4 hover:cursor-pointer hover:border-1 hover:border-gray-300" @click="() => $router.push('/users')">
       <template #title>Total Users</template>
       <template #content>
         <div v-if="loading">
