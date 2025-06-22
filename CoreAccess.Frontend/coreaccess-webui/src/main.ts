@@ -31,6 +31,15 @@ import StepPanels from 'primevue/steppanels';
 import StepItem from 'primevue/stepitem';
 import Step from 'primevue/step';
 import StepPanel from 'primevue/steppanel';
+import Checkbox from 'primevue/checkbox';
+import Tag from 'primevue/tag';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Divider from "primevue/divider";
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
 
 import CoreAccessPreset from "./assets/theme.ts";
 
@@ -70,6 +79,16 @@ app.component('StepPanels', StepPanels);
 app.component('StepItem', StepItem);
 app.component('Step', Step);
 app.component('StepPanel', StepPanel);
+app.component('Checkbox', Checkbox);
+app.component('Tag', Tag);
+app.component('DataTable', DataTable);
+app.component('Column', Column);
+app.component('Divider', Divider);
+app.component('Accordion', Accordion);
+app.component('AccordionPanel', AccordionPanel);
+app.component('AccordionHeader', AccordionHeader);
+app.component('AccordionContent', AccordionContent);
+
 app.directive('Tooltip', Tooltip);
 
 app.component('Sidebar', Sidebar);
