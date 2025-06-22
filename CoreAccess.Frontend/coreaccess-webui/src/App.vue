@@ -23,6 +23,8 @@ onMounted(async () => {
 
   if (!appStateStore.isInitiated && router.currentRoute.value.path !== '/initial-setup') {
     router.push('/initial-setup');
+  }else if(appStateStore.isInitiated && router.currentRoute.value.path === '/initial-setup') {
+    router.push('/');
   }
 
   loading.value = false;

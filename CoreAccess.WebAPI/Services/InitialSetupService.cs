@@ -80,7 +80,7 @@ public class InitialSetupService(
             {
                 Username = "root",
                 Email = "root@coreaccess.com",
-                Password = password
+                Password = password,
             };
             CoreLogger.LogSystem(CoreLogLevel.Warning, nameof(InitialSetupService), "Admin user not provided, using default root user with a generated password. Please change it after setup. Password: "+ password);
         }

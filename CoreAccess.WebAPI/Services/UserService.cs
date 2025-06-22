@@ -139,6 +139,17 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
             {
                 Username = user.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password),
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Phone = user.Phone,
+                Address = user.Address,
+                City = user.City,
+                State = user.State,
+                Zip = user.Zip,
+                Country = user.Country,
+                Status = user.Status,
+                CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
                 UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
             };
             
