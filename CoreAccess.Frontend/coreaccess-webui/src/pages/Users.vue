@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { fetchUsers } from '../services/UserService';
-import { CoreUserDto, CoreUserStatus } from "../model/CoreUserModel.ts";
+import type { CoreUserDto } from "../model/CoreUserModel.ts";
+import { CoreUserStatus } from "../model/CoreUserModel.ts";
 
 const users = ref<CoreUserDto[]>([]);
 const loading = ref(false);
