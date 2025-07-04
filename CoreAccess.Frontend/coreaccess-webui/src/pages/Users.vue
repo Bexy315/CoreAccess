@@ -3,19 +3,61 @@ import { onMounted, ref } from 'vue';
 import { fetchUsers } from '../services/UserService';
 import type { CoreUserDto } from "../model/CoreUserModel.ts";
 import { CoreUserStatus } from "../model/CoreUserModel.ts";
+import AddUserDialog from "../components/dialogs/AddUserDialog.vue";
 
 const users = ref<CoreUserDto[]>([]);
+const selectedUsers = ref<CoreUserDto[]>([]);
+const rowsPerPageOptions = ref([5, 10, 20, 50]);
+const rows = ref(10);
+const first = ref(0)
+const totalRecords = ref(0);
 const loading = ref(false);
 
-onMounted(async () => {
-  loading.value = true;
-  try {
-    const result = await fetchUsers({ page: 1, pageSize: 20 });
-    users.value = result.items;
-  } finally {
-    loading.value = false;
+const addUserDialogVisible = ref(false);
+
+const menuItems = ref([
+  {
+    label: 'New',
+    icon: 'pi pi-plus',
+    command: () => {
+      addUserDialogVisible.value = true;
+    }
+  },
+  {
+    label: 'Delete',
+    icon: 'pi pi-trash',
+    command: () => {
+      console.log("Print command executed");
+    }
   }
+]);
+
+onMounted(async () => {
+  await loadUsers(0, rows.value);
 });
+
+const loadUsers = async (page = 0, pageSize = 10) => {
+  loading.value = true
+  try {
+    const response = await fetchUsers({
+      page: page + 1,
+      pageSize: pageSize
+    })
+    users.value = response.items
+    totalRecords.value = response.totalCount
+  } catch (err) {
+    console.error('Failed to load users', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+const onPage = (event: any) => {
+  first.value = event.first
+  rows.value = event.rows
+  const page = event.page
+  loadUsers(page, event.rows)
+}
 
 function formatStatus(status: CoreUserStatus): string {
   switch (status) {
@@ -36,7 +78,11 @@ function formatStatus(status: CoreUserStatus): string {
     <h1 class="text-2xl font-bold mb-4">Benutzerverwaltung</h1>
     <p class="mb-4">Hier können Sie Benutzer verwalten.</p>
 
-    <DataTable :value="users" :loading="loading" stripedRows responsiveLayout="scroll">
+    <DataTable :value="users" :lazy="true" v-model:selection="selectedUsers" :first="first" @page="onPage" :totalRecords="totalRecords" paginator :rows="rows" :rowsPerPageOptions="rowsPerPageOptions" :loading="loading" stripedRows responsiveLayout="scroll">
+      <template #header>
+        <Menubar :model="menuItems" class="!bg-white"></Menubar>
+      </template>
+      <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column field="username" header="Benutzername" />
       <Column header="Name">
         <template #body="{ data }">
@@ -57,6 +103,12 @@ function formatStatus(status: CoreUserStatus): string {
         </template>
       </Column>
     </DataTable>
+
+    <div class="flex justify-center items-center">
+      <AddUserDialog
+          v-model:visible="addUserDialogVisible"
+      />
+    </div>
   </div>
 </template>
 

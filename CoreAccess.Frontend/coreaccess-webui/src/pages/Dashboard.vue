@@ -72,7 +72,7 @@ const failedLoginsToday = 3;
       </template>
     </Card>
 
-    <Card class="bg-white shadow rounded-2xl p-4">
+    <Card class="bg-white shadow rounded-2xl p-4 hover:cursor-pointer hover:border-1 hover:border-gray-300" @click="() => $router.push('/roles')">
       <template #title>Roles</template>
       <template #content>
         <div v-if="loading">

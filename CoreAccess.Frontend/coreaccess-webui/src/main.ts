@@ -12,9 +12,9 @@ import "vue-sidebar-menu/dist/vue-sidebar-menu.css";
 
 import './assets/tailwind.css';
 
-import Menubar from 'primevue/menubar';
 import PanelMenu from 'primevue/panelmenu';
 import Menu from 'primevue/menu';
+import Menubar from 'primevue/menubar';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import Password from "primevue/password";
@@ -41,6 +41,13 @@ import AccordionPanel from 'primevue/accordionpanel';
 import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import Select from 'primevue/select';
+import Dialog from "primevue/dialog";
+import InputNumber from 'primevue/inputnumber';
+import InputSwitch from 'primevue/toggleswitch';
+import MultiSelect from 'primevue/multiselect';
+
+
+import AddUserDialog from "./components/dialogs/AddUserDialog.vue";
 
 import CoreAccessPreset from "./assets/theme.ts";
 
@@ -62,9 +69,9 @@ app.use(ToastService);
 
 app.use(VueSidebarMenu);
 
-app.component('Menubar', Menubar);
 app.component('PanelMenu', PanelMenu);
 app.component('Menu', Menu);
+app.component('Menubar', Menubar);
 app.component('Avatar', Avatar);
 app.component('Button', Button);
 app.component('Password', Password);
@@ -90,6 +97,13 @@ app.component('AccordionPanel', AccordionPanel);
 app.component('AccordionHeader', AccordionHeader);
 app.component('AccordionContent', AccordionContent);
 app.component('Select', Select);
+app.component('Dialog', Dialog);
+app.component('InputNumber', InputNumber);
+app.component('InputSwitch', InputSwitch);
+app.component('MultiSelect', MultiSelect);
+
+
+app.component('AddUserDialog', AddUserDialog);
 
 app.directive('Tooltip', Tooltip);
 

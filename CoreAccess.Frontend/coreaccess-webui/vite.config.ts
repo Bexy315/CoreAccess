@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
     return {
         plugins: [vue()],
         server: {
+            host: true,
             port: Number(env.VITE_FRONTEND_PORT) || 5173,
         },
         base: '/',
