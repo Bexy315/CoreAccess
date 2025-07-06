@@ -23,7 +23,7 @@ if (builder.Environment.IsDevelopment())
         options.AddPolicy("DevCors", policy =>
         {
             policy
-                .WithOrigins("http://localhost:8080", "http://localhost:8081", "http://localhost:8082")
+                .WithOrigins("http://localhost:8081", "http://localhost:8080")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();

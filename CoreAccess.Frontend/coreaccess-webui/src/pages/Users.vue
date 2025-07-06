@@ -71,6 +71,11 @@ function formatStatus(status: CoreUserStatus): string {
       return 'Unbekannt';
   }
 }
+
+function addedUser(){
+  addUserDialogVisible.value = false;
+  loadUsers(first.value / rows.value, rows.value);
+}
 </script>
 
 <template>
@@ -84,7 +89,7 @@ function formatStatus(status: CoreUserStatus): string {
       </template>
       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column field="username" header="Benutzername" />
-      <Column header="Name">
+      <Column header="Name" >
         <template #body="{ data }">
           {{ data.firstName }} {{ data.lastName }}
         </template>
@@ -107,6 +112,7 @@ function formatStatus(status: CoreUserStatus): string {
     <div class="flex justify-center items-center">
       <AddUserDialog
           v-model:visible="addUserDialogVisible"
+          v-on:submit="addedUser"
       />
     </div>
   </div>

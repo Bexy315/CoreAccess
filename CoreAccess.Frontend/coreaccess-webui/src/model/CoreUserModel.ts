@@ -35,9 +35,24 @@ export interface CoreUserDto {
     state?: string;
     zip?: string;
     country?: string;
-    profilePicture?: Uint8Array; // oder `string` wenn Base64 übertragen wird
+    profilePicture?: string; // Base64 encoded string
     profilePictureContentType?: string;
     status: CoreUserStatus;
     createdAt: string; // ISO-8601
     updatedAt: string;
+}
+
+export interface CoreUserCreateRequest {
+    username: string;
+    password: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+    status: CoreUserStatus;
 }

@@ -67,8 +67,6 @@ public class CoreUserCreateRequest
     public string? Zip { get; set; }
     public string? Country { get; set; }
     public CoreUserStatus Status { get; set; } = CoreUserStatus.Active;
-    public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
-    public string UpdatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 }
 
 public class CoreUserUpdateRequest

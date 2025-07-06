@@ -49,6 +49,31 @@ public class AdminController( IUserService userService, InitialSetupService init
         }
     }
     
+    [HttpPost]
+    [Route("user")]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
+    public async Task<IActionResult> CreateUser([FromBody]CoreUserCreateRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (request == null)
+                return BadRequest("User request cannot be null.");
+            
+            var user = await userService.CreateUserAsync(request, cancellationToken);
+            return Ok(user);
+        }
+        catch(ArgumentException ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while creating user", ex);
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while creating user", ex);
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
     [HttpDelete]
     [Route("user/{userId}")]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]

@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
 import type { PagedResult } from '../model/CommonModel.ts';
-import type { CoreUserDto, CoreUserSearchOptions } from '../model/CoreUserModel.ts';
+import type {CoreUserCreateRequest, CoreUserDto, CoreUserSearchOptions} from '../model/CoreUserModel.ts';
 
 /**
  * Ruft Benutzer anhand von Suchoptionen ab (Admin-Only).
@@ -12,5 +12,10 @@ export async function fetchUsers(options: CoreUserSearchOptions): Promise<PagedR
         params: options,
     });
 
+    return response.data;
+}
+
+export async function createUser(request: CoreUserCreateRequest): Promise<CoreUserDto> {
+    const response = await apiClient.post<CoreUserDto>('/admin/user', request);
     return response.data;
 }
