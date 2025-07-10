@@ -286,6 +286,8 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         try
         {
             await userRepository.DeleteUserAsync(id, cancellationToken);
+
+            await userRepository.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {

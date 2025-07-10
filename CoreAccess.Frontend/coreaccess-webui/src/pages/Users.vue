@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { fetchUsers } from '../services/UserService';
+import {onMounted, ref, watch} from 'vue';
+import {deleteUser, fetchUsers} from '../services/UserService';
 import type { CoreUserDto } from "../model/CoreUserModel.ts";
 import { CoreUserStatus } from "../model/CoreUserModel.ts";
 import AddUserDialog from "../components/dialogs/AddUserDialog.vue";
+import {showError} from "../utils/toast.ts";
 
 const users = ref<CoreUserDto[]>([]);
 const selectedUsers = ref<CoreUserDto[]>([]);
@@ -15,6 +16,14 @@ const loading = ref(false);
 
 const addUserDialogVisible = ref(false);
 
+const menuDeleteItem = ref({
+  label: 'Delete',
+  icon: 'pi pi-trash',
+  command: async () => {
+    await deleteSelectedUsers();
+  }
+})
+
 const menuItems = ref([
   {
     label: 'New',
@@ -22,15 +31,43 @@ const menuItems = ref([
     command: () => {
       addUserDialogVisible.value = true;
     }
-  },
-  {
-    label: 'Delete',
-    icon: 'pi pi-trash',
-    command: () => {
-      console.log("Print command executed");
-    }
   }
 ]);
+
+watch(selectedUsers, () => {
+  if(selectedUsers.value.length == 1) {
+    menuItems.value.push(menuDeleteItem.value);
+  } else {
+    if(menuItems.value.includes(menuDeleteItem.value)) {
+      menuItems.value = menuItems.value.filter(item => item !== menuDeleteItem.value);
+    }
+  }
+});
+
+const deleteSelectedUsers = async () => {
+  if (selectedUsers.value.length === 0) {
+    console.warn('No users selected for deletion');
+    return;
+  }
+
+  if(selectedUsers.value.length > 1) {
+    console.warn('Multiple users selected, please delete only one at a time');
+    return;
+  }
+
+  try {
+    // Assuming deleteUsers is a function that handles the deletion of users
+    await deleteUser(selectedUsers.value[0].id).catch(error => {
+      console.error('Error deleting user:', error);
+      showError('Fehler beim Löschen des Benutzers. Bitte versuchen Sie es später erneut.');
+    });
+    selectedUsers.value = [];
+    await loadUsers(first.value / rows.value, rows.value);
+  } catch (error) {
+    console.error('Failed to delete users', error);
+    showError('Fehler beim Löschen des Benutzers. Bitte versuchen Sie es später erneut.');
+  }
+}
 
 onMounted(async () => {
   await loadUsers(0, rows.value);
@@ -65,7 +102,7 @@ function formatStatus(status: CoreUserStatus): string {
       return 'Aktiv';
     case CoreUserStatus.Inactive:
       return 'Inaktiv';
-    case CoreUserStatus.Locked:
+    case CoreUserStatus.Suspended:
       return 'Gesperrt';
     default:
       return 'Unbekannt';
@@ -83,7 +120,18 @@ function addedUser(){
     <h1 class="text-2xl font-bold mb-4">Benutzerverwaltung</h1>
     <p class="mb-4">Hier können Sie Benutzer verwalten.</p>
 
-    <DataTable :value="users" :lazy="true" v-model:selection="selectedUsers" :first="first" @page="onPage" :totalRecords="totalRecords" paginator :rows="rows" :rowsPerPageOptions="rowsPerPageOptions" :loading="loading" stripedRows responsiveLayout="scroll">
+    <DataTable :value="users"
+               :lazy="true"
+               v-model:selection="selectedUsers"
+               :first="first"
+               @page="onPage"
+               :totalRecords="totalRecords"
+               paginator
+               :rows="rows"
+               :rowsPerPageOptions="rowsPerPageOptions"
+               :loading="loading"
+               stripedRows
+               responsiveLayout="scroll">
       <template #header>
         <Menubar :model="menuItems" class="!bg-white"></Menubar>
       </template>

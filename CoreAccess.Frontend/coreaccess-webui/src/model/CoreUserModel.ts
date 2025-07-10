@@ -1,7 +1,8 @@
 export const CoreUserStatus = {
-    Active: 1,
-    Inactive: 2,
-    Locked: 3,
+    Active: 0,
+    Inactive: 1,
+    Suspended: 2,
+    Deleted: 3,
 } as const;
 
 export type CoreUserStatus = typeof CoreUserStatus[keyof typeof CoreUserStatus];

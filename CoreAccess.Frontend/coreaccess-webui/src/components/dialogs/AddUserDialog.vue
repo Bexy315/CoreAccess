@@ -4,7 +4,7 @@
       <StepList>
         <Step value="1">Basis</Step>
         <Step value="2">Metadaten</Step>
-        <Step value="3">Custom-Felder</Step>
+      <!--  <Step value="3">Custom-Felder</Step> -->
         <Step value="4">Übersicht</Step>
       </StepList>
 
@@ -59,7 +59,7 @@
           </div>
         </StepPanel>
 
-        <!-- Step 3: Custom-Felder -->
+        <!-- Step 3: Custom-Felder
         <StepPanel v-slot="{ activateCallback }" value="3">
           <div class="space-y-3">
             <div v-for="f in customFields" :key="f.key">
@@ -77,7 +77,7 @@
             <Button label="Weiter" icon="pi pi-arrow-right" @click="activateCallback('4')" />
           </div>
         </StepPanel>
-
+-->
         <!-- Step 4: Übersicht -->
         <StepPanel v-slot="{ activateCallback }" value="4">
           <div class="space-y-2">
@@ -142,7 +142,7 @@ const selectedStatus =ref({ label: 'Aktiv', value: CoreUserStatus.Active });
 const availableStatus = ref([
   { label: 'Aktiv', value: CoreUserStatus.Active },
   { label: 'Inaktiv', value: CoreUserStatus.Inactive },
-  { label: 'Gesperrt', value: CoreUserStatus.Locked }
+  { label: 'Gesperrt', value: CoreUserStatus.Suspended }
 ]);
 
 const customFields = ref<Array<{ key: string; name: string; type: string }>>([
