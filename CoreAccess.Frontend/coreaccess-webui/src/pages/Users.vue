@@ -24,6 +24,14 @@ const menuDeleteItem = ref({
   }
 })
 
+const menuEditItem = ref({
+  label: 'Edit',
+  icon: 'pi pi-pencil',
+  command: () => {
+    console.log('Edit user:', selectedUsers.value[0]);
+  }
+});
+
 const menuItems = ref([
   {
     label: 'New',
@@ -37,9 +45,10 @@ const menuItems = ref([
 watch(selectedUsers, () => {
   if(selectedUsers.value.length == 1) {
     menuItems.value.push(menuDeleteItem.value);
+    menuItems.value.push(menuEditItem.value)
   } else {
     if(menuItems.value.includes(menuDeleteItem.value)) {
-      menuItems.value = menuItems.value.filter(item => item !== menuDeleteItem.value);
+      menuItems.value = menuItems.value.filter(item => (item !== menuDeleteItem.value && item !== menuEditItem.value));
     }
   }
 });
@@ -117,8 +126,8 @@ function addedUser(){
 
 <template>
   <div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">Benutzerverwaltung</h1>
-    <p class="mb-4">Hier können Sie Benutzer verwalten.</p>
+    <h1 class="text-2xl font-bold mb-4">User Management</h1>
+    <p class="mb-4">Here you can manage users.</p>
 
     <DataTable :value="users"
                :lazy="true"
@@ -131,24 +140,26 @@ function addedUser(){
                :rowsPerPageOptions="rowsPerPageOptions"
                :loading="loading"
                stripedRows
-               responsiveLayout="scroll">
+               responsiveLayout="scroll"
+               removableSort
+    >
       <template #header>
         <Menubar :model="menuItems" class="!bg-white"></Menubar>
       </template>
       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-      <Column field="username" header="Benutzername" />
+      <Column field="username" header="Username" />
       <Column header="Name" >
         <template #body="{ data }">
           {{ data.firstName }} {{ data.lastName }}
         </template>
       </Column>
-      <Column field="email" header="E-Mail" />
+      <Column field="email" header="Email" />
       <Column header="Status">
         <template #body="{ data }">
           {{ formatStatus(data.status) }}
         </template>
       </Column>
-      <Column header="Rollen">
+      <Column header="Roles">
         <template #body="{ data }">
           <div class="flex flex-wrap gap-2">
             <Tag v-for="role in data.roles" :key="role.id" :value="role.name" severity="info" />

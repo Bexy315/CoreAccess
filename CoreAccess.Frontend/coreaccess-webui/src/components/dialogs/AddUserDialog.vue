@@ -1,101 +1,55 @@
 <template>
-  <Dialog v-model:visible="visible" modal header="Benutzer erstellen" style="width: 80%; height: 100%">
+  <Dialog v-model:visible="visible" modal header="Create User" style="width: 80%; height: 100%">
     <Stepper value="1">
       <StepList>
-        <Step value="1">Basis</Step>
-        <Step value="2">Metadaten</Step>
-      <!--  <Step value="3">Custom-Felder</Step> -->
-        <Step value="4">Übersicht</Step>
+        <Step value="1">Basic</Step>
+        <Step value="4">Overview</Step>
       </StepList>
 
       <StepPanels>
-        <!-- Step 1: Basis -->
+        <!-- Step 1: Basic -->
         <StepPanel v-slot="{ activateCallback }" value="1">
           <div>
             <span class="mb-2">Credentials:</span>
             <div class="flex flex-row gap-3 mt-2">
-              <InputText v-model="user.username" placeholder="Benutzername" />
+              <InputText v-model="user.username" placeholder="Username" />
               <Password v-model="user.password" placeholder="Password" toggleMask />
             </div>
           </div>
           <div class="mt-2 flex flex-col gap-3">
             <span class="mt-2 mb-2">Optional:</span>
-            <InputText v-model="user.email" placeholder="E-Mail" />
-            <InputText v-model="user.firstName" placeholder="Vorname" />
-            <InputText v-model="user.lastName" placeholder="Nachname" />
-            <InputText v-model="user.phone" placeholder="Telefon" />
-            <InputText v-model="user.address" placeholder="Adresse" />
-            <InputText v-model="user.city" placeholder="Stadt" />
-            <InputText v-model="user.state" placeholder="Bundesland" />
-            <InputText v-model="user.zip" placeholder="Postleitzahl" />
-            <InputText v-model="user.country" placeholder="Land" />
+            <InputText v-model="user.email" placeholder="Email" />
+            <InputText v-model="user.firstName" placeholder="First Name" />
+            <InputText v-model="user.lastName" placeholder="Last Name" />
+            <InputText v-model="user.phone" placeholder="Phone" />
+            <InputText v-model="user.address" placeholder="Address" />
+            <InputText v-model="user.city" placeholder="City" />
+            <InputText v-model="user.state" placeholder="State" />
+            <InputText v-model="user.zip" placeholder="ZIP Code" />
+            <InputText v-model="user.country" placeholder="Country" />
           </div>
           <div class="flex justify-end pt-4 absolute bottom-2 pr-12 w-full">
-            <Button label="Weiter" icon="pi pi-arrow-right" @click="activateCallback('2')" />
+            <Button label="Next" icon="pi pi-arrow-right" @click="activateCallback('4')" />
           </div>
         </StepPanel>
 
-        <!-- Step 2: Metadaten -->
-        <StepPanel v-slot="{ activateCallback }" value="2">
-          <div>
-            <MultiSelect
-                v-model="selectedRoles"
-                :options="availableRoles"
-                optionLabel="name"
-                placeholder="Rollen auswählen"
-            />
-            <div class="mt-4">
-              <Select
-                  v-model="selectedStatus"
-                  :options="availableStatus"
-                  optionLabel="label"
-                  placeholder="Status auswählen"
-              />
-            </div>
-          </div>
-          <div class="flex justify-end pt-4 absolute bottom-2 pr-12 w-full">
-            <Button class="mr-2" label="Zurück" icon="pi pi-arrow-left" @click="activateCallback('1')" />
-            <Button label="Weiter" icon="pi pi-arrow-right" @click="activateCallback('3')" />
-          </div>
-        </StepPanel>
-
-        <!-- Step 3: Custom-Felder
-        <StepPanel v-slot="{ activateCallback }" value="3">
-          <div class="space-y-3">
-            <div v-for="f in customFields" :key="f.key">
-              <label>{{ f.name }}</label>
-              <InputText v-if="f.type === 'Text' || f.type === 'Guid'" v-model="customValues[f.key]" />
-              <InputNumber v-else-if="f.type === 'Number'" v-model="customValues[f.key]" />
-              <div v-else-if="f.type === 'Boolean'" class="flex items-center">
-                <InputSwitch v-model="customValues[f.key]" />
-                <span class="ml-2">{{ f.name }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-end pt-4 absolute bottom-2 pr-12 w-full">
-            <Button class="mr-2" label="Zurück" icon="pi pi-arrow-left" @click="activateCallback('2')" />
-            <Button label="Weiter" icon="pi pi-arrow-right" @click="activateCallback('4')" />
-          </div>
-        </StepPanel>
--->
-        <!-- Step 4: Übersicht -->
+        <!-- Step 4: Overview -->
         <StepPanel v-slot="{ activateCallback }" value="4">
           <div class="space-y-2">
             <p><b>Username:</b> {{ user.username }}</p>
-            <p><b>E-Mail:</b> {{ user.email }}</p>
-            <p><b>Rollen:</b> {{ selectedRoles.map(r => r.name).join(', ') }}</p>
-            <div class="mt-2">
-              <b>Custom-Felder:</b>
-              <ul class="list-disc pl-4">
-                <li v-for="f in customFields" :key="f.key">
-                  {{ f.name }}: {{ customValues[f.key] }}
-                </li>
-              </ul>
-            </div>
+            <p><b>Email:</b> {{ user.email }}</p>
+            <p><b>First Name:</b> {{ user.firstName }}</p>
+            <p><b>Last Name:</b> {{ user.lastName }}</p>
+            <p><b>Phone:</b> {{ user.phone }}</p>
+            <p><b>Address:</b> {{ user.address }}</p>
+            <p><b>City:</b> {{ user.city }}</p>
+            <p><b>State:</b> {{ user.state }}</p>
+            <p><b>ZIP Code:</b> {{ user.zip }}</p>
+            <p><b>Country:</b> {{ user.country }}</p>
           </div>
           <div class="flex justify-end pt-4 absolute bottom-2 pr-12 w-full">
-            <Button class="mr-2" label="Zurück" icon="pi pi-arrow-left" @click="activateCallback('3')" />
-            <Button label="Erstellen" icon="pi pi-check" @click="submit()" severity="success" />
+            <Button class="mr-2" label="Back" icon="pi pi-arrow-left" @click="activateCallback('1')" />
+            <Button label="Create" icon="pi pi-check" @click="submit()" severity="success" />
           </div>
         </StepPanel>
       </StepPanels>
@@ -131,19 +85,7 @@ const user = reactive<CoreUserCreateRequest>({
 
 const selectedRoles = ref([] as CoreRole[]);
 
-const availableRoles = ref([
-  { id: '1', name: 'Admin', description: 'Administrator role', createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z', isSystem: true, permissions: [] },
-  { id: '2', name: 'Editor', description: 'Editor role', createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z', isSystem: false, permissions: [] },
-  { id: '3', name: 'Viewer', description: 'Viewer role', createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z', isSystem: false, permissions: [] }
-] as CoreRole[]);
-
 const selectedStatus =ref({ label: 'Aktiv', value: CoreUserStatus.Active });
-
-const availableStatus = ref([
-  { label: 'Aktiv', value: CoreUserStatus.Active },
-  { label: 'Inaktiv', value: CoreUserStatus.Inactive },
-  { label: 'Gesperrt', value: CoreUserStatus.Suspended }
-]);
 
 const customFields = ref<Array<{ key: string; name: string; type: string }>>([
   { key: 'department', name: 'Abteilung', type: 'Text' },
