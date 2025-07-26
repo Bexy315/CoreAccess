@@ -7,23 +7,23 @@ namespace CoreAccess.WebAPI.Services;
 
 public interface IRoleService
 {
-    Task<PagedResult<CoreRoleDto>> SearchRolesAsync(CoreRoleSearchOptions options);
-    Task<CoreRoleDto> CreateRoleAsync(CoreRoleCreateRequest request);
-    Task<CoreRoleDto> UpdateRoleAsync(string userId, CoreRoleUpdateRequest user);
+    Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options);
+    Task<RoleDto> CreateRoleAsync(RoleCreateRequest request);
+    Task<RoleDto> UpdateRoleAsync(string userId, RoleUpdateRequest user);
     Task AddPermissionToRoleAsync(string roleName, string permissionName);
     Task DeleteRoleAsync(string id);
 }
 
 public class RoleService(IRoleRepository roleRepository, IPermissionRepository permissionRepository) : IRoleService
 {
-    public async Task<PagedResult<CoreRoleDto>> SearchRolesAsync(CoreRoleSearchOptions options)
+    public async Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options)
     {
         try
         {
             var result = await roleRepository.SearchRolesAsync(options);
-            var dto = new PagedResult<CoreRoleDto>
+            var dto = new PagedResult<RoleDto>
             {
-                Items = result.Select(x => new CoreRoleDto(x)).ToList(),
+                Items = result.Select(x => new RoleDto(x)).ToList(),
                 TotalCount = result.Count,
                 Page = options.Page,
                 PageSize = options.PageSize
@@ -37,11 +37,11 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
     }
 
-    public async Task<CoreRoleDto> CreateRoleAsync(CoreRoleCreateRequest request)
+    public async Task<RoleDto> CreateRoleAsync(RoleCreateRequest request)
     {
         try
         {
-            var newRole = new CoreRole
+            var newRole = new Role
             {
                 Name = request.Name,
                 Description = request.Description,
@@ -55,7 +55,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             {
                 throw new Exception("Failed to create role");
             }
-            return new CoreRoleDto(createdRole);
+            return new RoleDto(createdRole);
         }
         catch (Exception ex)
         {
@@ -64,11 +64,11 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
     }
 
-    public async Task<CoreRoleDto> UpdateRoleAsync(string userId, CoreRoleUpdateRequest user)
+    public async Task<RoleDto> UpdateRoleAsync(string userId, RoleUpdateRequest user)
     {
         try
         {
-            var existingRole = await roleRepository.SearchRolesAsync(new CoreRoleSearchOptions()
+            var existingRole = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
             {
                 Id = userId,
                 Page = 1,
@@ -90,7 +90,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             {
                 throw new Exception("Failed to update role");
             }
-            return new CoreRoleDto(role);
+            return new RoleDto(role);
         }
         catch (Exception ex)
         {
@@ -103,7 +103,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
     {
         try
         {
-            var role = await roleRepository.SearchRolesAsync(new CoreRoleSearchOptions()
+            var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
             {
                 Name = roleName,
                 Page = 1,

@@ -5,28 +5,28 @@ namespace CoreAccess.WebAPI.Services;
 
 public interface IUserService
 {
-    Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default);
-    Task<CoreUser> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
-    Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
-    Task<CoreUser> GetCoreUserByDto(CoreUserDto dto, CancellationToken cancellationToken = default);
-    Task<CoreUser> CreateUserAsync(CoreUserCreateRequest request, CancellationToken cancellationToken = default);
-    Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default);
-    Task<CoreUser> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
-    Task<CoreUser> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
+    Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
+    Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
+    Task<User> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<User> GetCoreUserByDto(UserDto dto, CancellationToken cancellationToken = default);
+    Task<User> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
+    Task<User> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
+    Task<User> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
+    Task<User> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
-    Task<CoreUser> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
+    Task<User> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
 }
 internal class UserService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IRoleRepository roleRepository, IRoleService roleService) : IUserService
 {
-    public async Task<PagedResult<CoreUserDto>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default)
     {
         try
         {
             var result = await userRepository.SearchUsersAsync(options, cancellationToken);
-            var dto = new PagedResult<CoreUserDto>
+            var dto = new PagedResult<UserDto>
             {
-                Items = result.Select(x => new CoreUserDto(x)).ToList(),
+                Items = result.Select(x => new UserDto(x)).ToList(),
                 TotalCount = result.Count,
                 Page = options.Page,
                 PageSize = options.PageSize
@@ -40,7 +40,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId))
         {
@@ -49,7 +49,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
 
         try
         {
-            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
                 Id = userId,
                 Page = 1,
@@ -70,7 +70,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<User> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(refreshToken))
         {
@@ -81,7 +81,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         {
             var userId = await refreshTokenRepository.GetUserIdByRefreshToken(refreshToken, cancellationToken);
 
-            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
                 Id = userId,
                 Page = 1,
@@ -101,16 +101,16 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> GetCoreUserByDto(CoreUserDto dto, CancellationToken cancellationToken = default)
+    public async Task<User> GetCoreUserByDto(UserDto dto, CancellationToken cancellationToken = default)
     {
         if (dto == null)
         {
-            throw new ArgumentNullException(nameof(dto), "CoreUserDto cannot be null");
+            throw new ArgumentNullException(nameof(dto), "UserDto cannot be null");
         }
 
         try
         {
-            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
                 Id = dto.Id.ToString(),
                 Page = 1,
@@ -119,7 +119,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
             
             if (user == null)
             {
-                throw new KeyNotFoundException("User not found for the provided CoreUserDto.");
+                throw new KeyNotFoundException("User not found for the provided UserDto.");
             }
 
             return user;
@@ -131,11 +131,11 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> CreateUserAsync(CoreUserCreateRequest user, CancellationToken cancellationToken = default)
+    public async Task<User> CreateUserAsync(UserCreateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
-            var newUser = new CoreUser
+            var newUser = new User
             {
                 Username = user.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password),
@@ -168,11 +168,11 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> UpdateUserAsync(string userId, CoreUserUpdateRequest user, CancellationToken cancellationToken = default)
+    public async Task<User> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
-            var existingUser = await userRepository.SearchUsersAsync(new CoreUserSearchOptions()
+            var existingUser = await userRepository.SearchUsersAsync(new UserSearchOptions()
             {
                 Id = userId,
                 Page = 1,
@@ -214,7 +214,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default)
+    public async Task<User> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId))
         {
@@ -247,7 +247,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default)
+    public async Task<User> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleName))
         {
@@ -257,7 +257,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         try
         {
             var user = await GetUserByIdAsync(userId, cancellationToken);
-            var role = await roleRepository.SearchRolesAsync(new CoreRoleSearchOptions{
+            var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions{
                 Name = roleName,
                 Page = 1,
                 PageSize = 1
@@ -300,7 +300,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
     {
         try
         {
-            var existingUsers = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            var existingUsers = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
                 Username = username,
                 Page = 1,
@@ -315,7 +315,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<CoreUser> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default)
+    public async Task<User> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default)
     {
         if(username == null || password == null)
         {
@@ -324,7 +324,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         
         try
         {
-            var user = await userRepository.SearchUsersAsync(new CoreUserSearchOptions
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
                 Username = username,
                 Page = 1,

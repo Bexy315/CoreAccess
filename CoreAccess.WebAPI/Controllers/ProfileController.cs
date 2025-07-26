@@ -8,11 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
-[Route("api/user")]
+[Route("api/profile")]
 public class ProfileController(IUserService userService) : ControllerBase
 {
     [HttpGet]
     [Route("{userId}")]
+    [Produces(typeof(UserDto))]
     [CoreAuthorize]
     public async Task<IActionResult> GetProfile([FromRoute]string userId, CancellationToken cancellationToken = default)
     {
@@ -25,7 +26,7 @@ public class ProfileController(IUserService userService) : ControllerBase
             if (user == null)
                 return NotFound("User not found.");
             
-            return Ok(new CoreUserDto(user));
+            return Ok(new UserDto(user));
         }
         catch(ArgumentException ex)
         {
@@ -41,11 +42,15 @@ public class ProfileController(IUserService userService) : ControllerBase
     
     [HttpGet]
     [Route("{userId}/profile-picture")]
+    [Produces("image/jpeg", "image/png", "image/gif")]
     [CoreAuthorize]
     public async Task<IActionResult> GetProfilePicture([FromRoute]string userId)
     {
         try
         {
+            if(string.IsNullOrWhiteSpace(userId))
+                return BadRequest("User ID is required.");
+            
             var user = await userService.GetUserByIdAsync(userId);
             
             if(user.ProfilePicture == null || user.ProfilePicture.Length == 0)
@@ -67,15 +72,19 @@ public class ProfileController(IUserService userService) : ControllerBase
 
     [HttpPost]
     [Route("{userId}")]
+    [Produces(typeof(UserDto))]
     [CoreAuthorize]
-    public async Task<IActionResult> UpdateProfile([FromRoute]string userId, [FromBody]CoreUserUpdateRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateProfile([FromRoute]string userId, [FromBody]UserUpdateRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             if(string.IsNullOrWhiteSpace(userId))
                 return BadRequest("User ID is required.");
+
+            if(userId != User.FindFirst(claim => (claim.Type == AccessClaimType.UserId))?.Value)
+                return Forbid("You can only update your own profile.");
             
-            return Ok(new CoreUserDto(await userService.UpdateUserAsync(userId, request, cancellationToken)));
+            return Ok(new UserDto(await userService.UpdateUserAsync(userId, request, cancellationToken)));
         }
         catch(ArgumentException ex)
         {
@@ -96,6 +105,12 @@ public class ProfileController(IUserService userService) : ControllerBase
     {
         try
         {
+            if(string.IsNullOrWhiteSpace(userId))
+                return BadRequest("User ID is required.");
+            
+            if(userId != User.FindFirst(claim => (claim.Type == AccessClaimType.UserId))?.Value)
+                return Forbid("You can only update your own profile picture.");
+            
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
             

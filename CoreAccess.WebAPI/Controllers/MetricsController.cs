@@ -10,18 +10,18 @@ namespace CoreAccess.WebAPI.Controllers;
 public class MetricsController(IUserService userService, IRoleService roleService) : ControllerBase
 {
     [HttpGet]
-    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     [Route("dashboard")]
+    [Produces(typeof(DashboardMetrics))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> GetDashboardMetrics()
     {
-        var users = await userService.SearchUsersAsync(options: new CoreUserSearchOptions());
-        var roles = await roleService.SearchRolesAsync(options: new CoreRoleSearchOptions());
-        var metrics = new
-        {
-            TotalUsers = users.TotalCount,
-            TotalRoles = roles.TotalCount,
-        };
-
+        var users = await userService.SearchUsersAsync(options: new UserSearchOptions());
+        var roles = await roleService.SearchRolesAsync(options: new RoleSearchOptions());
+        
+        DashboardMetrics metrics = new ();
+        metrics.TotalUsers = users.TotalCount;
+        metrics.TotalRoles = roles.TotalCount;
+        
         return Ok(metrics);
     }
     

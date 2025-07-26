@@ -1,3 +1,4 @@
+using CoreAccess.WebAPI.Controllers;
 using CoreAccess.WebAPI.Decorator;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
@@ -8,10 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoreAccess.WebAPI.Controllers;
 [Controller]
 [Route("api/admin")]
-public class AdminController( IUserService userService, InitialSetupService initialSetupService) : ControllerBase
+public class AdminController(IUserService userService, InitialSetupService initialSetupService) : ControllerBase
 {
     [HttpGet]
     [Route("config")]
+    [Produces(typeof(bool))]
     public async Task<IActionResult> GetAppConfig(CancellationToken cancellationToken = default)
     {
         try
@@ -28,8 +30,9 @@ public class AdminController( IUserService userService, InitialSetupService init
     
     [HttpGet]
     [Route("user")]
+    [Produces(typeof(PagedResult<UserDto>))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
-    public async Task<IActionResult> GetUser([FromQuery]CoreUserSearchOptions options, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetUser([FromQuery]UserSearchOptions options, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -51,8 +54,9 @@ public class AdminController( IUserService userService, InitialSetupService init
     
     [HttpPost]
     [Route("user")]
+    [Produces(typeof(UserDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
-    public async Task<IActionResult> CreateUser([FromBody]CoreUserCreateRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CreateUser([FromBody]UserCreateRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -60,7 +64,7 @@ public class AdminController( IUserService userService, InitialSetupService init
                 return BadRequest("User request cannot be null.");
             
             var user = await userService.CreateUserAsync(request, cancellationToken);
-            return Ok(user);
+            return Ok(new UserDto(user));
         }
         catch(ArgumentException ex)
         {
@@ -70,6 +74,31 @@ public class AdminController( IUserService userService, InitialSetupService init
         catch (Exception ex)
         {
             CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while creating user", ex);
+            return StatusCode(500, ex.Message);
+        }
+    }
+    [HttpPut]
+    [Route("user/{userId}")]
+    [Produces(typeof(UserDto))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
+    public async Task<IActionResult> UpdateUser([FromRoute]string userId, [FromBody]UserUpdateRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (request == null)
+                return BadRequest("User request cannot be null.");
+            
+            var user = await userService.UpdateUserAsync(userId, request, cancellationToken);
+            return Ok(new UserDto(user));
+        }
+        catch(ArgumentException ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while updating user", ex);
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while updating user", ex);
             return StatusCode(500, ex.Message);
         }
     }
@@ -98,13 +127,14 @@ public class AdminController( IUserService userService, InitialSetupService init
         
     [HttpPost]
     [Route("user/{userId}/role/{roleName}")]
-    [CoreAuthorize]
+    [Produces(typeof(UserDto))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> AddRoleToUser([FromRoute]string userId, [FromRoute]string roleName, CancellationToken cancellationToken = default)
     {
         try
         {
-            await userService.AddRoleToUserAsync(userId, roleName, cancellationToken);
-            return Ok();
+            var user = await userService.AddRoleToUserAsync(userId, roleName, cancellationToken);
+            return Ok(new UserDto(user));
         }
         catch(ArgumentException ex)
         {

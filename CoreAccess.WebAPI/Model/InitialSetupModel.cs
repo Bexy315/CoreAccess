@@ -21,5 +21,5 @@ public class JwtInitialSetupRequest
 }
 public class UserInitialSetupRequest
 {
-    public CoreUserCreateRequest? Admin { get; set; } = new();
+    public UserCreateRequest? Admin { get; set; } = new();
 }

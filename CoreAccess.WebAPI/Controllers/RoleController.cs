@@ -10,8 +10,9 @@ namespace CoreAccess.WebAPI.Controllers;
 public class RoleController(IRoleService roleService) : ControllerBase
 {
     [HttpGet]
-    [CoreAuthorize]
-    public async Task<IActionResult> GetRoles([FromQuery] CoreRoleSearchOptions options)
+    [Produces(typeof(PagedResult<RoleDto>))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
+    public async Task<IActionResult> GetRoles([FromQuery] RoleSearchOptions options)
     {
         try
         {
@@ -31,14 +32,14 @@ public class RoleController(IRoleService roleService) : ControllerBase
     }
     
     [HttpPost]
-    [CoreAuthorize]
-    public async Task<IActionResult> CreateRole([FromBody] CoreRoleCreateRequest request)
+    [Produces(typeof(RoleDto))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
+    public async Task<IActionResult> CreateRole([FromBody] RoleCreateRequest request)
     {
         try
         {
             if(request == null)
                 return BadRequest("Role request cannot be null.");
-            
             
             var result = await roleService.CreateRoleAsync(request);
             return Ok(result);
@@ -57,14 +58,14 @@ public class RoleController(IRoleService roleService) : ControllerBase
     
     [HttpPut]
     [Route("{id}")]
-    [CoreAuthorize]
-    public async Task<IActionResult> UpdateRole(string id, [FromBody] CoreRoleUpdateRequest request)
+    [Produces(typeof(RoleDto))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
+    public async Task<IActionResult> UpdateRole(string id, [FromBody] RoleUpdateRequest request)
     {
         try
         {
             if(string.IsNullOrEmpty(id))
                 return BadRequest("Role ID cannot be null or empty.");
-            
             
             var result = await roleService.UpdateRoleAsync(id, request);
             return Ok(result);
@@ -83,7 +84,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
     
     [HttpDelete]
     [Route("{id}")]
-    [CoreAuthorize(Roles = "Admin")]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> DeleteRole(string id)
     {
         try

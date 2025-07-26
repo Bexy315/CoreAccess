@@ -6,35 +6,35 @@ namespace CoreAccess.WebAPI.Repositories;
 
 public interface IPermissionRepository
 {
-    Task<List<CorePermission>> GetAllPermissionsAsync();
-    Task<CorePermission> GetPermissionByNameAsync(string permissionName);
-    Task<CorePermission?> GetPermissionByIdAsync(Guid id);
-    Task<CorePermission> AddPermissionAsync(CreatePermissionRequest request);
+    Task<List<Permission>> GetAllPermissionsAsync();
+    Task<Permission> GetPermissionByNameAsync(string permissionName);
+    Task<Permission?> GetPermissionByIdAsync(Guid id);
+    Task<Permission> AddPermissionAsync(CreatePermissionRequest request);
     Task DeletePermissionAsync(Guid id);
     Task SaveChangesAsync();
 }
 public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepository
 {
 
-    public async Task<List<CorePermission>> GetAllPermissionsAsync()
+    public async Task<List<Permission>> GetAllPermissionsAsync()
     {
         return await context.Permissions.ToListAsync();
     }
 
-    public async Task<CorePermission> GetPermissionByNameAsync(string permissionName)
+    public async Task<Permission> GetPermissionByNameAsync(string permissionName)
     {
         return await context.Permissions.FirstOrDefaultAsync(p => p.Name == permissionName)
                ?? throw new KeyNotFoundException($"Permission '{permissionName}' not found.");
     }
 
-    public async Task<CorePermission?> GetPermissionByIdAsync(Guid id)
+    public async Task<Permission?> GetPermissionByIdAsync(Guid id)
     {
         return await context.Permissions.FindAsync(id);
     }
 
-    public async Task<CorePermission> AddPermissionAsync(CreatePermissionRequest request)
+    public async Task<Permission> AddPermissionAsync(CreatePermissionRequest request)
     {
-        var newPermission = new CorePermission
+        var newPermission = new Permission
         {
             Id = Guid.NewGuid(),
             Name = request.Name,

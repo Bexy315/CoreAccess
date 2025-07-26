@@ -2,21 +2,28 @@ using System.Text.Json.Serialization;
 
 namespace CoreAccess.WebAPI.Model;
 
-public class CoreLoginRequest
+public class LoginRequest
 {
     public string Username { get; set; } = null!;
     public string Password { get; set; } = null!;
     public string LoginIp { get; set; } = "0.0.0.0";
 }
 
+public class LoginResponse
+{
+    public string AccessToken { get; set; } = null!;
+    public string RefreshToken { get; set; } = null!;
+    public Guid UserId { get; set; }
+}
 
-public class CoreRegisterRequest
+
+public class RegisterRequest
 {
     public string Username { get; set; } = "";
     public string Password { get; set; } = "";
 }
 
-public class CoreRefreshTokenRequest
+public class RefreshTokenRequest
 {
     public string RefreshToken { get; set; } = null!;
     public string LoginIp { get; set; } = "0.0.0.0";
@@ -36,7 +43,7 @@ public class RefreshToken
     
     public Guid CoreUserId { get; set; }
     [JsonIgnore]
-    public CoreUser CoreUser { get; set; } = null!;
+    public User User { get; set; } = null!;
 }
 
 public class RefreshTokenResponse
@@ -46,7 +53,7 @@ public class RefreshTokenResponse
     public Guid UserId { get; set; }
 }
 
-public static class CoreAccessClaimType
+public static class AccessClaimType
 {
     public const string UserId = "coreaccess:user_id";
     public const string UserName = "coreaccess:username";

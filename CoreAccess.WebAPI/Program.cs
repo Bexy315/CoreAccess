@@ -3,13 +3,9 @@ using CoreAccess.WebAPI.Repositories;
 using CoreAccess.WebAPI.Services;
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Sinks;
 using CoreAccess.WebAPI.Middleware;
-using CoreAccess.WebAPI.Services.CoreAuth;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -107,7 +103,7 @@ builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 #region Services
 
 builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
-builder.Services.AddScoped<ICoreAccessTokenService, CoreAccessTokenService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 

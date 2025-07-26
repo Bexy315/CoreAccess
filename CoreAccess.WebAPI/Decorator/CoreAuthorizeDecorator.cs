@@ -1,6 +1,4 @@
-using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
-using CoreAccess.WebAPI.Services.CoreAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -24,7 +22,7 @@ public class CoreAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
             return Task.CompletedTask;
         }
         
-        var tokenService = httpContext.RequestServices.GetService<ICoreAccessTokenService>();
+        var tokenService = httpContext.RequestServices.GetService<ITokenService>();
 
         var claimsPrincipal = tokenService.ValidateToken(token);
         

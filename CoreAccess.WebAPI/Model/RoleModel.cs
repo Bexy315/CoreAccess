@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace CoreAccess.WebAPI.Model;
 
-public class CoreRole
+public class Role
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "";
@@ -10,12 +10,12 @@ public class CoreRole
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string UpdatedAt { get; set; } = "";
     public bool IsSystem { get; set; } = false;
-    public List<CorePermission> Permissions { get; set; } = new();
+    public List<Permission> Permissions { get; set; } = new();
     [JsonIgnore]
-    public List<CoreUser> Users { get; set; } = new();
+    public List<User> Users { get; set; } = new();
 }
 
-public class CoreRoleDto(CoreRole src)
+public class RoleDto(Role src)
 {
     public Guid Id { get; set; } = src.Id;
     public string Name { get; set; } = src.Name;
@@ -24,17 +24,17 @@ public class CoreRoleDto(CoreRole src)
     public string UpdatedAt { get; set; } = src.UpdatedAt;
     public bool IsSystem { get; set; } = src.IsSystem;
 }
-public class CoreRoleCreateRequest
+public class RoleCreateRequest
 {
     public string Name { get; set; } = "";
     public string? Description { get; set; }
 }
-public class CoreRoleUpdateRequest
+public class RoleUpdateRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }
 }
-public class CoreRoleSearchOptions
+public class RoleSearchOptions
 {
     public string? Search { get; set; }
     public string? Id { get; set; }

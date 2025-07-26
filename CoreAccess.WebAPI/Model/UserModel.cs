@@ -1,6 +1,6 @@
 namespace CoreAccess.WebAPI.Model;
 
-public enum CoreUserStatus
+public enum UserStatus
 {
     Active,
     Inactive,
@@ -8,7 +8,7 @@ public enum CoreUserStatus
     Deleted
 }
 
-public class CoreUser
+public class User
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Username { get; set; } = "";
@@ -23,16 +23,16 @@ public class CoreUser
     public string? Country { get; set; }
     public byte[]? ProfilePicture { get; set; } 
     public string? ProfilePictureContentType { get; set; }
-    public CoreUserStatus Status { get; set; } = CoreUserStatus.Active;
+    public UserStatus Status { get; set; } = UserStatus.Active;
     public bool IsSystem { get; set; } = false;
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string UpdatedAt { get; set; } = "";
     public string PasswordHash { get; set; } = "";
-    public List<CoreRole> Roles { get; set; } = new();
+    public List<Role> Roles { get; set; } = new();
     public List<RefreshToken>? RefreshTokens { get; set; } = null;
 }
 
-public class CoreUserDto(CoreUser src)
+public class UserDto(User src)
 {
     public Guid Id { get; set; } = src.Id;
     public string Username { get; set; } = src.Username;
@@ -47,13 +47,13 @@ public class CoreUserDto(CoreUser src)
     public string? Country { get; set; } = src.Country;
     public byte[]? ProfilePicture { get; set; } = src.ProfilePicture;
     public string? ProfilePictureContentType { get; set; } = src.ProfilePictureContentType;
-    public CoreUserStatus Status { get; set; } = src.Status;
+    public UserStatus Status { get; set; } = src.Status;
     public string CreatedAt { get; set; } = src.CreatedAt;
     public string UpdatedAt { get; set; } = src.UpdatedAt;
-    public List<CoreRole> Roles { get; set; } = src.Roles;
+    public List<Role> Roles { get; set; } = src.Roles;
 }
 
-public class CoreUserCreateRequest
+public class UserCreateRequest
 {
     public string Username { get; set; } = "";
     public string Password { get; set; } = "";
@@ -66,10 +66,10 @@ public class CoreUserCreateRequest
     public string? State { get; set; }
     public string? Zip { get; set; }
     public string? Country { get; set; }
-    public CoreUserStatus Status { get; set; } = CoreUserStatus.Active;
+    public UserStatus Status { get; set; } = UserStatus.Active;
 }
 
-public class CoreUserUpdateRequest
+public class UserUpdateRequest
 {
     public string? Username { get; set; }
     public string? Email { get; set; }
@@ -81,12 +81,13 @@ public class CoreUserUpdateRequest
     public string? State { get; set; }
     public string? Zip { get; set; }
     public string? Country { get; set; }
-    public CoreUserStatus? Status { get; set; }
+    public UserStatus? Status { get; set; }
+    //TODO: Remove RefreshTokens and UpdatedAt
     public string? UpdatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public List<RefreshToken>? RefreshTokens { get; set; } = null;
 }
 
-public class CoreUserSearchOptions
+public class UserSearchOptions
 {
     public string? Search { get; set; } = "";
     public string? Id { get; set; }
@@ -99,7 +100,7 @@ public class CoreUserSearchOptions
     public string? State { get; set; }
     public string? Zip { get; set; }
     public string? Country { get; set; }
-    public CoreUserStatus? Status { get; set; }
+    public UserStatus? Status { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 }

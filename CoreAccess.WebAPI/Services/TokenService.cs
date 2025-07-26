@@ -5,27 +5,27 @@ using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Repositories;
 using Microsoft.IdentityModel.Tokens;
 
-namespace CoreAccess.WebAPI.Services.CoreAuth;
+namespace CoreAccess.WebAPI.Services;
 
-public interface ICoreAccessTokenService
+public interface ITokenService
 {
-    string GenerateAccessToken(CoreUser user, string scope = "default", CancellationToken cancellationToken = default);
+    string GenerateAccessToken(User user, string scope = "default", CancellationToken cancellationToken = default);
 
-    Task<RefreshTokenResponse> RefreshTokenAsync(CoreRefreshTokenRequest request, CancellationToken cancellationToken = default);
-    Task<RefreshToken> GenerateRefreshTokenAsync(CoreUser user, string createdByIp, CancellationToken cancellationToken = default);
+    Task<RefreshTokenResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default);
+    Task<RefreshToken> GenerateRefreshTokenAsync(User user, string createdByIp, CancellationToken cancellationToken = default);
     Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default);
     Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default);
-    Task<CoreUser> ValidateRefreshToken(string token, CancellationToken cancellationToken = default);
+    Task<User> ValidateRefreshToken(string token, CancellationToken cancellationToken = default);
     ClaimsPrincipal? ValidateToken(string token);
     public Claim GetClaim(ClaimsPrincipal principal, string claimType);
 }
-public class CoreAccessTokenService(
+public class TokenService(
     IAppSettingsService appSettingsService,
     IUserService userService,
     IRefreshTokenRepository refreshTokenRepository)
-    : ICoreAccessTokenService
+    : ITokenService
 {
-    public string GenerateAccessToken(CoreUser user, string scope = "default", CancellationToken cancellationToken = default)
+    public string GenerateAccessToken(User user, string scope = "default", CancellationToken cancellationToken = default)
     {
         if (!appSettingsService.TryGet(AppSettingsKeys.JwtSecretKey, out string? secret, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT Secret is not set in AppSettings.");
@@ -35,9 +35,9 @@ public class CoreAccessTokenService(
 
         var claims = new List<Claim>
         {
-            new(CoreAccessClaimType.UserId, user.Id.ToString()),
-            new(CoreAccessClaimType.UserName, user.Username),
-            new(CoreAccessClaimType.TokenId, Guid.NewGuid().ToString())
+            new(AccessClaimType.UserId, user.Id.ToString()),
+            new(AccessClaimType.UserName, user.Username),
+            new(AccessClaimType.TokenId, Guid.NewGuid().ToString())
         };
 
         string roles = "";
@@ -47,7 +47,7 @@ public class CoreAccessTokenService(
             roles += $"{role.Name},";
         }
         
-        claims.Add(new Claim(CoreAccessClaimType.Roles, roles));
+        claims.Add(new Claim(AccessClaimType.Roles, roles));
         
         if (!appSettingsService.TryGet(AppSettingsKeys.JwtIssuer, out string? issuer, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT Issuer is not set in AppSettings.");
@@ -69,7 +69,7 @@ public class CoreAccessTokenService(
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public async Task<RefreshTokenResponse> RefreshTokenAsync(CoreRefreshTokenRequest request, CancellationToken cancellationToken = default)
+    public async Task<RefreshTokenResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         var user = await ValidateRefreshToken(request.RefreshToken, cancellationToken);
         
@@ -87,7 +87,7 @@ public class CoreAccessTokenService(
         };
     }
 
-    public async Task<RefreshToken> GenerateRefreshTokenAsync(CoreUser user, string createdByIp, CancellationToken cancellationToken = default)
+    public async Task<RefreshToken> GenerateRefreshTokenAsync(User user, string createdByIp, CancellationToken cancellationToken = default)
     {
         var refreshToken = new RefreshToken
         {
@@ -95,7 +95,7 @@ public class CoreAccessTokenService(
             Expires = DateTime.UtcNow.AddDays(7),
             Created = DateTime.UtcNow,
             CreatedByIp = createdByIp,
-            CoreUser = user
+            User = user
         };
         
         await refreshTokenRepository.UpdateOrInsertRefreshTokenAsync(refreshToken, cancellationToken);
@@ -110,7 +110,7 @@ public class CoreAccessTokenService(
 
         var groupedTokens = allTokens
             .Where(t => !t.IsActive)
-            .GroupBy(t => t.CoreUser.Id);
+            .GroupBy(t => t.User.Id);
 
         foreach (var group in groupedTokens)
         {
@@ -140,7 +140,7 @@ public class CoreAccessTokenService(
         await refreshTokenRepository.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<CoreUser> ValidateRefreshToken(string token, CancellationToken cancellationToken = default)
+    public async Task<User> ValidateRefreshToken(string token, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(token))
             throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");

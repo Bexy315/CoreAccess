@@ -7,9 +7,9 @@ namespace CoreAccess.WebAPI.DbContext;
 
 public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) : Microsoft.EntityFrameworkCore.DbContext(options)
 {
-    public DbSet<CoreUser> Users { get; set; }
-    public DbSet<CoreRole> Roles { get; set; }
-    public DbSet<CorePermission> Permissions { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
     public DbSet<AppSetting> AppSettings { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
@@ -19,8 +19,8 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
 
     var isSqlite = Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
 
-    #region CoreUser
-    var userBuilder = modelBuilder.Entity<CoreUser>();
+    #region User
+    var userBuilder = modelBuilder.Entity<User>();
 
     userBuilder.HasKey(u => u.Id);
     if (isSqlite) ConfigureGuidAsBlob(userBuilder, u => u.Id);
@@ -39,8 +39,8 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
         .WithMany(r => r.Users)
         .UsingEntity<Dictionary<string, object>>(
             "UserRoles",
-            j => j.HasOne<CoreRole>().WithMany().HasForeignKey("RoleId"),
-            j => j.HasOne<CoreUser>().WithMany().HasForeignKey("UserId"),
+            j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
+            j => j.HasOne<User>().WithMany().HasForeignKey("UserId"),
             j =>
             {
                 j.ToTable("UserRoles");
@@ -49,7 +49,7 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
             });
 
     userBuilder.HasMany(u => u.RefreshTokens)
-        .WithOne(rt => rt.CoreUser)
+        .WithOne(rt => rt.User)
         .HasForeignKey(rt => rt.CoreUserId)
         .OnDelete(DeleteBehavior.Restrict);
 
@@ -69,16 +69,16 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     }
     #endregion
 
-    #region CoreRole
-    var roleBuilder = modelBuilder.Entity<CoreRole>();
+    #region Role
+    var roleBuilder = modelBuilder.Entity<Role>();
     roleBuilder.HasKey(r => r.Id);
 
     roleBuilder.HasMany(r => r.Permissions)
         .WithMany(p => p.Roles)
         .UsingEntity<Dictionary<string, object>>(
             "RolePermissions",
-            j => j.HasOne<CorePermission>().WithMany().HasForeignKey("PermissionId"),
-            j => j.HasOne<CoreRole>().WithMany().HasForeignKey("RoleId"),
+            j => j.HasOne<Permission>().WithMany().HasForeignKey("PermissionId"),
+            j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
             j =>
             {
                 j.ToTable("RolePermissions");
@@ -89,8 +89,8 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     if (isSqlite) ConfigureGuidAsBlob(roleBuilder, r => r.Id);
     #endregion
 
-    #region CorePermission
-    var permissionBuilder = modelBuilder.Entity<CorePermission>();
+    #region Permission
+    var permissionBuilder = modelBuilder.Entity<Permission>();
     permissionBuilder.HasKey(p => p.Id);
     #endregion
 
@@ -125,7 +125,7 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
 
     private void PreventSystemDeletes()
     {
-        var deletedUsers = ChangeTracker.Entries<CoreUser>()
+        var deletedUsers = ChangeTracker.Entries<User>()
             .Where(e => e.State == EntityState.Deleted && e.Entity.IsSystem)
             .ToList();
 

@@ -1,20 +1,17 @@
-using CoreAccess.WebAPI.Decorator;
-using CoreAccess.WebAPI.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
-using CoreAccess.WebAPI.Services.CoreAuth;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
 [Route("api/auth")]
-public class CoreAuthController(IAppSettingsService appSettingsService, IUserService userService, ICoreAccessTokenService tokenService) : ControllerBase
+public class AuthController(IAppSettingsService appSettingsService, IUserService userService, ITokenService tokenService) : ControllerBase
 {
     
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] CoreLoginRequest dto, CancellationToken cancellationToken = default)
+    [Produces(typeof(LoginResponse))]
+    public async Task<IActionResult> Login([FromBody] LoginRequest dto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -24,11 +21,11 @@ public class CoreAuthController(IAppSettingsService appSettingsService, IUserSer
             var accessToken = tokenService.GenerateAccessToken(user, cancellationToken: cancellationToken);
             var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
 
-            return Ok(new
+            return Ok(new LoginResponse()
             {
-                access_token = accessToken,
-                refresh_token = refreshToken.Token,
-                userId = user.Id
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+                UserId = user.Id
             });
         }
         catch (ArgumentException ex)
@@ -46,7 +43,7 @@ public class CoreAuthController(IAppSettingsService appSettingsService, IUserSer
     }
     
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> Refresh([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -68,7 +65,7 @@ public class CoreAuthController(IAppSettingsService appSettingsService, IUserSer
     }
     
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] CoreRefreshTokenRequest dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest dto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -88,7 +85,8 @@ public class CoreAuthController(IAppSettingsService appSettingsService, IUserSer
     }
     
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] CoreRegisterRequest dto, CancellationToken cancellationToken = default)
+    [Produces(typeof(UserDto))]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest dto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -98,8 +96,8 @@ public class CoreAuthController(IAppSettingsService appSettingsService, IUserSer
             if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
                 return BadRequest("Username already exists.");
 
-            var user = await userService.CreateUserAsync(new CoreUserCreateRequest(){Password = dto.Password, Username = dto.Username}, cancellationToken);
-            return Ok(user.Id);
+            var user = await userService.CreateUserAsync(new UserCreateRequest(){Password = dto.Password, Username = dto.Username}, cancellationToken);
+            return Ok(new UserDto(user));
         }
         catch (ArgumentException ex)
         {

@@ -1,5 +1,5 @@
 using CoreAccess.WebAPI.DbContext;
-using CoreAccess.WebAPI.Helpers;
+using CoreAccess.WebAPI.Decorator;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
 using CoreAccess.WebAPI.Model;
@@ -14,35 +14,46 @@ namespace CoreAccess.WebAPI.Controllers;
 public class SystemController(IAppSettingsService appSettingsService, CoreAccessDbContext db) : ControllerBase
 {
     [HttpGet("health")]
+    [Produces(typeof(HealthCheckResponse))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> GetHealth()
     {
-        var result = new Dictionary<string, object>();
+        HealthCheckResponse healthResponse = new();
 
         try
         {
             await db.Database.ExecuteSqlRawAsync("SELECT 1");
-            result["Database"] = "OK";
+            healthResponse.Checks["Database"] = "OK";
         }
         catch (Exception ex)
         {
-            result["Database"] = $"ERROR: {ex.Message}";
+            healthResponse.Checks["Database"] = $"ERROR: {ex.Message}";
         }
 
         var tokenKey = appSettingsService.Get(AppSettingsKeys.JwtSecretKey, decryptIfNeeded: true);
-        result["JwtSecretKey"] = string.IsNullOrWhiteSpace(tokenKey) ? "MISSING" : "OK";
+        healthResponse.Checks["JwtSecretKey"] = string.IsNullOrWhiteSpace(tokenKey) ? "MISSING" : "OK";
 
-        var overallStatus = result.All(kv => kv.Value?.ToString() == "OK") ? "Healthy" : "Unhealthy";
-
-        return Ok(new
+        healthResponse.Status = healthResponse.Checks.All(kv => kv.Value?.ToString() == "OK") ? "Healthy" : "Unhealthy";
+        
+        if (healthResponse.Status == "Unhealthy")
         {
-            Status = overallStatus,
-            Uptime = Environment.TickCount64 / 1000,
-            Checks = result
-        });
+            CoreLogger.LogSystem(CoreLogLevel.Warning, nameof(SystemController), "System health check failed", 
+                new Exception("One or more checks failed"));
+        }
+        else
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Information, nameof(SystemController), "System health check passed.");
+        }
+        
+        healthResponse.Timestamp = DateTime.UtcNow;
+        healthResponse.Uptime = Environment.TickCount / 1000; // Convert milliseconds to seconds
+
+        return Ok(healthResponse);
     }
     
     [HttpGet]
     [Route("start-debug")]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task <IActionResult> StartDebug(CancellationToken cancellationToken = default)
     {
         try
@@ -63,12 +74,5 @@ public class SystemController(IAppSettingsService appSettingsService, CoreAccess
             Console.WriteLine(ex);
             return StatusCode(500, ex.Message);
         }
-    }
-    
-    [HttpGet]
-    [Route("ping")]
-    public IActionResult Ping()
-    {
-        return Ok("Pong");
     }
 }

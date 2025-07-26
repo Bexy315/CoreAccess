@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace CoreAccess.WebAPI.Model;
 
-public class CorePermission
+public class Permission
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "";
@@ -11,7 +11,7 @@ public class CorePermission
     public string UpdatedAt { get; set; } = "";
     public bool IsSystem { get; set; } = false;
     [JsonIgnore]
-    public List<CoreRole> Roles { get; set; } = new();
+    public List<Role> Roles { get; set; } = new();
 }
 
 public class CreatePermissionRequest

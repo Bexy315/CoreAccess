@@ -1,4 +1,3 @@
-using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
 
 namespace CoreAccess.WebAPI.Middleware;

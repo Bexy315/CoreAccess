@@ -35,7 +35,7 @@ public class InitialSetupService(
         
         appSettingsService.Set(AppSettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri);
 
-        var adminRole = await roleService.CreateRoleAsync(new CoreRoleCreateRequest()
+        var adminRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
             Name = "CoreAccess.Admin",
             Description = "CoreAccess Admin role for administrative access to CoreAccess"
@@ -44,7 +44,7 @@ public class InitialSetupService(
         appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, isSystem: true);
         appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, isSystem: true);
         
-        await roleService.CreateRoleAsync(new CoreRoleCreateRequest()
+        await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
             Name = "User",
             Description = "User role for default users"
@@ -76,7 +76,7 @@ public class InitialSetupService(
         if (request.UserInitialSettings.Admin == null)
         {
             string password = SecureKeyHelper.GenerateSecurePassword();
-            request.UserInitialSettings.Admin = new CoreUserCreateRequest
+            request.UserInitialSettings.Admin = new UserCreateRequest
             {
                 Username = "root",
                 Email = "root@coreaccess.com",

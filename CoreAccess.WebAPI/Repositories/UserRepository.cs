@@ -6,14 +6,14 @@ namespace CoreAccess.WebAPI.Repositories;
 
 public interface IUserRepository
 {
-    public Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default);
-    public Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user, CancellationToken cancellationToken = default);
+    public Task<List<User>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<User> InsertOrUpdateUserAsync(User user, CancellationToken cancellationToken = default);
     public Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 public class UserRepository(CoreAccessDbContext context) : IUserRepository
 {
-    public async Task<List<CoreUser>> SearchUsersAsync(CoreUserSearchOptions options, CancellationToken cancellationToken = default)
+    public async Task<List<User>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default)
     {
         var users = await context.Users.Include(u => u.Roles).ToListAsync(cancellationToken);
             
@@ -88,13 +88,13 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
         
         return result;
     }
-    public async Task<CoreUser> InsertOrUpdateUserAsync(CoreUser user, CancellationToken cancellationToken = default)
+    public async Task<User> InsertOrUpdateUserAsync(User user, CancellationToken cancellationToken = default)
     {
-        var existingUser = await context.Set<CoreUser>().FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+        var existingUser = await context.Set<User>().FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
         
         if (existingUser == null)
         {
-            await context.Set<CoreUser>().AddAsync(user, cancellationToken);
+            await context.Set<User>().AddAsync(user, cancellationToken);
             return user;
         }
 

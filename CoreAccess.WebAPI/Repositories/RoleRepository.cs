@@ -6,15 +6,15 @@ namespace CoreAccess.WebAPI.Repositories;
 
 public interface IRoleRepository
 {
-    public Task<List<CoreRole>> SearchRolesAsync(CoreRoleSearchOptions options, CancellationToken cancellationToken = default);
-    public Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole user, CancellationToken cancellationToken = default);
+    public Task<List<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<Role> InsertOrUpdateRoleAsync(Role user, CancellationToken cancellationToken = default);
     public Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default);
     public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
 public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
 {
-    public async Task<List<CoreRole>> SearchRolesAsync(CoreRoleSearchOptions options, CancellationToken cancellationToken = default)
+    public async Task<List<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default)
     {
         var users = await context.Roles.ToListAsync(cancellationToken);
         
@@ -53,13 +53,13 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         return result;
     }
 
-    public async Task<CoreRole> InsertOrUpdateRoleAsync(CoreRole role, CancellationToken cancellationToken = default)
+    public async Task<Role> InsertOrUpdateRoleAsync(Role role, CancellationToken cancellationToken = default)
     {
-        var existingRole = await context.Set<CoreRole>().FirstOrDefaultAsync(r => r.Id == role.Id, cancellationToken);
+        var existingRole = await context.Set<Role>().FirstOrDefaultAsync(r => r.Id == role.Id, cancellationToken);
         
         if (existingRole == null)
         {
-            context.Set<CoreRole>().Add(role);
+            context.Set<Role>().Add(role);
         }
         else
         {

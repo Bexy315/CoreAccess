@@ -57,3 +57,21 @@ export interface CoreUserCreateRequest {
     country?: string;
     status: CoreUserStatus;
 }
+
+export interface CoreUserUpdateRequest {
+    username?: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+    status?: CoreUserStatus;
+
+    // Diese beiden Felder sind laut TODO bald unnötig – trotzdem für jetzt enthalten:
+    updatedAt?: string; // im Format "yyyy-MM-dd HH:mm:ss"
+    refreshTokens?: any[] | null; // Typ `RefreshToken` ggf. definieren, aber laut TODO bald weg
+}
