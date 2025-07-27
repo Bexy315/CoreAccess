@@ -5,7 +5,6 @@ import type { CoreUserDto } from "../model/CoreUserModel.ts";
 import { CoreUserStatus } from "../model/CoreUserModel.ts";
 import AddUserDialog from "../components/dialogs/AddUserDialog.vue";
 import {showError} from "../utils/toast.ts";
-import EditUserDialog from "../components/dialogs/EditUserDialog.vue";
 
 const users = ref<CoreUserDto[]>([]);
 const selectedUsers = ref<CoreUserDto[]>([]);
@@ -174,9 +173,6 @@ function addedUser(){
           v-model:visible="addUserDialogVisible"
           v-on:submit="addedUser"
       />
-      <EditUserDialog user="selectedUsers[0]"
-                      v-model:visible="selectedUsers.length === 1"
-                      v-on:submit="loadUsers(first.value / rows.value, rows.value)"
     </div>
   </div>
 </template>

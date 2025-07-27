@@ -73,12 +73,12 @@ class CoreAuth {
 
             const data = response.data;
 
-            if (!data?.access_token || !data?.refresh_token) {
-                throw new Error('Invalid response: tokens missing');
+            if (!data?.accessToken || !data?.refreshToken) {
+                throw new Error('Invalid response: tokens missing from server');
             }
 
-            this.tokenStorage.setTokens(data.access_token, data.refresh_token);
-            this.user = response.userId;
+            this.tokenStorage.setTokens(data.accessToken, data.refreshToken);
+            this.user = response.data.userId;
             localStorage.setItem('coreaccess_userId', this.user);
             this.isAuthenticated = true;
 

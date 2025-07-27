@@ -32,7 +32,7 @@ const userInitialSettings = ref({
     state: '',
     zip: '',
     country: '',
-    status: 1
+    status: 0
   }
 })
 

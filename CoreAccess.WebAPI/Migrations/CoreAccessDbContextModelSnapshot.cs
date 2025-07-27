@@ -76,6 +76,46 @@ namespace CoreAccess.WebAPI.Migrations
                     b.ToTable("Permissions", "coreaccess");
                 });
 
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.RefreshToken", b =>
+                {
+                    b.Property<byte[]>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BLOB");
+
+                    b.Property<byte[]>("CoreUserId")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedByIp")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Revoked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RevokedByIp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CoreUserId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("RefreshTokens", "coreaccess");
+                });
+
             modelBuilder.Entity("CoreAccess.WebAPI.Model.Role", b =>
                 {
                     b.Property<byte[]>("Id")
@@ -174,46 +214,6 @@ namespace CoreAccess.WebAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("Users", "coreaccess");
-                });
-
-            modelBuilder.Entity("CoreAccess.WebAPI.Model.RefreshToken", b =>
-                {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("CoreUserId")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByIp")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Expires")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("Revoked")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RevokedByIp")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CoreUserId");
-
-                    b.HasIndex("Token")
-                        .IsUnique();
-
-                    b.ToTable("RefreshTokens", "coreaccess");
                 });
 
             modelBuilder.Entity("RolePermissions", b =>

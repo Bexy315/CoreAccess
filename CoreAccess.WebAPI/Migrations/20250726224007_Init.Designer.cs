@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoreAccess.WebAPI.Migrations
 {
     [DbContext(typeof(CoreAccessDbContext))]
-    [Migration("20250611223357_Init")]
+    [Migration("20250726224007_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -50,7 +50,7 @@ namespace CoreAccess.WebAPI.Migrations
                     b.ToTable("AppSettings", "coreaccess");
                 });
 
-            modelBuilder.Entity("CoreAccess.WebAPI.Model.CorePermission", b =>
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.Permission", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -79,7 +79,47 @@ namespace CoreAccess.WebAPI.Migrations
                     b.ToTable("Permissions", "coreaccess");
                 });
 
-            modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreRole", b =>
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.RefreshToken", b =>
+                {
+                    b.Property<byte[]>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BLOB");
+
+                    b.Property<byte[]>("CoreUserId")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedByIp")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Revoked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RevokedByIp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CoreUserId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("RefreshTokens", "coreaccess");
+                });
+
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.Role", b =>
                 {
                     b.Property<byte[]>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,7 +148,7 @@ namespace CoreAccess.WebAPI.Migrations
                     b.ToTable("Roles", "coreaccess");
                 });
 
-            modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreUser", b =>
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.User", b =>
                 {
                     b.Property<byte[]>("Id")
                         .ValueGeneratedOnAdd()
@@ -179,46 +219,6 @@ namespace CoreAccess.WebAPI.Migrations
                     b.ToTable("Users", "coreaccess");
                 });
 
-            modelBuilder.Entity("CoreAccess.WebAPI.Model.RefreshToken", b =>
-                {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("CoreUserId")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByIp")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Expires")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("Revoked")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RevokedByIp")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CoreUserId");
-
-                    b.HasIndex("Token")
-                        .IsUnique();
-
-                    b.ToTable("RefreshTokens", "coreaccess");
-                });
-
             modelBuilder.Entity("RolePermissions", b =>
                 {
                     b.Property<byte[]>("RoleId")
@@ -251,24 +251,24 @@ namespace CoreAccess.WebAPI.Migrations
 
             modelBuilder.Entity("CoreAccess.WebAPI.Model.RefreshToken", b =>
                 {
-                    b.HasOne("CoreAccess.WebAPI.Model.CoreUser", "CoreUser")
+                    b.HasOne("CoreAccess.WebAPI.Model.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("CoreUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("CoreUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RolePermissions", b =>
                 {
-                    b.HasOne("CoreAccess.WebAPI.Model.CorePermission", null)
+                    b.HasOne("CoreAccess.WebAPI.Model.Permission", null)
                         .WithMany()
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CoreAccess.WebAPI.Model.CoreRole", null)
+                    b.HasOne("CoreAccess.WebAPI.Model.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -277,20 +277,20 @@ namespace CoreAccess.WebAPI.Migrations
 
             modelBuilder.Entity("UserRoles", b =>
                 {
-                    b.HasOne("CoreAccess.WebAPI.Model.CoreRole", null)
+                    b.HasOne("CoreAccess.WebAPI.Model.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CoreAccess.WebAPI.Model.CoreUser", null)
+                    b.HasOne("CoreAccess.WebAPI.Model.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CoreAccess.WebAPI.Model.CoreUser", b =>
+            modelBuilder.Entity("CoreAccess.WebAPI.Model.User", b =>
                 {
                     b.Navigation("RefreshTokens");
                 });

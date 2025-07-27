@@ -1,7 +1,6 @@
 {
   "name": "coreaccess-webui",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@coreaccess/client": "^0.0.5",
+    "@coreaccess/client": "^0.0.7",
     "@primeuix/themes": "^1.1.1",
     "@primevue/forms": "^4.3.4",
     "@primevue/themes": "^4.3.4",

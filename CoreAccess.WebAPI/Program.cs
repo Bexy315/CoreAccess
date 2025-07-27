@@ -111,30 +111,6 @@ builder.Services.AddScoped<InitialSetupService>();
 
 #endregion
 
-#region Auth
-/**
-var jwtSecret = Environment.GetEnvironmentVariable("COREACCESS_JWT_SECRET") ?? "default_secret_key_change_me";
-var key = Encoding.ASCII.GetBytes(jwtSecret);
-
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.RequireHttpsMetadata = false; // Set to true in production!
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    });
-**/
-#endregion 
 
 var app = builder.Build();
 
