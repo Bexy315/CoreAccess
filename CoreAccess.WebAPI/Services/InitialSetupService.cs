@@ -52,14 +52,14 @@ public class InitialSetupService(
         
         var permissions = new List<CreatePermissionRequest>
         {
-            new() { Name = "user.read", Description = "Read users" },
-            new() { Name = "user.write", Description = "Create/update/delete users" },
-            new() { Name = "role.read", Description = "Read roles" },
-            new() { Name = "role.write", Description = "Create/update/delete roles" },
-            new() { Name = "permission.read", Description = "Read permissions" },
-            new() { Name = "permission.write", Description = "Manage permissions" },
-            new() { Name = "settings.read", Description = "Read system settings" },
-            new() { Name = "settings.write", Description = "Update system settings" }
+            new() { Name = "user.read", Description = "Read users", IsSystem = true },
+            new() { Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
+            new() { Name = "role.read", Description = "Read roles", IsSystem = true },
+            new() { Name = "role.write", Description = "Create/update/delete roles", IsSystem = true },
+            new() { Name = "permission.read", Description = "Read permissions", IsSystem = true },
+            new() { Name = "permission.write", Description = "Manage permissions", IsSystem = true },
+            new() { Name = "settings.read", Description = "Read system settings", IsSystem = true },
+            new() { Name = "settings.write", Description = "Update system settings", IsSystem = true }
         };
         
         foreach (var permission in permissions)
