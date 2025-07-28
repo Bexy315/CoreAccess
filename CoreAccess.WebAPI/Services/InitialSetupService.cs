@@ -33,16 +33,28 @@ public class InitialSetupService(
             throw new ArgumentException(nameof(request.GeneralInitialSettings.BaseUri), "BaseUri is required for initial setup.");
         }
         
-        appSettingsService.Set(AppSettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri);
-
+        appSettingsService.Set(AppSettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, isSystem: true);
+        
+        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "General settings configured successfully.");
+        
+        if (string.IsNullOrWhiteSpace(request.JwtInitialSettings.JwtSecret))
+            request.JwtInitialSettings.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
+        
+        appSettingsService.Set(AppSettingsKeys.JwtSecretKey, request.JwtInitialSettings.JwtSecret, true, true);
+        appSettingsService.Set(AppSettingsKeys.JwtIssuer, request.JwtInitialSettings.Issuer, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.JwtAudience, request.JwtInitialSettings.Audience, isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, isSystem: true);
+        
+        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "JWT settings configured successfully.");
+        
+        
         var adminRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
             Name = "CoreAccess.Admin",
             Description = "CoreAccess Admin role for administrative access to CoreAccess"
         });
-        
-        appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, isSystem: true);
         
         await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
@@ -50,7 +62,7 @@ public class InitialSetupService(
             Description = "User role for default users"
         });
         
-        var permissions = new List<CreatePermissionRequest>
+        List<CreatePermissionRequest> permissions = new()
         {
             new() { Name = "user.read", Description = "Read users", IsSystem = true },
             new() { Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
@@ -90,15 +102,6 @@ public class InitialSetupService(
         
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "User '" + request.UserInitialSettings.Admin.Username + "' created successfully.");
         
-        if (string.IsNullOrWhiteSpace(request.JwtInitialSettings.JwtSecret))
-            request.JwtInitialSettings.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
-        
-        appSettingsService.Set(AppSettingsKeys.JwtSecretKey, request.JwtInitialSettings.JwtSecret, true, true);
-        appSettingsService.Set(AppSettingsKeys.JwtIssuer, request.JwtInitialSettings.Issuer, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.JwtAudience, request.JwtInitialSettings.Audience, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, isSystem: true);
-        
-        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "JWT settings configured successfully.");
 
         await SaveCompletedAsync();
         
