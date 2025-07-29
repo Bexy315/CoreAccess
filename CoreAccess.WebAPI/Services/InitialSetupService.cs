@@ -7,7 +7,6 @@ using CoreAccess.WebAPI.Repositories;
 namespace CoreAccess.WebAPI.Services;
 
 public class InitialSetupService(
-    ILogger<InitialSetupService> logger,
     IAppSettingsService appSettingsService,
     IUserService userService,
     IRoleService roleService,
@@ -17,19 +16,19 @@ public class InitialSetupService(
     {
         if(await IsSetupCompletedAsync())
         {
-            logger.LogError("Initial setup already completed.");
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),"Initial setup already completed.");
             throw new ArgumentException("Initial setup already completed.");
         }
         
         if (request == null)
         {
-            logger.LogError("Initial setup request cannot be null.");
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),"Initial setup request cannot be null.");
             throw new ArgumentException(nameof(request), "Initial setup request cannot be null.");
         }
         
         if (string.IsNullOrWhiteSpace(request.GeneralInitialSettings.BaseUri))
         {
-            logger.LogError("BaseUri is required for initial setup.");
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),"BaseUri is required for initial setup.");
             throw new ArgumentException(nameof(request.GeneralInitialSettings.BaseUri), "BaseUri is required for initial setup.");
         }
         
@@ -79,7 +78,7 @@ public class InitialSetupService(
             var createdPermission = await permissionRepository.AddPermissionAsync(permission);
             if (createdPermission == null)
             {
-                logger.LogError($"Failed to create permission: {permission.Name}");
+                CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),$"Failed to create permission: {permission.Name}");
                 throw new Exception($"Failed to create permission: {permission.Name}");
             }
             await roleService.AddPermissionToRoleAsync(adminRole.Name, createdPermission.Name);

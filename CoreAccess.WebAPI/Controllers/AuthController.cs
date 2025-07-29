@@ -97,7 +97,7 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
                 return BadRequest("Username already exists.");
 
             var user = await userService.CreateUserAsync(new UserCreateRequest(){Password = dto.Password, Username = dto.Username}, cancellationToken);
-            return Ok(new UserDto(user));
+            return Ok(user);
         }
         catch (ArgumentException ex)
         {

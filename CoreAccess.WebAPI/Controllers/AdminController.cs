@@ -64,7 +64,7 @@ public class AdminController(IUserService userService, InitialSetupService initi
                 return BadRequest("User request cannot be null.");
             
             var user = await userService.CreateUserAsync(request, cancellationToken);
-            return Ok(new UserDto(user));
+            return Ok(user);
         }
         catch(ArgumentException ex)
         {
@@ -89,7 +89,7 @@ public class AdminController(IUserService userService, InitialSetupService initi
                 return BadRequest("User request cannot be null.");
             
             var user = await userService.UpdateUserAsync(userId, request, cancellationToken);
-            return Ok(new UserDto(user));
+            return Ok(user);
         }
         catch(ArgumentException ex)
         {
@@ -134,7 +134,7 @@ public class AdminController(IUserService userService, InitialSetupService initi
         try
         {
             var user = await userService.AddRoleToUserAsync(userId, roleName, cancellationToken);
-            return Ok(new UserDto(user));
+            return Ok(user);
         }
         catch(ArgumentException ex)
         {

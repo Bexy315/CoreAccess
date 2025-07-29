@@ -8,11 +8,11 @@ public interface IUserService
     Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
     Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
     Task<User> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
-    Task<User> GetCoreUserByDto(UserDto dto, CancellationToken cancellationToken = default);
-    Task<User> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
-    Task<User> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
-    Task<User> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
-    Task<User> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
+    Task<User> GetUserByDto(UserDto dto, CancellationToken cancellationToken = default);
+    Task<UserDto> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
+    Task<UserDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
+    Task<UserDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
+    Task<UserDto> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
     Task<User> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
@@ -101,7 +101,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<User> GetCoreUserByDto(UserDto dto, CancellationToken cancellationToken = default)
+    public async Task<User> GetUserByDto(UserDto dto, CancellationToken cancellationToken = default)
     {
         if (dto == null)
         {
@@ -131,7 +131,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<User> CreateUserAsync(UserCreateRequest user, CancellationToken cancellationToken = default)
+    public async Task<UserDto> CreateUserAsync(UserCreateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -159,7 +159,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
             {
                 throw new Exception("Failed to create user");
             }
-            return createdUser;
+            return new UserDto(createdUser);
         }
         catch (Exception ex)
         {
@@ -168,7 +168,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<User> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default)
+    public async Task<UserDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -205,7 +205,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
                 throw new Exception("Failed to update user. Updated user not found");
             }
             
-            return updatedUser;
+            return new UserDto(updatedUser);
         }
         catch (Exception ex)
         {
@@ -214,7 +214,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<User> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default)
+    public async Task<UserDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId))
         {
@@ -238,7 +238,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
             await userRepository.SaveChangesAsync(cancellationToken);
 
-            return updatedUser;
+            return new UserDto(updatedUser);
         }
         catch (Exception ex)
         {
@@ -247,7 +247,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<User> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default)
+    public async Task<UserDto> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleName))
         {
@@ -272,7 +272,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
             await userRepository.SaveChangesAsync(cancellationToken);
 
-            return updatedUser;
+            return new UserDto(updatedUser);
         }
         catch (Exception ex)
         {

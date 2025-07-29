@@ -84,7 +84,7 @@ public class ProfileController(IUserService userService) : ControllerBase
             if(userId != User.FindFirst(claim => (claim.Type == AccessClaimType.UserId))?.Value)
                 return Forbid("You can only update your own profile.");
             
-            return Ok(new UserDto(await userService.UpdateUserAsync(userId, request, cancellationToken)));
+            return Ok(await userService.UpdateUserAsync(userId, request, cancellationToken));
         }
         catch(ArgumentException ex)
         {
