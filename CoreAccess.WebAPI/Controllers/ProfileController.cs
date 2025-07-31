@@ -80,10 +80,10 @@ public class ProfileController(IUserService userService) : ControllerBase
         {
             if(string.IsNullOrWhiteSpace(userId))
                 return BadRequest("User ID is required.");
-
+            
             if(userId != User.FindFirst(claim => (claim.Type == AccessClaimType.UserId))?.Value)
                 return Forbid("You can only update your own profile.");
-            
+             
             return Ok(await userService.UpdateUserAsync(userId, request, cancellationToken));
         }
         catch(ArgumentException ex)

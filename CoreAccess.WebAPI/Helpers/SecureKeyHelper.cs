@@ -8,10 +8,10 @@ public static class SecureKeyHelper
     private const string KeyPath = "/data/keys/";
 
     /// <summary>
-    /// Gibt einen gespeicherten Base64-kodierten 256-Bit-Schlüssel zurück oder erzeugt einen neuen, falls nicht vorhanden.
+    /// Returns a stored Base64-encoded 256-bit key or generates a new one if not present.
     /// </summary>
-    /// <param name="keyName">Name des Schlüssels (Dateiname ohne Endung).</param>
-    /// <returns>Ein Base64-kodierter 256-Bit-Schlüssel.</returns>
+    /// <param name="keyName">Name of the key (filename without extension).</param>
+    /// <returns>A Base64-encoded 256-bit key.</returns>
     public static string GetOrCreateBase64Key(string keyName)
     {
         var keyFilePath = Path.Combine(AppContext.BaseDirectory, KeyPath, $"{keyName}.key");
@@ -21,7 +21,7 @@ public static class SecureKeyHelper
             return File.ReadAllText(keyFilePath);
         }
 
-        // 256-Bit = 32 Byte zufälliger Schlüssel
+        // 256-bit = 32 bytes random key
         var keyBytes = RandomNumberGenerator.GetBytes(32);
         var base64Key = Convert.ToBase64String(keyBytes);
 
@@ -35,10 +35,10 @@ public static class SecureKeyHelper
         return base64Key;
     }
     /// <summary>
-    /// Gibt einen zufälligen Base64-kodierten 256-Bit-Schlüssel zurück, welcher nicht gespeichert wird.
+    /// Returns a random Base64-encoded 256-bit key which is not stored.
     /// </summary>
-    /// <param name="length">Länge des Schlüssels in Bytes (Standard: 32).</param>
-    /// <returns>Ein Base64-kodierter 256-Bit-Schlüssel.</returns>
+    /// <param name="length">Length of the key in bytes (default: 32).</param>
+    /// <returns>A Base64-encoded 256-bit key.</returns>
     public static string GenerateRandomBase64Key(int length = 32)
     {
         var keyBytes = RandomNumberGenerator.GetBytes(length);
