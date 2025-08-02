@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoreAccess.WebAPI.Migrations
 {
     [DbContext(typeof(CoreAccessDbContext))]
-    [Migration("20250726224007_Init")]
-    partial class Init
+    [Migration("20250802195609_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -89,20 +89,13 @@ namespace CoreAccess.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("BLOB");
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByIp")
-                        .IsRequired()
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Expires")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("Revoked")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RevokedByIp")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Token")

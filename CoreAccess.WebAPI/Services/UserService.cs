@@ -79,11 +79,11 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
 
         try
         {
-            var userId = await refreshTokenRepository.GetUserIdByRefreshToken(refreshToken, cancellationToken);
+            var token = await refreshTokenRepository.GetRefreshTokenAsync(token: refreshToken, cancellationToken: cancellationToken);
 
             var user = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
-                Id = userId,
+                Id = token.CoreUserId.ToString(),
                 Page = 1,
                 PageSize = 1
             }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);

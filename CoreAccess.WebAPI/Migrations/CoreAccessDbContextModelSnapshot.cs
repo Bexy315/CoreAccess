@@ -86,20 +86,13 @@ namespace CoreAccess.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("BLOB");
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByIp")
-                        .IsRequired()
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Expires")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("Revoked")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RevokedByIp")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Token")

@@ -9,7 +9,7 @@ public interface IPermissionRepository
     Task<List<Permission>> GetAllPermissionsAsync();
     Task<Permission> GetPermissionByNameAsync(string permissionName);
     Task<Permission?> GetPermissionByIdAsync(Guid id);
-    Task<Permission> AddPermissionAsync(CreatePermissionRequest request);
+    Task<Permission> CreatePermissionAsync(CreatePermissionRequest request);
     Task DeletePermissionAsync(Guid id);
     Task SaveChangesAsync();
 }
@@ -32,7 +32,7 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
         return await context.Permissions.FindAsync(id);
     }
 
-    public async Task<Permission> AddPermissionAsync(CreatePermissionRequest request)
+    public async Task<Permission> CreatePermissionAsync(CreatePermissionRequest request)
     {
         var newPermission = new Permission
         {

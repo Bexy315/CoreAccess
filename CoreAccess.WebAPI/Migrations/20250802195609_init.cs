@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreAccess.WebAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -128,10 +128,8 @@ namespace CoreAccess.WebAPI.Migrations
                     Id = table.Column<byte[]>(type: "BLOB", nullable: false),
                     Token = table.Column<string>(type: "TEXT", nullable: false),
                     Expires = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedByIp = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Revoked = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    RevokedByIp = table.Column<string>(type: "TEXT", nullable: true),
                     CoreUserId = table.Column<byte[]>(type: "BLOB", nullable: false)
                 },
                 constraints: table =>

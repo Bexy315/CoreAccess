@@ -75,7 +75,7 @@ public class InitialSetupService(
         
         foreach (var permission in permissions)
         {
-            var createdPermission = await permissionRepository.AddPermissionAsync(permission);
+            var createdPermission = await permissionRepository.CreatePermissionAsync(permission);
             if (createdPermission == null)
             {
                 CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),$"Failed to create permission: {permission.Name}");

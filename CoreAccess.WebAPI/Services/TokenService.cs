@@ -93,13 +93,11 @@ public class TokenService(
         {
             Token = SecureKeyHelper.GenerateRandomBase64Key(),
             Expires = DateTime.UtcNow.AddDays(7),
-            Created = DateTime.UtcNow,
-            CreatedByIp = createdByIp,
+            CreatedAt = DateTime.UtcNow,
             User = user
         };
         
         await refreshTokenRepository.UpdateOrInsertRefreshTokenAsync(refreshToken, cancellationToken);
-        await refreshTokenRepository.SaveChangesAsync(cancellationToken);
         
         return refreshToken;
     }
@@ -114,14 +112,12 @@ public class TokenService(
 
         foreach (var group in groupedTokens)
         {
-            var inactiveTokens = group.OrderByDescending(t => t.Created).Skip(5).ToList();
+            var inactiveTokens = group.OrderByDescending(t => t.CreatedAt).Skip(5).ToList();
             foreach (var token in inactiveTokens)
             {
                 await refreshTokenRepository.DeleteRefreshTokenAsync(token.Token, cancellationToken);
             }
         }
-
-        await refreshTokenRepository.SaveChangesAsync(cancellationToken);
     }
 
     public async Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default)
@@ -129,15 +125,13 @@ public class TokenService(
         if (string.IsNullOrEmpty(token))
             throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");
 
-        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token, cancellationToken);
+        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token: token, cancellationToken: cancellationToken);
         if (refreshToken == null)
             throw new InvalidOperationException("Refresh Token not found");
 
         refreshToken.Revoked = DateTime.UtcNow;
-        refreshToken.RevokedByIp = revokedByIp;
         
         await refreshTokenRepository.UpdateOrInsertRefreshTokenAsync(refreshToken, cancellationToken);
-        await refreshTokenRepository.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<User> ValidateRefreshToken(string token, CancellationToken cancellationToken = default)
@@ -145,7 +139,7 @@ public class TokenService(
         if (string.IsNullOrEmpty(token))
             throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");
 
-        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token, cancellationToken);
+        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token: token, cancellationToken: cancellationToken);
         if (refreshToken == null)
             throw new UnauthorizedAccessException("Refresh Token not found");
 

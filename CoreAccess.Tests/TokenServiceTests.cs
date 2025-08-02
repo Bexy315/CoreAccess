@@ -99,7 +99,7 @@ public class TokenServiceTests
     public async Task ValidateRefreshToken_WithInvalidToken_Throws()
     {
         // Arrange
-        _refreshTokenRepository.Setup(r => r.GetRefreshTokenAsync("invalid-token", It.IsAny<CancellationToken>()))
+        _refreshTokenRepository.Setup(r => r.GetRefreshTokenAsync("invalid-token",null, null, false,  It.IsAny<CancellationToken>()))
             .ReturnsAsync((RefreshToken?)null);
 
         // Act & Assert
@@ -119,7 +119,7 @@ public class TokenServiceTests
             Roles = new List<Role>()
         };
 
-        _refreshTokenRepository.Setup(r => r.GetRefreshTokenAsync(token, It.IsAny<CancellationToken>()))
+        _refreshTokenRepository.Setup(r => r.GetRefreshTokenAsync(token, null, null, false,  It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RefreshToken { Token = token, Expires = DateTime.UtcNow + TimeSpan.FromDays(1), User = user });
 
         _userService.Setup(u => u.GetUserByRefreshTokenAsync(token, It.IsAny<CancellationToken>()))
@@ -139,7 +139,6 @@ public class TokenServiceTests
             })).Returns(true);
 
         _refreshTokenRepository.Setup(r => r.UpdateOrInsertRefreshTokenAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()));
-        _refreshTokenRepository.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _refreshTokenRepository
             .Setup(r => r.GetAllRefreshTokenAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<RefreshToken>()); // <-- statt null
