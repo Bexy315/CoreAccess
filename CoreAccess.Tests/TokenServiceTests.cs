@@ -145,11 +145,7 @@ public class TokenServiceTests
 
 
         // Act
-        var response = await _tokenService.RefreshTokenAsync(new RefreshTokenRequest
-        {
-            RefreshToken = token,
-            LoginIp = "127.0.0.1"
-        });
+        var response = await _tokenService.RefreshTokenAsync(token);
 
         // Assert
         Assert.NotNull(response);

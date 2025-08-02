@@ -23,12 +23,6 @@ public class RegisterRequest
     public string Password { get; set; } = "";
 }
 
-public class RefreshTokenRequest
-{
-    public string RefreshToken { get; set; } = null!;
-    public string LoginIp { get; set; } = "0.0.0.0";
-}
-
 public class RefreshToken
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -54,7 +48,7 @@ public static class AccessClaimType
 {
     public const string UserId = "coreaccess:user_id";
     public const string UserName = "coreaccess:username";
-    public const string Roles = "coreaccess:roles";
+    public const string Role = "coreaccess:role";
     public const string TokenId = "coreaccess:token_id";
     public const string Permissions = "coreaccess:permissions";
 }

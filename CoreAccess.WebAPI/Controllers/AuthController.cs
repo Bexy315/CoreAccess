@@ -19,7 +19,7 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
                 cancellationToken);
 
             var accessToken = tokenService.GenerateAccessToken(user, cancellationToken: cancellationToken);
-            var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, dto.LoginIp, cancellationToken);
+            var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, cancellationToken);
 
             return Ok(new LoginResponse()
             {
@@ -43,11 +43,11 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
     }
     
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Refresh([FromBody] string refreshToken, CancellationToken cancellationToken = default)
     {
         try
         {
-           return Ok(await tokenService.RefreshTokenAsync(dto, cancellationToken));
+           return Ok(await tokenService.RefreshTokenAsync(refreshToken, cancellationToken));
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -65,11 +65,11 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
     }
     
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Logout([FromBody] string refreshToken, CancellationToken cancellationToken = default)
     {
         try
         {
-            await tokenService.RevokeRefreshTokenAsync(dto.RefreshToken, dto.LoginIp,
+            await tokenService.RevokeRefreshTokenAsync(refreshToken, 
                 cancellationToken: cancellationToken);
             return Ok();
         }

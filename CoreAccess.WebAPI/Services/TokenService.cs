@@ -11,10 +11,10 @@ public interface ITokenService
 {
     string GenerateAccessToken(User user, string scope = "default", CancellationToken cancellationToken = default);
 
-    Task<RefreshTokenResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default);
-    Task<RefreshToken> GenerateRefreshTokenAsync(User user, string createdByIp, CancellationToken cancellationToken = default);
+    Task<RefreshTokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<RefreshToken> GenerateRefreshTokenAsync(User user, CancellationToken cancellationToken = default);
     Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default);
-    Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default);
+    Task RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
     Task<User> ValidateRefreshToken(string token, CancellationToken cancellationToken = default);
     ClaimsPrincipal? ValidateToken(string token);
     public Claim GetClaim(ClaimsPrincipal principal, string claimType);
@@ -24,7 +24,8 @@ public class TokenService(
     IUserService userService,
     IRefreshTokenRepository refreshTokenRepository)
     : ITokenService
-{
+{  
+    private static JwtSecurityTokenHandler tokenHandler = new();
     public string GenerateAccessToken(User user, string scope = "default", CancellationToken cancellationToken = default)
     {
         if (!appSettingsService.TryGet(AppSettingsKeys.JwtSecretKey, out string? secret, decryptIfNeeded: true))
@@ -35,19 +36,21 @@ public class TokenService(
 
         var claims = new List<Claim>
         {
+            new(AccessClaimType.TokenId, Guid.NewGuid().ToString()),
             new(AccessClaimType.UserId, user.Id.ToString()),
-            new(AccessClaimType.UserName, user.Username),
-            new(AccessClaimType.TokenId, Guid.NewGuid().ToString())
+            new(AccessClaimType.UserName, user.Username)
         };
-
-        string roles = "";
+        if (!string.IsNullOrEmpty(scope))
+        {
+            claims.Add(new Claim("scope", scope));
+        }
         
         foreach (var role in user.Roles)
         {
-            roles += $"{role.Name},";
+            claims.Add(new Claim(AccessClaimType.Role, role.Name));
         }
         
-        claims.Add(new Claim(AccessClaimType.Roles, roles));
+        
         
         if (!appSettingsService.TryGet(AppSettingsKeys.JwtIssuer, out string? issuer, decryptIfNeeded: true))
             throw new InvalidOperationException("JWT Issuer is not set in AppSettings.");
@@ -66,17 +69,17 @@ public class TokenService(
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return tokenHandler.WriteToken(token);
     }
 
-    public async Task<RefreshTokenResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    public async Task<RefreshTokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var user = await ValidateRefreshToken(request.RefreshToken, cancellationToken);
+        var user = await ValidateRefreshToken(refreshToken, cancellationToken);
         
         var newAccessToken = GenerateAccessToken(user, cancellationToken: cancellationToken);
-        var newRefreshToken = await GenerateRefreshTokenAsync(user, request.LoginIp, cancellationToken);
+        var newRefreshToken = await GenerateRefreshTokenAsync(user, cancellationToken);
 
-        await RevokeRefreshTokenAsync(request.RefreshToken, request.LoginIp, cancellationToken);
+        await RevokeRefreshTokenAsync(refreshToken, cancellationToken);
         await RecycleRefreshTokensAsync(cancellationToken);
 
         return new RefreshTokenResponse
@@ -87,7 +90,7 @@ public class TokenService(
         };
     }
 
-    public async Task<RefreshToken> GenerateRefreshTokenAsync(User user, string createdByIp, CancellationToken cancellationToken = default)
+    public async Task<RefreshToken> GenerateRefreshTokenAsync(User user, CancellationToken cancellationToken = default)
     {
         var refreshToken = new RefreshToken
         {
@@ -120,7 +123,7 @@ public class TokenService(
         }
     }
 
-    public async Task RevokeRefreshTokenAsync(string token, string revokedByIp = "0.0.0.0", CancellationToken cancellationToken = default)
+    public async Task RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(token))
             throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");
@@ -159,8 +162,7 @@ public class TokenService(
     {
         var secret = appSettingsService.Get(AppSettingsKeys.JwtSecretKey, decryptIfNeeded: true);
         if (string.IsNullOrEmpty(secret)) return null;
-
-        var tokenHandler = new JwtSecurityTokenHandler();
+        
         var key = new SymmetricSecurityKey(Convert.FromBase64String(secret));
 
         try
