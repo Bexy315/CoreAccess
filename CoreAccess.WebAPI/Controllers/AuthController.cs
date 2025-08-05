@@ -1,87 +1,70 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using CoreAccess.WebAPI.Model;
 using CoreAccess.WebAPI.Services;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
 
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
-[Route("api/auth")]
 public class AuthController(IAppSettingsService appSettingsService, IUserService userService, ITokenService tokenService) : ControllerBase
 {
-    
-    [HttpPost("login")]
-    [Produces(typeof(LoginResponse))]
-    public async Task<IActionResult> Login([FromBody] LoginRequest dto, CancellationToken cancellationToken = default)
+    [HttpPost("connect/token")]
+    public async Task<IActionResult> Exchange()
     {
-        try
+        var request = HttpContext.GetOpenIddictServerRequest();
+        if (request == null)
+            throw new InvalidOperationException("OpenIddict request is null.");
+        
+        if (request.IsPasswordGrantType())
         {
-            var user = await userService.ValidateCredentialsByUsernameAsync(dto.Username, dto.Password,
-                cancellationToken);
-
-            var accessToken = tokenService.GenerateAccessToken(user, cancellationToken: cancellationToken);
-            var refreshToken = await tokenService.GenerateRefreshTokenAsync(user, cancellationToken);
-
-            return Ok(new LoginResponse()
+            var user = await userService.SearchUsersAsync(new UserSearchOptions()
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken.Token,
-                UserId = user.Id
+                Username = request.Username,
+                PageSize = 1
             });
+            
+            if (user == null || user.TotalCount == 0 || !await userService.ValidateCredentialsByUsernameAsync(user.Items.FirstOrDefault().Username, request.Password))
+            {
+                return Forbid();
+            }
+            
+            var claims = new List<Claim>()
+            {
+                new(OpenIddictConstants.Claims.Subject, user.Items.FirstOrDefault().Id.ToString()),
+                new(OpenIddictConstants.Claims.Name, user.Items.FirstOrDefault().Username)
+            };
+            
+            foreach (var role in user.Items.FirstOrDefault().Roles)
+            {
+                claims.Add(new Claim(AccessClaimType.Role, role.Name));
+            }
+
+            var identity = new ClaimsIdentity(claims, TokenValidationParameters.DefaultAuthenticationType);
+            var principal = new ClaimsPrincipal(identity);
+
+            principal.SetScopes(OpenIddictConstants.Scopes.OpenId, OpenIddictConstants.Scopes.OfflineAccess);
+            principal.SetResources("coreaccess-api");
+
+            return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
-        catch (ArgumentException ex)
+
+        if (request.IsRefreshTokenGrantType())
         {
-            return BadRequest(ex.Message);
+            var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            var principal = result.Principal;
+
+            if (principal == null)
+                return Forbid();
+            
+            return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
-    }
-    
-    [HttpPost("refresh-token")]
-    public async Task<IActionResult> Refresh([FromBody] string refreshToken, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-           return Ok(await tokenService.RefreshTokenAsync(refreshToken, cancellationToken));
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            return StatusCode(500, ex.Message);
-        }
-    }
-    
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] string refreshToken, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            await tokenService.RevokeRefreshTokenAsync(refreshToken, 
-                cancellationToken: cancellationToken);
-            return Ok();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            return StatusCode(500, ex.Message);
-        }
+
+        return BadRequest("Unsupported grant type.");
     }
     
     [HttpPost("register")]

@@ -11,7 +11,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     public DbSet<Role> Roles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<AppSetting> AppSettings { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
    protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
@@ -48,25 +47,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
                 j.HasIndex("RoleId");
             });
 
-    userBuilder.HasMany(u => u.RefreshTokens)
-        .WithOne(rt => rt.User)
-        .HasForeignKey(rt => rt.CoreUserId)
-        .OnDelete(DeleteBehavior.Restrict);
-
-    #endregion
-
-    #region RefreshToken
-    var tokenBuilder = modelBuilder.Entity<RefreshToken>();
-    tokenBuilder.HasKey(rt => rt.Id);
-    tokenBuilder.HasIndex(rt => rt.CoreUserId);
-    
-    tokenBuilder.HasIndex(rt => rt.Token).IsUnique();
-
-    if (isSqlite)
-    {
-        ConfigureGuidAsBlob(tokenBuilder, rt => rt.Id);
-        ConfigureGuidAsBlob(tokenBuilder, rt => rt.CoreUserId);
-    }
     #endregion
 
     #region Role
@@ -104,6 +84,7 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     #endregion
 
     base.OnModelCreating(modelBuilder);
+    modelBuilder.UseOpenIddict();
 }
 
 

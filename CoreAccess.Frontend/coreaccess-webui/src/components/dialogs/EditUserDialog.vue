@@ -113,7 +113,7 @@ watch(
 
 async function submit() {
   try {
-    console.log('Updating user:', editUser);
+    console.log('Updating user:', editUser);n
     await updateUser("", editUser); // Muss natürlich die ID enthalten
     emit('submit');
   } catch (error) {

@@ -29,7 +29,6 @@ public class User
     public string UpdatedAt { get; set; } = "";
     public string PasswordHash { get; set; } = "";
     public List<Role> Roles { get; set; } = new();
-    public List<RefreshToken>? RefreshTokens { get; set; } = null;
 }
 
 public class UserDto(User src)
@@ -82,9 +81,6 @@ public class UserUpdateRequest
     public string? Zip { get; set; }
     public string? Country { get; set; }
     public UserStatus? Status { get; set; }
-    //TODO: Remove RefreshTokens and UpdatedAt
-    public string? UpdatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
-    public List<RefreshToken>? RefreshTokens { get; set; } = null;
 }
 
 public class UserSearchOptions

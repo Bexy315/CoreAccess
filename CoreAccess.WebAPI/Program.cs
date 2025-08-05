@@ -95,7 +95,6 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 #endregion
@@ -108,6 +107,32 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddScoped<InitialSetupService>();
+
+#endregion
+
+#region OpenIddict
+
+builder.Services.AddOpenIddict()
+    .AddCore(options =>
+    {
+        options.UseEntityFrameworkCore()
+            .UseDbContext<CoreAccessDbContext>();
+    })
+    .AddServer(options =>
+    {
+        options.SetTokenEndpointUris("/connect/token");
+        options.AllowPasswordFlow();
+        options.AllowRefreshTokenFlow();
+        
+        
+        options.AcceptAnonymousClients();
+        options.UseAspNetCore()
+            .EnableTokenEndpointPassthrough()
+            .DisableTransportSecurityRequirement();
+
+        options.AddDevelopmentEncryptionCertificate()
+            .AddDevelopmentSigningCertificate();
+    });
 
 #endregion
 

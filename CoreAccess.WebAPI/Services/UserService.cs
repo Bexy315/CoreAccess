@@ -7,7 +7,6 @@ public interface IUserService
 {
     Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
     Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
-    Task<User> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
     Task<User> GetUserByDto(UserDto dto, CancellationToken cancellationToken = default);
     Task<UserDto> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
     Task<UserDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
@@ -15,9 +14,9 @@ public interface IUserService
     Task<UserDto> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
-    Task<User> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
+    Task<bool> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
 }
-internal class UserService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IRoleRepository roleRepository, IRoleService roleService) : IUserService
+internal class UserService(IUserRepository userRepository, IRoleRepository roleRepository, IRoleService roleService) : IUserService
 {
     public async Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default)
     {
@@ -59,37 +58,6 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found for the provided ID.");
-            }
-
-            return user;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            throw;
-        }
-    }
-
-    public async Task<User> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrEmpty(refreshToken))
-        {
-            throw new ArgumentNullException(nameof(refreshToken), "Refresh token cannot be null or empty");
-        }
-
-        try
-        {
-            var token = await refreshTokenRepository.GetRefreshTokenAsync(token: refreshToken, cancellationToken: cancellationToken);
-
-            var user = await userRepository.SearchUsersAsync(new UserSearchOptions
-            {
-                Id = token.CoreUserId.ToString(),
-                Page = 1,
-                PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
-            if(user == null)
-            {
-                throw new KeyNotFoundException("User not found for the provided refresh token.");
             }
 
             return user;
@@ -315,7 +283,7 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
         }
     }
 
-    public async Task<User> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default)
+    public async Task<bool> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default)
     {
         if(username == null || password == null)
         {
@@ -333,15 +301,15 @@ internal class UserService(IUserRepository userRepository, IRefreshTokenReposito
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
-                throw new UnauthorizedAccessException("Invalid username or password.");;
+                return false;
             }
 
-            return user;
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            throw;
+            return false;
         }
     }
 }

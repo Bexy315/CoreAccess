@@ -10,19 +10,12 @@ namespace CoreAccess.WebAPI.Services;
 public interface ITokenService
 {
     string GenerateAccessToken(User user, string scope = "default", CancellationToken cancellationToken = default);
-
-    Task<RefreshTokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
-    Task<RefreshToken> GenerateRefreshTokenAsync(User user, CancellationToken cancellationToken = default);
-    Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default);
-    Task RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
-    Task<User> ValidateRefreshToken(string token, CancellationToken cancellationToken = default);
     ClaimsPrincipal? ValidateToken(string token);
     public Claim GetClaim(ClaimsPrincipal principal, string claimType);
 }
 public class TokenService(
     IAppSettingsService appSettingsService,
-    IUserService userService,
-    IRefreshTokenRepository refreshTokenRepository)
+    IUserService userService)
     : ITokenService
 {  
     private static JwtSecurityTokenHandler tokenHandler = new();
@@ -71,93 +64,6 @@ public class TokenService(
 
         return tokenHandler.WriteToken(token);
     }
-
-    public async Task<RefreshTokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
-    {
-        var user = await ValidateRefreshToken(refreshToken, cancellationToken);
-        
-        var newAccessToken = GenerateAccessToken(user, cancellationToken: cancellationToken);
-        var newRefreshToken = await GenerateRefreshTokenAsync(user, cancellationToken);
-
-        await RevokeRefreshTokenAsync(refreshToken, cancellationToken);
-        await RecycleRefreshTokensAsync(cancellationToken);
-
-        return new RefreshTokenResponse
-        {
-            AccessToken = newAccessToken,
-            RefreshToken = newRefreshToken.Token,
-            UserId = user.Id
-        };
-    }
-
-    public async Task<RefreshToken> GenerateRefreshTokenAsync(User user, CancellationToken cancellationToken = default)
-    {
-        var refreshToken = new RefreshToken
-        {
-            Token = SecureKeyHelper.GenerateRandomBase64Key(),
-            Expires = DateTime.UtcNow.AddDays(7),
-            CreatedAt = DateTime.UtcNow,
-            User = user
-        };
-        
-        await refreshTokenRepository.UpdateOrInsertRefreshTokenAsync(refreshToken, cancellationToken);
-        
-        return refreshToken;
-    }
-    
-    public async Task RecycleRefreshTokensAsync(CancellationToken cancellationToken = default)
-    {
-        var allTokens = await refreshTokenRepository.GetAllRefreshTokenAsync(cancellationToken);
-
-        var groupedTokens = allTokens
-            .Where(t => !t.IsActive)
-            .GroupBy(t => t.User.Id);
-
-        foreach (var group in groupedTokens)
-        {
-            var inactiveTokens = group.OrderByDescending(t => t.CreatedAt).Skip(5).ToList();
-            foreach (var token in inactiveTokens)
-            {
-                await refreshTokenRepository.DeleteRefreshTokenAsync(token.Token, cancellationToken);
-            }
-        }
-    }
-
-    public async Task RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrEmpty(token))
-            throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");
-
-        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token: token, cancellationToken: cancellationToken);
-        if (refreshToken == null)
-            throw new InvalidOperationException("Refresh Token not found");
-
-        refreshToken.Revoked = DateTime.UtcNow;
-        
-        await refreshTokenRepository.UpdateOrInsertRefreshTokenAsync(refreshToken, cancellationToken);
-    }
-
-    public async Task<User> ValidateRefreshToken(string token, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrEmpty(token))
-            throw new ArgumentNullException(nameof(token), "Refresh token cannot be null or empty");
-
-        var refreshToken = await refreshTokenRepository.GetRefreshTokenAsync(token: token, cancellationToken: cancellationToken);
-        if (refreshToken == null)
-            throw new UnauthorizedAccessException("Refresh Token not found");
-
-        if (!refreshToken.IsActive)
-            throw new UnauthorizedAccessException("Refresh Token is not active");
-
-        var user = await userService.GetUserByRefreshTokenAsync(token, cancellationToken);
-        
-        if(user == null)
-            throw new InvalidOperationException("User associated with the refresh token not found");
-        
-        
-        return user;
-    }
-
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var secret = appSettingsService.Get(AppSettingsKeys.JwtSecretKey, decryptIfNeeded: true);

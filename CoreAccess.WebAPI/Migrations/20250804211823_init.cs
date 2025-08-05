@@ -31,6 +31,53 @@ namespace CoreAccess.WebAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OpenIddictApplications",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    ApplicationType = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    ClientId = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    ClientSecret = table.Column<string>(type: "TEXT", nullable: true),
+                    ClientType = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    ConcurrencyToken = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    ConsentType = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: true),
+                    DisplayNames = table.Column<string>(type: "TEXT", nullable: true),
+                    JsonWebKeySet = table.Column<string>(type: "TEXT", nullable: true),
+                    Permissions = table.Column<string>(type: "TEXT", nullable: true),
+                    PostLogoutRedirectUris = table.Column<string>(type: "TEXT", nullable: true),
+                    Properties = table.Column<string>(type: "TEXT", nullable: true),
+                    RedirectUris = table.Column<string>(type: "TEXT", nullable: true),
+                    Requirements = table.Column<string>(type: "TEXT", nullable: true),
+                    Settings = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictApplications", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OpenIddictScopes",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    ConcurrencyToken = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Descriptions = table.Column<string>(type: "TEXT", nullable: true),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: true),
+                    DisplayNames = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Properties = table.Column<string>(type: "TEXT", nullable: true),
+                    Resources = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictScopes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Permissions",
                 schema: "coreaccess",
                 columns: table => new
@@ -94,6 +141,32 @@ namespace CoreAccess.WebAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OpenIddictAuthorizations",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    ApplicationId = table.Column<string>(type: "TEXT", nullable: true),
+                    ConcurrencyToken = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    CreationDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Properties = table.Column<string>(type: "TEXT", nullable: true),
+                    Scopes = table.Column<string>(type: "TEXT", nullable: true),
+                    Status = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Subject = table.Column<string>(type: "TEXT", maxLength: 400, nullable: true),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictAuthorizations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OpenIddictAuthorizations_OpenIddictApplications_ApplicationId",
+                        column: x => x.ApplicationId,
+                        principalSchema: "coreaccess",
+                        principalTable: "OpenIddictApplications",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RolePermissions",
                 schema: "coreaccess",
                 columns: table => new
@@ -118,30 +191,6 @@ namespace CoreAccess.WebAPI.Migrations
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RefreshTokens",
-                schema: "coreaccess",
-                columns: table => new
-                {
-                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    Token = table.Column<string>(type: "TEXT", nullable: false),
-                    Expires = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Revoked = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    CoreUserId = table.Column<byte[]>(type: "BLOB", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RefreshTokens_Users_CoreUserId",
-                        column: x => x.CoreUserId,
-                        principalSchema: "coreaccess",
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -171,6 +220,42 @@ namespace CoreAccess.WebAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "OpenIddictTokens",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    ApplicationId = table.Column<string>(type: "TEXT", nullable: true),
+                    AuthorizationId = table.Column<string>(type: "TEXT", nullable: true),
+                    ConcurrencyToken = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    CreationDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    ExpirationDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Payload = table.Column<string>(type: "TEXT", nullable: true),
+                    Properties = table.Column<string>(type: "TEXT", nullable: true),
+                    RedemptionDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    ReferenceId = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Status = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Subject = table.Column<string>(type: "TEXT", maxLength: 400, nullable: true),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 150, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OpenIddictTokens_OpenIddictApplications_ApplicationId",
+                        column: x => x.ApplicationId,
+                        principalSchema: "coreaccess",
+                        principalTable: "OpenIddictApplications",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_OpenIddictTokens_OpenIddictAuthorizations_AuthorizationId",
+                        column: x => x.AuthorizationId,
+                        principalSchema: "coreaccess",
+                        principalTable: "OpenIddictAuthorizations",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AppSettings_Key",
                 schema: "coreaccess",
@@ -179,16 +264,42 @@ namespace CoreAccess.WebAPI.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_CoreUserId",
+                name: "IX_OpenIddictApplications_ClientId",
                 schema: "coreaccess",
-                table: "RefreshTokens",
-                column: "CoreUserId");
+                table: "OpenIddictApplications",
+                column: "ClientId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_Token",
+                name: "IX_OpenIddictAuthorizations_ApplicationId_Status_Subject_Type",
                 schema: "coreaccess",
-                table: "RefreshTokens",
-                column: "Token",
+                table: "OpenIddictAuthorizations",
+                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictScopes_Name",
+                schema: "coreaccess",
+                table: "OpenIddictScopes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictTokens_ApplicationId_Status_Subject_Type",
+                schema: "coreaccess",
+                table: "OpenIddictTokens",
+                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictTokens_AuthorizationId",
+                schema: "coreaccess",
+                table: "OpenIddictTokens",
+                column: "AuthorizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictTokens_ReferenceId",
+                schema: "coreaccess",
+                table: "OpenIddictTokens",
+                column: "ReferenceId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -219,7 +330,11 @@ namespace CoreAccess.WebAPI.Migrations
                 schema: "coreaccess");
 
             migrationBuilder.DropTable(
-                name: "RefreshTokens",
+                name: "OpenIddictScopes",
+                schema: "coreaccess");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictTokens",
                 schema: "coreaccess");
 
             migrationBuilder.DropTable(
@@ -228,6 +343,10 @@ namespace CoreAccess.WebAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserRoles",
+                schema: "coreaccess");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictAuthorizations",
                 schema: "coreaccess");
 
             migrationBuilder.DropTable(
@@ -240,6 +359,10 @@ namespace CoreAccess.WebAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users",
+                schema: "coreaccess");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictApplications",
                 schema: "coreaccess");
         }
     }
