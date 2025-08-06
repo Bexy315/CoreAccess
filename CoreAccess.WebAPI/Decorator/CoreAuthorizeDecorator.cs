@@ -24,7 +24,7 @@ public class CoreAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
         
         var tokenService = httpContext.RequestServices.GetService<ITokenService>();
 
-        var claimsPrincipal = tokenService.ValidateToken(token);
+        var claimsPrincipal = tokenService.ValidateTokenAsync(token).Result;
         
         if (claimsPrincipal == null)
         {
@@ -32,7 +32,7 @@ public class CoreAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
             return Task.CompletedTask;
         }
 
-        var userId = tokenService.GetClaim(claimsPrincipal, "coreaccess:user_id");
+        var userId = tokenService.GetClaim(claimsPrincipal, "sub");
         
         if (string.IsNullOrWhiteSpace(userId.Value))
         {
@@ -43,25 +43,14 @@ public class CoreAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
         if (!string.IsNullOrWhiteSpace(Roles))
         {
             var roles = Roles.Split(',').Select(r => r.Trim()).ToList();
-            var userRoles = tokenService.GetClaim(claimsPrincipal, "coreaccess:roles").Value.Split(',')
-                .Select(r => r.Trim()).ToList();
-
+            var userRoles = claimsPrincipal.Claims
+                .Where(c => c.Type == "role")
+                .Select(c => c.Value)
+                .ToList();
+            
             if (!roles.Any(role => userRoles.Contains(role)))
             {
-                context.Result = new ForbidResult();
-                return Task.CompletedTask;
-            }
-        }
-        
-        if (!string.IsNullOrWhiteSpace(Permissions))
-        {
-            var permissions = Permissions.Split(',').Select(p => p.Trim()).ToList();
-            var userPermissions = tokenService.GetClaim(claimsPrincipal, "coreaccess:permissions").Value.Split(',')
-                .Select(p => p.Trim()).ToList();
-
-            if (!permissions.Any(permission => userPermissions.Contains(permission)))
-            {
-                context.Result = new ForbidResult();
+                context.Result = new ObjectResult("Forbidden") { StatusCode = StatusCodes.Status403Forbidden };
                 return Task.CompletedTask;
             }
         }

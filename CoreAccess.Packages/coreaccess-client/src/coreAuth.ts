@@ -31,7 +31,7 @@ class CoreAuth {
 
         if (access) {
             this.isAuthenticated = true;
-            this.user = localStorage.getItem('coreaccess_userId')?? '';
+            this.user = localStorage.getItem('coreaccess_userId') ?? '';
 
             this.notifyLogin();
         } else {
@@ -66,22 +66,32 @@ class CoreAuth {
 
     async login(credentials: { username: string; password: string }) {
         try {
-            const response = await httpClient.post('/auth/login', {
-                username: credentials.username,
-                password: credentials.password
+            const formData = new URLSearchParams();
+            formData.append('grant_type', 'password');
+            formData.append('username', credentials.username);
+            formData.append('password', credentials.password);
+            formData.append('scope', 'openid offline_access');
+
+            const response = await httpClient.post('/connect/token', formData, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             });
 
             const data = response.data;
 
-            if (!data?.accessToken || !data?.refreshToken) {
+            if (!data?.access_token || !data?.refresh_token) {
                 throw new Error('Invalid response: tokens missing from server');
             }
 
-            this.tokenStorage.setTokens(data.accessToken, data.refreshToken);
-            this.user = response.data.userId;
-            localStorage.setItem('coreaccess_userId', this.user);
-            this.isAuthenticated = true;
+            this.tokenStorage.setTokens(data.access_token, data.refresh_token);
 
+            // Wenn du sub oder andere Claims im Token parst
+            const payload = this.decodeJwt(data.access_token);
+            this.user = payload.sub || '';
+            localStorage.setItem('coreaccess_userId', this.user);
+
+            this.isAuthenticated = true;
             this.notifyLogin();
         } catch (error: any) {
             this.tokenStorage.clearTokens();
@@ -91,7 +101,7 @@ class CoreAuth {
 
             this.notifyLogout();
 
-            const msg = error.response?.data?.message || error.message || 'Login failed';
+            const msg = error.response?.data?.error_description || error.message || 'Login failed';
             throw new Error(msg);
         }
     }
@@ -117,29 +127,51 @@ class CoreAuth {
         return this.tokenStorage.getAccessToken();
     }
 
-    refreshAccessToken(): Promise<string | null> {
-        return new Promise((resolve, reject) => {
-            httpClient.post('/auth/refresh-token', {
-                refreshToken: this.tokenStorage.getRefreshToken()
-            })
-                .then((response: { data: { accessToken: string; refreshToken: string; userId: string } }) => {
-                    const data = response.data;
-                    if (data?.accessToken) {
-                        this.tokenStorage.setTokens(data.accessToken, data.refreshToken);
-                        this.user = data.userId;
-                        resolve(data.accessToken);
-                    } else {
-                        reject(new Error('Invalid response: access token missing'));
-                    }
-                })
-                .catch((error: unknown) => {
-                    this.tokenStorage.clearTokens();
-                    this.isAuthenticated = false;
-                    this.user = null;
-                    this.notifyLogout();
-                    reject(error);
-                });
-        });
+    async refreshAccessToken(): Promise<string | null> {
+        try {
+            const refreshToken = this.tokenStorage.getRefreshToken();
+            if (!refreshToken) throw new Error('No refresh token found');
+
+            const formData = new URLSearchParams();
+            formData.append('grant_type', 'refresh_token');
+            formData.append('refresh_token', refreshToken);
+
+            const response = await httpClient.post('/connect/token', formData, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+
+            const data = response.data;
+            if (!data?.access_token || !data?.refresh_token) {
+                throw new Error('Invalid response from token endpoint');
+            }
+
+            this.tokenStorage.setTokens(data.access_token, data.refresh_token);
+
+            // Optional: sub erneut auslesen
+            const payload = this.decodeJwt(data.access_token);
+            this.user = payload.sub || '';
+            localStorage.setItem('coreaccess_userId', this.user);
+
+            return data.access_token;
+        } catch (error) {
+            this.tokenStorage.clearTokens();
+            this.isAuthenticated = false;
+            this.user = null;
+            this.notifyLogout();
+            throw error;
+        }
+    }
+
+    private decodeJwt(token: string): any {
+        try {
+            const payload = token.split('.')[1];
+            const decoded = atob(payload);
+            return JSON.parse(decoded);
+        } catch {
+            return {};
+        }
     }
 }
 

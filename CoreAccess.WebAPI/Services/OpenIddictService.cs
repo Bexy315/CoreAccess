@@ -1,0 +1,29 @@
+using System.Security.Claims;
+using CoreAccess.WebAPI.Model;
+using OpenIddict.Abstractions;
+
+namespace CoreAccess.WebAPI.Services;
+
+public interface IOpenIddictService
+{
+    List<Claim> GetUserClaims(UserDto user);
+}
+
+public class OpenIddictService() : IOpenIddictService
+{
+    public List<Claim> GetUserClaims(UserDto user)
+    {
+        List<Claim> claims = new List<Claim>();
+        
+        claims.Add(new(OpenIddictConstants.Claims.Subject, user.Id.ToString()));
+        claims.Add(new(OpenIddictConstants.Claims.Name, user.Username));
+        claims.Add(new Claim(OpenIddictConstants.Claims.Email, user.Email ?? string.Empty));
+        foreach (var role in user.Roles)
+        {
+            claims.Add(new Claim(OpenIddictConstants.Claims.Role, role.Name));
+        }
+
+        return claims;
+    }
+    
+}

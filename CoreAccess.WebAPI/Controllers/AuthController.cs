@@ -11,9 +11,9 @@ using OpenIddict.Server.AspNetCore;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
-public class AuthController(IAppSettingsService appSettingsService, IUserService userService, ITokenService tokenService) : ControllerBase
+public class AuthController(IAppSettingsService appSettingsService, IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService) : ControllerBase
 {
-    [HttpPost("connect/token")]
+    [HttpPost("api/connect/token")]
     public async Task<IActionResult> Exchange()
     {
         var request = HttpContext.GetOpenIddictServerRequest();
@@ -32,16 +32,11 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
             {
                 return Forbid();
             }
+            var claims = openIddictService.GetUserClaims(user.Items.FirstOrDefault());
             
-            var claims = new List<Claim>()
+            foreach (var claim in claims)
             {
-                new(OpenIddictConstants.Claims.Subject, user.Items.FirstOrDefault().Id.ToString()),
-                new(OpenIddictConstants.Claims.Name, user.Items.FirstOrDefault().Username)
-            };
-            
-            foreach (var role in user.Items.FirstOrDefault().Roles)
-            {
-                claims.Add(new Claim(AccessClaimType.Role, role.Name));
+                claim.SetDestinations(OpenIddictConstants.Destinations.AccessToken);
             }
 
             var identity = new ClaimsIdentity(claims, TokenValidationParameters.DefaultAuthenticationType);
@@ -57,7 +52,6 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         {
             var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             var principal = result.Principal;
-
             if (principal == null)
                 return Forbid();
             

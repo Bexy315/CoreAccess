@@ -7,6 +7,7 @@ using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Sinks;
 using CoreAccess.WebAPI.Middleware;
 using Microsoft.OpenApi.Models;
+using OpenIddict.Validation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,6 +106,7 @@ builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IOpenIddictService, OpenIddictService>();
 
 builder.Services.AddScoped<InitialSetupService>();
 
@@ -120,7 +122,7 @@ builder.Services.AddOpenIddict()
     })
     .AddServer(options =>
     {
-        options.SetTokenEndpointUris("/connect/token");
+        options.SetTokenEndpointUris("/api/connect/token");
         options.AllowPasswordFlow();
         options.AllowRefreshTokenFlow();
         
@@ -132,7 +134,17 @@ builder.Services.AddOpenIddict()
 
         options.AddDevelopmentEncryptionCertificate()
             .AddDevelopmentSigningCertificate();
+    }).AddValidation(options =>
+    {
+        options.UseLocalServer();
     });
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+    options.DefaultForbidScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+});
 
 #endregion
 
@@ -168,6 +180,7 @@ else
 
 app.UseMiddleware<InitialSetupGuardMiddleware>();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

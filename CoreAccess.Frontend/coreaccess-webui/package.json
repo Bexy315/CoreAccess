@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@coreaccess/client": "^0.0.7",
+    "@coreaccess/client": "^0.0.9",
     "@primeuix/themes": "^1.1.1",
     "@primevue/forms": "^4.3.4",
     "@primevue/themes": "^4.3.4",
