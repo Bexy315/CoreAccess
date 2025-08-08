@@ -17,7 +17,10 @@ public class OpenIddictService() : IOpenIddictService
         
         claims.Add(new(OpenIddictConstants.Claims.Subject, user.Id.ToString()));
         claims.Add(new(OpenIddictConstants.Claims.Name, user.Username));
-        claims.Add(new Claim(OpenIddictConstants.Claims.Email, user.Email ?? string.Empty));
+        
+        if(!string.IsNullOrWhiteSpace(user.Email))
+            claims.Add(new Claim(OpenIddictConstants.Claims.Email, user.Email));
+        
         foreach (var role in user.Roles)
         {
             claims.Add(new Claim(OpenIddictConstants.Claims.Role, role.Name));
