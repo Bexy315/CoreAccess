@@ -11,9 +11,10 @@ using OpenIddict.Server.AspNetCore;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
+[Route("api")]
 public class AuthController(IAppSettingsService appSettingsService, IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService) : ControllerBase
 {
-    [HttpPost("api/connect/token")]
+    [HttpPost("connect/token")]
     public async Task<IActionResult> Exchange()
     {
         var request = HttpContext.GetOpenIddictServerRequest();

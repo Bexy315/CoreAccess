@@ -4,11 +4,10 @@ namespace CoreAccess.WebAPI.Middleware;
 
 public class InitialSetupGuardMiddleware(RequestDelegate next)
 {
-    private readonly string[] _allowedPaths = ["/api/setup", "/api/admin/config"];
+    private readonly string[] _allowedPaths = ["/api/setup", "/api/admin/config", "/initial-setup"];
 
     public async Task InvokeAsync(HttpContext context, IAppSettingsService appSettingsService)
     {
-        
         if (!IsSetupCompleted() &&
             !_allowedPaths.Any(p => context.Request.Path.StartsWithSegments(p)) )
         {
