@@ -1,11 +1,11 @@
-using CoreAccess.WebAPI.DbContext;
-using CoreAccess.WebAPI.Repositories;
-using CoreAccess.WebAPI.Services;
+using CoreAccess.BizLayer.Middleware;
+using CoreAccess.BizLayer.Services;
+using CoreAccess.DataLayer.DbContext;
+using CoreAccess.DataLayer.Repositories;
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Sinks;
-using CoreAccess.WebAPI.Middleware;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Validation.AspNetCore;
 
@@ -51,7 +51,7 @@ builder.Services.AddDbContext<CoreAccessDbContext>(options =>
         Directory.CreateDirectory(Path.GetDirectoryName(sqlitePath)!);
 
         var sqliteConn = $"Data Source={sqlitePath};";
-        options.UseSqlite(sqliteConn);
+        options.UseSqlite(sqliteConn, x => x.MigrationsAssembly("CoreAccess.DataLayer"));
     }
 });
 

@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.WebAPI", "CoreAc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.Tests", "CoreAccess.Tests\CoreAccess.Tests.csproj", "{F02D9590-E7C8-45E0-99ED-B64A85412064}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.Services", "CoreAccess.Services\CoreAccess.Services.csproj", "{A3D1EB6A-926F-4432-9180-012F3ABFB3CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.BizLayer", "CoreAccess.BizLayer\CoreAccess.BizLayer.csproj", "{A3D1EB6A-926F-4432-9180-012F3ABFB3CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.DataLayer", "CoreAccess.DataLayer\CoreAccess.DataLayer.csproj", "{7B4A2486-EF33-4896-B179-C7BE87A042A3}"
 EndProject

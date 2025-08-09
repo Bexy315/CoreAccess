@@ -1,6 +1,6 @@
+using CoreAccess.BizLayer.Services;
+using CoreAccess.Models;
 using CoreAccess.WebAPI.Decorator;
-using CoreAccess.WebAPI.Model;
-using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoreAccess.WebAPI.Controllers;

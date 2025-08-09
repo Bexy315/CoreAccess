@@ -1,9 +1,9 @@
-using CoreAccess.WebAPI.DbContext;
+using CoreAccess.BizLayer.Services;
+using CoreAccess.DataLayer.DbContext;
+using CoreAccess.Models;
 using CoreAccess.WebAPI.Decorator;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
-using CoreAccess.WebAPI.Model;
-using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

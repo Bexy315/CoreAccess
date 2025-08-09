@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using CoreAccess.BizLayer.Services;
+using CoreAccess.Models;
 using Microsoft.AspNetCore.Mvc;
-using CoreAccess.WebAPI.Model;
-using CoreAccess.WebAPI.Services;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;

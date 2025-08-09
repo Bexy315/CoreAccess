@@ -4,6 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>CoreAccess.WebAPI</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,11 +28,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="App_Data\" />
-        <Folder Include="Migrations\" />
-    </ItemGroup>
-
-    <ItemGroup>
         <None Update=".env">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -41,6 +37,12 @@
         <Content Include="wwwroot\**\*">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CoreAccess.Models\CoreAccess.Models.csproj" />
+      <ProjectReference Include="..\CoreAccess.BizLayer\CoreAccess.BizLayer.csproj" />
+      <ProjectReference Include="..\CoreAccess.DataLayer\CoreAccess.DataLayer.csproj" />
     </ItemGroup>
 
 </Project>
