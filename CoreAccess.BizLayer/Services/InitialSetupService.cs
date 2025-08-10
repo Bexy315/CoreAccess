@@ -1,3 +1,4 @@
+using CoreAccess.BizLayer.Logger;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
 using CoreAccess.WebAPI.Helpers;
@@ -6,15 +7,34 @@ using CoreAccess.WebAPI.Logger.Model;
 
 namespace CoreAccess.BizLayer.Services;
 
+public interface IInitialSetupService
+{
+    bool IsSetupCompleted();
+    Task RunSetupAsync(InitialSetupRequest request);
+}
 public class InitialSetupService(
     IAppSettingsService appSettingsService,
+    ITenantService tenantService,
     IUserService userService,
     IRoleService roleService,
-    IPermissionRepository permissionRepository)
+    IPermissionRepository permissionRepository) : IInitialSetupService
 {
+    private static bool? IsSetupCompletedBuffer { get; set; } = null;
+
+
+    public bool IsSetupCompleted()
+    {   
+        if (IsSetupCompletedBuffer == null)
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, "data", "etc", "init_setup_completed.txt"); 
+            IsSetupCompletedBuffer = File.Exists(filePath) && File.ReadAllText(filePath).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+        } 
+        return IsSetupCompletedBuffer == true;
+    }
+
     public async Task RunSetupAsync(InitialSetupRequest request)
     {
-        if(await IsSetupCompletedAsync())
+        if(IsSetupCompletedBuffer == true)
         {
             CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),"Initial setup already completed.");
             throw new ArgumentException("Initial setup already completed.");
@@ -47,30 +67,40 @@ public class InitialSetupService(
         appSettingsService.Set(AppSettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, isSystem: true);
         
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "JWT settings configured successfully.");
+
+        var defaultTenant = await tenantService.CreateTenantAsync(new TenantCreateRequest()
+        {
+            Slug = "coreaccess",
+            DisplayName = "CoreAccess Default Tenant",
+            Description = "This is the default tenant for CoreAccess used for accessing the system.",
+            IsActive = true
+        });
         
         
         var adminRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
+            TenantId = defaultTenant.Id,
             Name = "CoreAccess.Admin",
             Description = "CoreAccess Admin role for administrative access to CoreAccess"
         });
         
         await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
+            TenantId = defaultTenant.Id,
             Name = "User",
             Description = "User role for default users"
         });
         
         List<CreatePermissionRequest> permissions = new()
         {
-            new() { Name = "user.read", Description = "Read users", IsSystem = true },
-            new() { Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
-            new() { Name = "role.read", Description = "Read roles", IsSystem = true },
-            new() { Name = "role.write", Description = "Create/update/delete roles", IsSystem = true },
-            new() { Name = "permission.read", Description = "Read permissions", IsSystem = true },
-            new() { Name = "permission.write", Description = "Manage permissions", IsSystem = true },
-            new() { Name = "settings.read", Description = "Read system settings", IsSystem = true },
-            new() { Name = "settings.write", Description = "Update system settings", IsSystem = true }
+            new() { TenantId = defaultTenant.Id, Name = "user.read", Description = "Read users", IsSystem = true },
+            new() { TenantId = defaultTenant.Id, Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
+            new() { TenantId = defaultTenant.Id, Name = "role.read", Description = "Read roles", IsSystem = true },
+            new() { TenantId = defaultTenant.Id, Name = "role.write", Description = "Create/update/delete roles", IsSystem = true },
+            new() { TenantId = defaultTenant.Id, Name = "permission.read", Description = "Read permissions", IsSystem = true },
+            new() { TenantId = defaultTenant.Id, Name = "permission.write", Description = "Manage permissions", IsSystem = true },
+            new() { TenantId = defaultTenant.Id, Name = "settings.read", Description = "Read system settings", IsSystem = true },
+            new() { TenantId = defaultTenant.Id, Name = "settings.write", Description = "Update system settings", IsSystem = true }
         };
         
         foreach (var permission in permissions)
@@ -96,11 +126,12 @@ public class InitialSetupService(
             CoreLogger.LogSystem(CoreLogLevel.Warning, nameof(InitialSetupService), "Admin user not provided, using default root user with a generated password. Please change it after setup. Password: "+ password);
         }
         
+        request.UserInitialSettings.Admin.TenantId = defaultTenant.Id;
+        
         var newUser = await userService.CreateUserAsync(request.UserInitialSettings.Admin);
         await userService.AddRoleToUserAsync(newUser.Id.ToString(), "CoreAccess.Admin");
         
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "User '" + request.UserInitialSettings.Admin.Username + "' created successfully.");
-        
 
         await SaveCompletedAsync();
         
@@ -108,7 +139,7 @@ public class InitialSetupService(
                 
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "Initial setup completed successfully.");
     }
-    
+
     private async Task SaveCompletedAsync()
     {
         var filePath = Path.Combine(AppContext.BaseDirectory, "/data/etc/init_setup_completed.txt");
@@ -116,6 +147,7 @@ public class InitialSetupService(
         if (File.Exists(filePath))
         {
             await File.WriteAllTextAsync(filePath, "true");
+            IsSetupCompletedBuffer = true;
             return;
         }
 
@@ -126,13 +158,6 @@ public class InitialSetupService(
         }
 
         await File.WriteAllTextAsync(filePath, "true");
+        IsSetupCompletedBuffer = true;
     }
-    
-    public async Task <bool> IsSetupCompletedAsync(CancellationToken cancellationToken = default)
-    {
-        var filePath = Path.Combine(AppContext.BaseDirectory, "/data/etc/init_setup_completed.txt");
-        return (await File.ReadAllTextAsync(filePath, cancellationToken)).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
-    }
-    
-    private static string Now() => DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 }

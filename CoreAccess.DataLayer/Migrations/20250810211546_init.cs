@@ -78,66 +78,23 @@ namespace CoreAccess.DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Permissions",
-                schema: "coreaccess",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<string>(type: "TEXT", nullable: false),
-                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Permissions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Roles",
+                name: "Tenants",
                 schema: "coreaccess",
                 columns: table => new
                 {
                     Id = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<string>(type: "TEXT", nullable: false),
-                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Slug = table.Column<string>(type: "TEXT", nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    LogoUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
+                    SettingsJson = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                schema: "coreaccess",
-                columns: table => new
-                {
-                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    Username = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: true),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: true),
-                    LastName = table.Column<string>(type: "TEXT", nullable: true),
-                    Phone = table.Column<string>(type: "TEXT", nullable: true),
-                    Address = table.Column<string>(type: "TEXT", nullable: true),
-                    City = table.Column<string>(type: "TEXT", nullable: true),
-                    State = table.Column<string>(type: "TEXT", nullable: true),
-                    Zip = table.Column<string>(type: "TEXT", nullable: true),
-                    Country = table.Column<string>(type: "TEXT", nullable: true),
-                    ProfilePicture = table.Column<byte[]>(type: "BLOB", nullable: true),
-                    ProfilePictureContentType = table.Column<string>(type: "TEXT", nullable: true),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<string>(type: "TEXT", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Tenants", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -167,12 +124,135 @@ namespace CoreAccess.DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Permissions",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    TenantId = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<string>(type: "TEXT", nullable: false),
+                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Permissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Permissions_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalSchema: "coreaccess",
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    TenantId = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<string>(type: "TEXT", nullable: false),
+                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Roles_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalSchema: "coreaccess",
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    TenantId = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Username = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: true),
+                    FirstName = table.Column<string>(type: "TEXT", nullable: true),
+                    LastName = table.Column<string>(type: "TEXT", nullable: true),
+                    Phone = table.Column<string>(type: "TEXT", nullable: true),
+                    Address = table.Column<string>(type: "TEXT", nullable: true),
+                    City = table.Column<string>(type: "TEXT", nullable: true),
+                    State = table.Column<string>(type: "TEXT", nullable: true),
+                    Zip = table.Column<string>(type: "TEXT", nullable: true),
+                    Country = table.Column<string>(type: "TEXT", nullable: true),
+                    ProfilePicture = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    ProfilePictureContentType = table.Column<string>(type: "TEXT", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<string>(type: "TEXT", nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalSchema: "coreaccess",
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OpenIddictTokens",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    ApplicationId = table.Column<string>(type: "TEXT", nullable: true),
+                    AuthorizationId = table.Column<string>(type: "TEXT", nullable: true),
+                    ConcurrencyToken = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    CreationDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    ExpirationDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Payload = table.Column<string>(type: "TEXT", nullable: true),
+                    Properties = table.Column<string>(type: "TEXT", nullable: true),
+                    RedemptionDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    ReferenceId = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Status = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Subject = table.Column<string>(type: "TEXT", maxLength: 400, nullable: true),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 150, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OpenIddictTokens_OpenIddictApplications_ApplicationId",
+                        column: x => x.ApplicationId,
+                        principalSchema: "coreaccess",
+                        principalTable: "OpenIddictApplications",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_OpenIddictTokens_OpenIddictAuthorizations_AuthorizationId",
+                        column: x => x.AuthorizationId,
+                        principalSchema: "coreaccess",
+                        principalTable: "OpenIddictAuthorizations",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RolePermissions",
                 schema: "coreaccess",
                 columns: table => new
                 {
                     RoleId = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    PermissionId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    PermissionId = table.Column<byte[]>(type: "BLOB", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -218,42 +298,6 @@ namespace CoreAccess.DataLayer.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OpenIddictTokens",
-                schema: "coreaccess",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    ApplicationId = table.Column<string>(type: "TEXT", nullable: true),
-                    AuthorizationId = table.Column<string>(type: "TEXT", nullable: true),
-                    ConcurrencyToken = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
-                    CreationDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    ExpirationDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Payload = table.Column<string>(type: "TEXT", nullable: true),
-                    Properties = table.Column<string>(type: "TEXT", nullable: true),
-                    RedemptionDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    ReferenceId = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
-                    Status = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
-                    Subject = table.Column<string>(type: "TEXT", maxLength: 400, nullable: true),
-                    Type = table.Column<string>(type: "TEXT", maxLength: 150, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OpenIddictTokens", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OpenIddictTokens_OpenIddictApplications_ApplicationId",
-                        column: x => x.ApplicationId,
-                        principalSchema: "coreaccess",
-                        principalTable: "OpenIddictApplications",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_OpenIddictTokens_OpenIddictAuthorizations_AuthorizationId",
-                        column: x => x.AuthorizationId,
-                        principalSchema: "coreaccess",
-                        principalTable: "OpenIddictAuthorizations",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -303,16 +347,41 @@ namespace CoreAccess.DataLayer.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Permissions_TenantId",
+                schema: "coreaccess",
+                table: "Permissions",
+                column: "TenantId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
                 schema: "coreaccess",
                 table: "RolePermissions",
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Roles_TenantId",
+                schema: "coreaccess",
+                table: "Roles",
+                column: "TenantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tenants_Slug",
+                schema: "coreaccess",
+                table: "Tenants",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
                 schema: "coreaccess",
                 table: "UserRoles",
                 column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_TenantId",
+                schema: "coreaccess",
+                table: "Users",
+                column: "TenantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Username",
@@ -363,6 +432,10 @@ namespace CoreAccess.DataLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "OpenIddictApplications",
+                schema: "coreaccess");
+
+            migrationBuilder.DropTable(
+                name: "Tenants",
                 schema: "coreaccess");
         }
     }

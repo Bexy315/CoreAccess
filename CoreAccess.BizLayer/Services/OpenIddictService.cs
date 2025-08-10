@@ -7,9 +7,10 @@ namespace CoreAccess.BizLayer.Services;
 public interface IOpenIddictService
 {
     List<Claim> GetUserClaims(UserDto user);
+    public Task AddApplicationAsync(OpenIddictApplicationDescriptor application);
 }
 
-public class OpenIddictService() : IOpenIddictService
+public class OpenIddictService(IOpenIddictApplicationManager applicationManager) : IOpenIddictService
 {
     public List<Claim> GetUserClaims(UserDto user)
     {
@@ -27,6 +28,16 @@ public class OpenIddictService() : IOpenIddictService
         }
 
         return claims;
+    }
+    
+    public async Task AddApplicationAsync(OpenIddictApplicationDescriptor application)
+    {
+        if (application == null) throw new ArgumentNullException(nameof(application));
+        
+        var app = await applicationManager.FindByClientIdAsync(application.ClientId);
+        if (app != null) return;
+
+        await applicationManager.CreateAsync(application);
     }
     
 }

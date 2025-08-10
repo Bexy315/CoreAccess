@@ -1,11 +1,11 @@
+using CoreAccess.BizLayer.Logger;
 using CoreAccess.BizLayer.Middleware;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.DataLayer.Repositories;
+using CoreAccess.WebAPI.Logger.Sinks;
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
-using CoreAccess.WebAPI.Logger;
-using CoreAccess.WebAPI.Logger.Sinks;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Validation.AspNetCore;
 
@@ -94,6 +94,7 @@ builder.Services.AddOpenApi();
 
 #region Repositories
 
+builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
@@ -102,13 +103,13 @@ builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 #region Services
 
+builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IOpenIddictService, OpenIddictService>();
-
-builder.Services.AddScoped<InitialSetupService>();
+builder.Services.AddScoped<IInitialSetupService, InitialSetupService>();
 
 #endregion
 
@@ -148,19 +149,19 @@ builder.Services.AddAuthentication(options =>
 
 #endregion
 
-
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
-    dbContext.Database.Migrate();
-}
 
 CoreLogger.Initialize(new List<ILogSink>
 {
     new ConsoleSink()
 });
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<CoreAccessDbContext>();
+    
+    dbContext.Database.Migrate();
+}
 
 app.MapOpenApi();
 app.UseSwagger();            

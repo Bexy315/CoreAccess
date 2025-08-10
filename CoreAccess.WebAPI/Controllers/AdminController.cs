@@ -1,3 +1,4 @@
+using CoreAccess.BizLayer.Logger;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.Models;
 using CoreAccess.WebAPI.Controllers;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoreAccess.WebAPI.Controllers;
 [Controller]
 [Route("api/admin")]
-public class AdminController(IUserService userService, InitialSetupService initialSetupService) : ControllerBase
+public class AdminController(IUserService userService, IInitialSetupService initialSetupService) : ControllerBase
 {
     [HttpGet]
     [Route("config")]
@@ -18,7 +19,7 @@ public class AdminController(IUserService userService, InitialSetupService initi
     {
         try
         {
-            var isSetupComplete = await initialSetupService.IsSetupCompletedAsync(cancellationToken);
+            var isSetupComplete = initialSetupService.IsSetupCompleted();
             return Ok(new { IsSetupComplete = isSetupComplete });
         }
         catch (Exception ex)

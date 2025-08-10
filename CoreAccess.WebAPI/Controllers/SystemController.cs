@@ -1,3 +1,4 @@
+using CoreAccess.BizLayer.Logger;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.Models;
@@ -6,12 +7,13 @@ using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenIddict.Abstractions;
 
 namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(IAppSettingsService appSettingsService, CoreAccessDbContext db) : ControllerBase
+public class SystemController(IAppSettingsService appSettingsService, IOpenIddictService openIddictService, CoreAccessDbContext db) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
@@ -58,11 +60,21 @@ public class SystemController(IAppSettingsService appSettingsService, CoreAccess
     {
         try
         {
-            appSettingsService.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel);
-            
+            //appSettingsService.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel);
+            await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
+            {
+                ClientId = "test-client",
+                DisplayName = "Test Client",
+                Permissions =
+                {
+                    OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
+                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+
+                }
+            });
             CoreLogger.LogSystem(CoreLogLevel.Information,nameof(SystemController), "Cool Debug message!!!", new Exception("Test exception"));
             
-            return Ok(systemLogLevel);
+            return Ok();
         }
         catch(ArgumentException ex)
         {

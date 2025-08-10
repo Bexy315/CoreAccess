@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Route("api/setup")]
-public class InitialSetupController(InitialSetupService initialSetupService) : ControllerBase
+public class InitialSetupController(IInitialSetupService initialSetupService) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> RunSetupAsync([FromBody] InitialSetupRequest request)

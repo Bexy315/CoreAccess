@@ -14,7 +14,6 @@ public interface IUserRepository
     public Task<List<User>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
     public Task<User> InsertOrUpdateUserAsync(User user, CancellationToken cancellationToken = default);
     public Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 public class UserRepository(CoreAccessDbContext context) : IUserRepository
 {
@@ -100,11 +99,15 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
         if (existingUser == null)
         {
             await context.Set<User>().AddAsync(user, cancellationToken);
+            
+            await context.SaveChangesAsync(cancellationToken);
             return user;
         }
 
         context.Entry(existingUser).CurrentValues.SetValues(user);
         context.Entry(existingUser).State = EntityState.Modified;
+        await context.SaveChangesAsync(cancellationToken);
+        
         return existingUser;
     }
 
@@ -120,15 +123,12 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
             
             context.Users.Remove(user);
             context.Entry(user).State = EntityState.Deleted;
+            
+            await context.SaveChangesAsync(cancellationToken);
         }
         else
         {
             throw new Exception("User not found");
         }
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await context.SaveChangesAsync(cancellationToken);
     }
 }

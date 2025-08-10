@@ -106,6 +106,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         {
             var newUser = new User
             {
+                TenantId = user.TenantId,
                 Username = user.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password),
                 Email = user.Email,
@@ -123,7 +124,6 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             };
             
             var createdUser = await userRepository.InsertOrUpdateUserAsync(newUser, cancellationToken);
-            await userRepository.SaveChangesAsync(cancellationToken);
             if (createdUser == null)
             {
                 throw new Exception("Failed to create user");
@@ -167,7 +167,6 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             existingUser.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(existingUser, cancellationToken);
-            await userRepository.SaveChangesAsync(cancellationToken);
             
             if (updatedUser == null)
             {
@@ -205,7 +204,6 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             user.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
-            await userRepository.SaveChangesAsync(cancellationToken);
 
             return new UserDto(updatedUser);
         }
@@ -239,7 +237,6 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
 
             user.Roles.Add(role);
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
-            await userRepository.SaveChangesAsync(cancellationToken);
 
             return new UserDto(updatedUser);
         }
@@ -255,8 +252,6 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         try
         {
             await userRepository.DeleteUserAsync(id, cancellationToken);
-
-            await userRepository.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {

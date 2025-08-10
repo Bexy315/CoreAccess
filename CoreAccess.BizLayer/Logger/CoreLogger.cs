@@ -1,8 +1,7 @@
-using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Logger.Model;
 using CoreAccess.WebAPI.Logger.Sinks;
 
-namespace CoreAccess.WebAPI.Logger;
+namespace CoreAccess.BizLayer.Logger;
 
 public static class CoreLogger
 {

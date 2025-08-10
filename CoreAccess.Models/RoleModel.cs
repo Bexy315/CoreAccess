@@ -5,14 +5,17 @@ namespace CoreAccess.Models;
 public class Role
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid TenantId { get; set; }
     public string Name { get; set; } = "";
     public string? Description { get; set; }
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string UpdatedAt { get; set; } = "";
     public bool IsSystem { get; set; } = false;
     public List<Permission> Permissions { get; set; } = new();
+    [JsonIgnore] public Tenant Tenant { get; set; }
+
     [JsonIgnore]
-    public List<User> Users { get; set; } = new();
+    public List<User> Users { get; set; }
 }
 
 public class RoleDto(Role src)
@@ -26,6 +29,7 @@ public class RoleDto(Role src)
 }
 public class RoleCreateRequest
 {
+    public Guid TenantId { get; set; } = Guid.Empty;
     public string Name { get; set; } = "";
     public string? Description { get; set; }
 }
