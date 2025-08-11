@@ -1,9 +1,11 @@
+using System.Text.Json;
 using CoreAccess.BizLayer.Logger;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
 using CoreAccess.WebAPI.Helpers;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
+using OpenIddict.Abstractions;
 
 namespace CoreAccess.BizLayer.Services;
 
@@ -17,7 +19,8 @@ public class InitialSetupService(
     ITenantService tenantService,
     IUserService userService,
     IRoleService roleService,
-    IPermissionRepository permissionRepository) : IInitialSetupService
+    IPermissionRepository permissionRepository,
+    IOpenIddictService openIddictService) : IInitialSetupService
 {
     private static bool? IsSetupCompletedBuffer { get; set; } = null;
 
@@ -34,39 +37,46 @@ public class InitialSetupService(
 
     public async Task RunSetupAsync(InitialSetupRequest request)
     {
-        if(IsSetupCompletedBuffer == true)
+        if (IsSetupCompletedBuffer == true)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),"Initial setup already completed.");
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService), "Initial setup already completed.");
             throw new ArgumentException("Initial setup already completed.");
         }
-        
+
         if (request == null)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),"Initial setup request cannot be null.");
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),
+                "Initial setup request cannot be null.");
             throw new ArgumentException(nameof(request), "Initial setup request cannot be null.");
         }
-        
+
         if (string.IsNullOrWhiteSpace(request.GeneralInitialSettings.BaseUri))
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),"BaseUri is required for initial setup.");
-            throw new ArgumentException(nameof(request.GeneralInitialSettings.BaseUri), "BaseUri is required for initial setup.");
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),
+                "BaseUri is required for initial setup.");
+            throw new ArgumentException(nameof(request.GeneralInitialSettings.BaseUri),
+                "BaseUri is required for initial setup.");
         }
-        
+
         appSettingsService.Set(AppSettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, isSystem: true);
-        
-        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "General settings configured successfully.");
-        
+        appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel,
+            isSystem: true);
+        appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration,
+            isSystem: true);
+
+        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService),
+            "General settings configured successfully.");
+
         if (string.IsNullOrWhiteSpace(request.JwtInitialSettings.JwtSecret))
             request.JwtInitialSettings.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
-        
+
         appSettingsService.Set(AppSettingsKeys.JwtSecretKey, request.JwtInitialSettings.JwtSecret, true, true);
         appSettingsService.Set(AppSettingsKeys.JwtIssuer, request.JwtInitialSettings.Issuer, isSystem: true);
         appSettingsService.Set(AppSettingsKeys.JwtAudience, request.JwtInitialSettings.Audience, isSystem: true);
         appSettingsService.Set(AppSettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, isSystem: true);
-        
-        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "JWT settings configured successfully.");
+
+        CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService),
+            "JWT settings configured successfully.");
 
         var defaultTenant = await tenantService.CreateTenantAsync(new TenantCreateRequest()
         {
@@ -74,6 +84,33 @@ public class InitialSetupService(
             DisplayName = "CoreAccess Default Tenant",
             Description = "This is the default tenant for CoreAccess used for accessing the system.",
             IsActive = true
+        });
+
+        await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
+        {
+            ClientId = "coreaccess",
+            DisplayName = "CoreAccess AdminUI (and default) Client",
+            ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
+            ClientType = OpenIddictConstants.ClientTypes.Public,
+            ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+            Permissions =
+            {
+                OpenIddictConstants.Permissions.GrantTypes.Password,
+                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                OpenIddictConstants.Permissions.GrantTypes.RefreshToken
+            },
+            RedirectUris =
+            {
+                new Uri(request.GeneralInitialSettings.BaseUri + "/signin-oidc")
+            },
+            PostLogoutRedirectUris =
+            {
+                new Uri(request.GeneralInitialSettings.BaseUri + "/signout-callback-oidc")
+            },
+            Properties =
+            {
+                {"tenant_id", JsonDocument.Parse($"\"{defaultTenant.Id}\"").RootElement}
+            },
         });
         
         

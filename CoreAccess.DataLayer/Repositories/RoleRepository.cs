@@ -14,7 +14,6 @@ public interface IRoleRepository
     public Task<List<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default);
     public Task<Role> InsertOrUpdateRoleAsync(Role user, CancellationToken cancellationToken = default);
     public Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default);
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
 public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
@@ -70,7 +69,8 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         {
             context.Entry(existingRole).CurrentValues.SetValues(role);
         }
-
+        
+        await context.SaveChangesAsync(cancellationToken);
         return role;
     }
 
@@ -80,6 +80,7 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         if (role != null)
         {
             context.Roles.Remove(role);
+            await context.SaveChangesAsync(cancellationToken);
         }
         else
         {

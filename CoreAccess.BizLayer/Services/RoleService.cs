@@ -52,7 +52,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             };
 
             var createdRole = await roleRepository.InsertOrUpdateRoleAsync(newRole);
-            await roleRepository.SaveChangesAsync();
             if (createdRole == null)
             {
                 throw new Exception("Failed to create role");
@@ -87,7 +86,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             existingRole.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
             var role = await roleRepository.InsertOrUpdateRoleAsync(existingRole);
-            await roleRepository.SaveChangesAsync();
             if (role == null)
             {
                 throw new Exception("Failed to update role");
@@ -126,7 +124,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             if (role.Permissions.All(p => p.Name != permission.Name))
             {
                 role.Permissions.Add(permission);
-                await roleRepository.SaveChangesAsync();
             }
         }
         catch (Exception ex)
@@ -141,7 +138,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         try
         {
             await roleRepository.DeleteRoleAsync(id);
-            await roleRepository.SaveChangesAsync();
         }
         catch (Exception ex)
         {
