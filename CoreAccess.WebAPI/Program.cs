@@ -94,7 +94,6 @@ builder.Services.AddOpenApi();
 
 #region Repositories
 
-builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
@@ -103,7 +102,6 @@ builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 #region Services
 
-builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();

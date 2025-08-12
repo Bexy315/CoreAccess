@@ -106,7 +106,6 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         {
             var newUser = new User
             {
-                TenantId = user.TenantId,
                 Username = user.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password),
                 Email = user.Email,

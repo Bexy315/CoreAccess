@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoreAccess.DataLayer.Migrations
 {
     [DbContext(typeof(CoreAccessDbContext))]
-    [Migration("20250810211546_init")]
+    [Migration("20250812190228_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -70,17 +70,11 @@ namespace CoreAccess.DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("TenantId")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<string>("UpdatedAt")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("Permissions", "coreaccess");
                 });
@@ -105,61 +99,13 @@ namespace CoreAccess.DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("TenantId")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<string>("UpdatedAt")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId");
-
                     b.ToTable("Roles", "coreaccess");
-                });
-
-            modelBuilder.Entity("CoreAccess.Models.Tenant", b =>
-                {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("LogoUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SettingsJson")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
-
-                    b.ToTable("Tenants", "coreaccess");
                 });
 
             modelBuilder.Entity("CoreAccess.Models.User", b =>
@@ -213,10 +159,6 @@ namespace CoreAccess.DataLayer.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("TenantId")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<string>("UpdatedAt")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -230,8 +172,6 @@ namespace CoreAccess.DataLayer.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -477,39 +417,6 @@ namespace CoreAccess.DataLayer.Migrations
                     b.ToTable("UserRoles", "coreaccess");
                 });
 
-            modelBuilder.Entity("CoreAccess.Models.Permission", b =>
-                {
-                    b.HasOne("CoreAccess.Models.Tenant", "Tenant")
-                        .WithMany("Permissions")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("CoreAccess.Models.Role", b =>
-                {
-                    b.HasOne("CoreAccess.Models.Tenant", "Tenant")
-                        .WithMany("Roles")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("CoreAccess.Models.User", b =>
-                {
-                    b.HasOne("CoreAccess.Models.Tenant", "Tenant")
-                        .WithMany("Users")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization", b =>
                 {
                     b.HasOne("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", "Application")
@@ -562,15 +469,6 @@ namespace CoreAccess.DataLayer.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CoreAccess.Models.Tenant", b =>
-                {
-                    b.Navigation("Permissions");
-
-                    b.Navigation("Roles");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>

@@ -16,7 +16,6 @@ public interface IInitialSetupService
 }
 public class InitialSetupService(
     IAppSettingsService appSettingsService,
-    ITenantService tenantService,
     IUserService userService,
     IRoleService roleService,
     IPermissionRepository permissionRepository,
@@ -78,14 +77,6 @@ public class InitialSetupService(
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService),
             "JWT settings configured successfully.");
 
-        var defaultTenant = await tenantService.CreateTenantAsync(new TenantCreateRequest()
-        {
-            Slug = "coreaccess",
-            DisplayName = "CoreAccess Default Tenant",
-            Description = "This is the default tenant for CoreAccess used for accessing the system.",
-            IsActive = true
-        });
-
         await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
         {
             ClientId = "coreaccess",
@@ -106,38 +97,32 @@ public class InitialSetupService(
             PostLogoutRedirectUris =
             {
                 new Uri(request.GeneralInitialSettings.BaseUri + "/signout-callback-oidc")
-            },
-            Properties =
-            {
-                {"tenant_id", JsonDocument.Parse($"\"{defaultTenant.Id}\"").RootElement}
-            },
+            }
         });
         
         
         var adminRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
-            TenantId = defaultTenant.Id,
             Name = "CoreAccess.Admin",
             Description = "CoreAccess Admin role for administrative access to CoreAccess"
         });
         
         await roleService.CreateRoleAsync(new RoleCreateRequest()
         {
-            TenantId = defaultTenant.Id,
             Name = "User",
             Description = "User role for default users"
         });
         
         List<CreatePermissionRequest> permissions = new()
         {
-            new() { TenantId = defaultTenant.Id, Name = "user.read", Description = "Read users", IsSystem = true },
-            new() { TenantId = defaultTenant.Id, Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
-            new() { TenantId = defaultTenant.Id, Name = "role.read", Description = "Read roles", IsSystem = true },
-            new() { TenantId = defaultTenant.Id, Name = "role.write", Description = "Create/update/delete roles", IsSystem = true },
-            new() { TenantId = defaultTenant.Id, Name = "permission.read", Description = "Read permissions", IsSystem = true },
-            new() { TenantId = defaultTenant.Id, Name = "permission.write", Description = "Manage permissions", IsSystem = true },
-            new() { TenantId = defaultTenant.Id, Name = "settings.read", Description = "Read system settings", IsSystem = true },
-            new() { TenantId = defaultTenant.Id, Name = "settings.write", Description = "Update system settings", IsSystem = true }
+            new() { Name = "user.read", Description = "Read users", IsSystem = true },
+            new() { Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
+            new() { Name = "role.read", Description = "Read roles", IsSystem = true },
+            new() { Name = "role.write", Description = "Create/update/delete roles", IsSystem = true },
+            new() { Name = "permission.read", Description = "Read permissions", IsSystem = true },
+            new() { Name = "permission.write", Description = "Manage permissions", IsSystem = true },
+            new() { Name = "settings.read", Description = "Read system settings", IsSystem = true },
+            new() { Name = "settings.write", Description = "Update system settings", IsSystem = true }
         };
         
         foreach (var permission in permissions)
@@ -162,8 +147,6 @@ public class InitialSetupService(
             };
             CoreLogger.LogSystem(CoreLogLevel.Warning, nameof(InitialSetupService), "Admin user not provided, using default root user with a generated password. Please change it after setup. Password: "+ password);
         }
-        
-        request.UserInitialSettings.Admin.TenantId = defaultTenant.Id;
         
         var newUser = await userService.CreateUserAsync(request.UserInitialSettings.Admin);
         await userService.AddRoleToUserAsync(newUser.Id.ToString(), "CoreAccess.Admin");

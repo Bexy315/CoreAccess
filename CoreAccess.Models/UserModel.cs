@@ -13,7 +13,6 @@ public enum UserStatus
 public class User
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid TenantId { get; set; } 
     public string Username { get; set; } = "";
     public string? Email { get; set; }
     public string? FirstName { get; set; }
@@ -32,7 +31,6 @@ public class User
     public string UpdatedAt { get; set; } = "";
     public string PasswordHash { get; set; } = "";
     public List<Role> Roles { get; set; } = new();
-    [JsonIgnore] public Tenant Tenant { get; set; }
 }
 
 public class UserDto(User src)

@@ -44,7 +44,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         {
             var newRole = new Role
             {
-                TenantId = request.TenantId,
                 Name = request.Name,
                 Description = request.Description,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),

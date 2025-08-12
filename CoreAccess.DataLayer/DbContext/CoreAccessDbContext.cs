@@ -7,7 +7,6 @@ namespace CoreAccess.DataLayer.DbContext;
 
 public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) : Microsoft.EntityFrameworkCore.DbContext(options)
 {
-    public DbSet<Tenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
@@ -18,32 +17,12 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     modelBuilder.HasDefaultSchema("coreaccess");
 
     var isSqlite = Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
-
-    #region Tenant
-
-    var tenantsBuilder = modelBuilder.Entity<Tenant>();
-
-    tenantsBuilder.HasKey(t => t.Id);
-    if (isSqlite) ConfigureGuidAsBlob(tenantsBuilder, u => u.Id);
-    tenantsBuilder.Property(t => t.Slug).IsRequired();
-    tenantsBuilder.HasIndex(t => t.Slug).IsUnique();
-    
-    tenantsBuilder.HasMany(u => u.Users).WithOne(u => u.Tenant).HasForeignKey(t => t.TenantId);
-    tenantsBuilder.HasMany(u => u.Roles).WithOne(u => u.Tenant).HasForeignKey(t => t.TenantId);
-    tenantsBuilder.HasMany(u => u.Permissions).WithOne(u => u.Tenant).HasForeignKey(t => t.TenantId);
-    
-    
-    #endregion
     
     #region User
     var userBuilder = modelBuilder.Entity<User>();
 
     userBuilder.HasKey(u => u.Id);
     if (isSqlite) ConfigureGuidAsBlob(userBuilder, u => u.Id);
-
-    userBuilder.Property(u => u.TenantId)
-        .IsRequired();
-    if (isSqlite) ConfigureGuidAsBlob(userBuilder, u => u.TenantId);
     
     userBuilder.Property(u => u.Username)
         .IsRequired()
@@ -76,11 +55,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     
     if (isSqlite) ConfigureGuidAsBlob(roleBuilder, r => r.Id);
     
-    roleBuilder.Property(r => r.TenantId)
-        .IsRequired();
-    
-    if (isSqlite) ConfigureGuidAsBlob(roleBuilder, r => r.TenantId);
-
     roleBuilder.HasMany(r => r.Permissions)
         .WithMany(p => p.Roles)
         .UsingEntity<Dictionary<string, object>>(
@@ -101,10 +75,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     var permissionBuilder = modelBuilder.Entity<Permission>();
     permissionBuilder.HasKey(p => p.Id);
     if (isSqlite) ConfigureGuidAsBlob(permissionBuilder, u => u.Id);
-    
-    permissionBuilder.Property(p => p.TenantId)
-        .IsRequired();
-    if (isSqlite) ConfigureGuidAsBlob(permissionBuilder, p => p.TenantId);
     
     #endregion
 

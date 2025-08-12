@@ -35,7 +35,6 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
         var newPermission = new Permission
         {
             Id = Guid.NewGuid(),
-            TenantId = request.TenantId,
             Name = request.Name,
             Description = request.Description,
             IsSystem = request.IsSystem,
