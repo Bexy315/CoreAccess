@@ -1,7 +1,7 @@
+using CoreAccess.BizLayer.Decorator;
 using CoreAccess.BizLayer.Logger;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.Models;
-using CoreAccess.WebAPI.Decorator;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
 using Microsoft.AspNetCore.Mvc;

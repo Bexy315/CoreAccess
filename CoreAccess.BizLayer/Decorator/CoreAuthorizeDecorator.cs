@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CoreAccess.WebAPI.Decorator;
+namespace CoreAccess.BizLayer.Decorator;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class CoreAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter

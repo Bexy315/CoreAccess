@@ -21,15 +21,18 @@ public class InitialSetupService(
     IPermissionRepository permissionRepository,
     IOpenIddictService openIddictService) : IInitialSetupService
 {
-    private static bool? IsSetupCompletedBuffer { get; set; } = null;
+    private static bool? IsSetupCompletedBuffer { get; set; } 
+    private static bool IsBufferInitialized { get; set; }
 
 
     public bool IsSetupCompleted()
     {   
-        if (IsSetupCompletedBuffer == null)
+        if (!IsBufferInitialized)
         {
-            var filePath = Path.Combine(AppContext.BaseDirectory, "data", "etc", "init_setup_completed.txt"); 
+          //  var filePath = Path.Combine(AppContext.BaseDirectory, "data", "etc", "init_setup_completed.txt"); 
+            var filePath = "E:\\data\\etc\\init_setup_completed.txt";
             IsSetupCompletedBuffer = File.Exists(filePath) && File.ReadAllText(filePath).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+            IsBufferInitialized = true;
         } 
         return IsSetupCompletedBuffer == true;
     }

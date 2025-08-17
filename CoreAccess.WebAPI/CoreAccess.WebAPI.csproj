@@ -43,6 +43,11 @@
       <ProjectReference Include="..\CoreAccess.Models\CoreAccess.Models.csproj" />
       <ProjectReference Include="..\CoreAccess.BizLayer\CoreAccess.BizLayer.csproj" />
       <ProjectReference Include="..\CoreAccess.DataLayer\CoreAccess.DataLayer.csproj" />
+      <ProjectReference Include="..\CoreAccess.Workers\CoreAccess.Workers.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="App_Data\" />
     </ItemGroup>
 
 </Project>

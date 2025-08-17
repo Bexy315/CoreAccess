@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.DataLayer", "Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.Models", "CoreAccess.Models\CoreAccess.Models.csproj", "{A15EAAAB-C9FB-42D5-8041-FEA0C2D4527F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreAccess.Workers", "CoreAccess.Workers\CoreAccess.Workers.csproj", "{207E0AC9-6AC4-43DA-8E4F-C9EBE5ECF902}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{A15EAAAB-C9FB-42D5-8041-FEA0C2D4527F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A15EAAAB-C9FB-42D5-8041-FEA0C2D4527F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A15EAAAB-C9FB-42D5-8041-FEA0C2D4527F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{207E0AC9-6AC4-43DA-8E4F-C9EBE5ECF902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{207E0AC9-6AC4-43DA-8E4F-C9EBE5ECF902}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{207E0AC9-6AC4-43DA-8E4F-C9EBE5ECF902}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{207E0AC9-6AC4-43DA-8E4F-C9EBE5ECF902}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

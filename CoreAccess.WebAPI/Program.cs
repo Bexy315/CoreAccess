@@ -4,6 +4,7 @@ using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.WebAPI.Logger.Sinks;
+using CoreAccess.Workers;
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -109,6 +110,8 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IOpenIddictService, OpenIddictService>();
 builder.Services.AddScoped<IInitialSetupService, InitialSetupService>();
 
+builder.Services.AddHostedService<CommonWorkerService>();
+
 #endregion
 
 #region OpenIddict
@@ -121,10 +124,12 @@ builder.Services.AddOpenIddict()
     })
     .AddServer(options =>
     {
-        options.SetTokenEndpointUris("/api/connect/token");
+        options.SetTokenEndpointUris("/connect/token");
+        options.SetAuthorizationEndpointUris("/connect/authorize");
+        options.SetUserInfoEndpointUris("/connect/userinfo");
         options.AllowPasswordFlow();
         options.AllowRefreshTokenFlow();
-        
+        options.AllowAuthorizationCodeFlow();
         
         options.AcceptAnonymousClients();
         options.UseAspNetCore()
@@ -133,6 +138,9 @@ builder.Services.AddOpenIddict()
 
         options.AddDevelopmentEncryptionCertificate()
             .AddDevelopmentSigningCertificate();
+        
+        options.RegisterClaims("role", "email", "name");
+        
     }).AddValidation(options =>
     {
         options.UseLocalServer();

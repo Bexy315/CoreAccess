@@ -11,7 +11,6 @@ using OpenIddict.Server.AspNetCore;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
-[Route("api")]
 public class AuthController(IAppSettingsService appSettingsService, IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService) : ControllerBase
 {
     [HttpPost("connect/token")]
@@ -62,7 +61,7 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         return BadRequest("Unsupported grant type.");
     }
     
-    [HttpPost("register")]
+    [HttpPost("api/register")]
     [Produces(typeof(UserDto))]
     public async Task<IActionResult> Register([FromBody] RegisterRequest dto, CancellationToken cancellationToken = default)
     {
