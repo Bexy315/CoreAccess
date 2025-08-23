@@ -21,7 +21,7 @@ if (builder.Environment.IsDevelopment())
         options.AddPolicy("DevCors", policy =>
         {
             policy
-                .WithOrigins("http://localhost:8081", "http://localhost:8080")
+                .WithOrigins("http://localhost:8081", "http://localhost:8080", "http://localhost:5173")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
@@ -116,6 +116,13 @@ builder.Services.AddHostedService<CommonWorkerService>();
 
 #region OpenIddict
 
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/account/login";
+        options.LogoutPath = "/account/logout";
+    });
+
 builder.Services.AddOpenIddict()
     .AddCore(options =>
     {
@@ -127,14 +134,18 @@ builder.Services.AddOpenIddict()
         options.SetTokenEndpointUris("/connect/token");
         options.SetAuthorizationEndpointUris("/connect/authorize");
         options.SetUserInfoEndpointUris("/connect/userinfo");
+        options.SetIntrospectionEndpointUris("/connect/introspect");
+        options.SetRevocationEndpointUris("/connect/revoke");
         options.AllowPasswordFlow();
         options.AllowRefreshTokenFlow();
         options.AllowAuthorizationCodeFlow();
         
+        
         options.AcceptAnonymousClients();
         options.UseAspNetCore()
             .EnableTokenEndpointPassthrough()
-            .DisableTransportSecurityRequirement();
+            .DisableTransportSecurityRequirement()
+            .EnableAuthorizationEndpointPassthrough();
 
         options.AddDevelopmentEncryptionCertificate()
             .AddDevelopmentSigningCertificate();
@@ -146,14 +157,9 @@ builder.Services.AddOpenIddict()
         options.UseLocalServer();
     });
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-    options.DefaultForbidScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-});
-
 #endregion
+
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -189,6 +195,8 @@ app.UseMiddleware<InitialSetupGuardMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
 
 app.MapControllers();
 

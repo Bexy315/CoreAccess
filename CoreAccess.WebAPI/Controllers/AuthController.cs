@@ -36,7 +36,7 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
             
             foreach (var claim in claims)
             {
-                claim.SetDestinations(OpenIddictConstants.Destinations.AccessToken);
+                claim.SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken, OpenIddictConstants.Destinations.IssuedToken);
             }
 
             var identity = new ClaimsIdentity(claims, TokenValidationParameters.DefaultAuthenticationType);
@@ -59,6 +59,38 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         }
 
         return BadRequest("Unsupported grant type.");
+    }
+    
+    [HttpGet("connect/authorize")]
+    public async Task<IActionResult> Authorize()
+    {
+        var request = HttpContext.GetOpenIddictServerRequest()
+                      ?? throw new InvalidOperationException("Missing OIDC request.");
+
+        // Wenn der User nicht eingeloggt ist → Redirect zur Login Page
+        if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            return Challenge("Cookies");
+        }
+        var userId = User.FindFirstValue(OpenIddictConstants.Claims.Subject);
+        
+        var user = await userService.SearchUsersAsync(new UserSearchOptions()
+        {
+            Id = userId,
+            PageSize = 1
+        });
+        
+        var claims = openIddictService.GetUserClaims(user.Items.FirstOrDefault());
+        var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        identity.AddClaims(claims);
+
+        // Scopes & Ressourcen übernehmen
+        identity.SetScopes(request.GetScopes());
+
+        var principal = new ClaimsPrincipal(identity);
+
+        // Auth-Response an OpenIddict weiterreichen
+        return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
     
     [HttpPost("api/register")]
