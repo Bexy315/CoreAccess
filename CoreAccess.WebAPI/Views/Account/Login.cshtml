@@ -2,29 +2,109 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh;">
-    <div class="card shadow-lg" style="max-width: 400px; width: 100%;">
-        <div class="card-body p-4">
-            <h2 class="card-title text-center mb-4">Login</h2>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-            <form method="post" asp-controller="Account" asp-action="Login">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required />
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required />
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
+        .login-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 320px;
+        }
 
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div class="alert alert-danger mt-3" role="alert">
-                    Invalid username or password
-                </div>
-            }
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            background-color: #fdecea;
+            color: #d93025;
+            border: 1px solid #f5c2c0;
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #0078d7;
+            box-shadow: 0 0 3px rgba(0,120,215,0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background-color: #0078d7;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+        }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <h2>CoreAccess Login</h2>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert" role="alert">
+            Invalid username or password
         </div>
-    </div>
+    }
+
+    <form method="post" asp-controller="Account" asp-action="Login">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="Username" required />
+        </div>
+        <div class="form-group">
+            <label for="password">Passwort</label>
+            <input type="password" id="password" name="Password" required />
+        </div>
+        <button type="submit">Login...</button>
+    </form>
 </div>
+</body>
+</html>
