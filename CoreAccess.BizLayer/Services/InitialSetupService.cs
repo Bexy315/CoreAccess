@@ -12,7 +12,7 @@ namespace CoreAccess.BizLayer.Services;
 public interface IInitialSetupService
 {
     bool IsSetupCompleted();
-    Task RunSetupAsync(InitialSetupRequest request);
+    Task RunSetupAsync(InitialSetupRequest request, CancellationToken cancellationToken = default);
 }
 public class InitialSetupService(
     IAppSettingsService appSettingsService,
@@ -23,13 +23,12 @@ public class InitialSetupService(
 {
     private static bool? IsSetupCompletedBuffer { get; set; } 
     private static bool IsBufferInitialized { get; set; }
-
-
+    
     public bool IsSetupCompleted()
     {   
         if (!IsBufferInitialized)
         {
-          //  var filePath = Path.Combine(AppContext.BaseDirectory, "data", "etc", "init_setup_completed.txt"); 
+          //var filePath = Path.Combine(AppContext.BaseDirectory, "data", "etc", "init_setup_completed.txt"); 
             var filePath = "E:\\data\\etc\\init_setup_completed.txt";
             IsSetupCompletedBuffer = File.Exists(filePath) && File.ReadAllText(filePath).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
             IsBufferInitialized = true;
@@ -37,7 +36,7 @@ public class InitialSetupService(
         return IsSetupCompletedBuffer == true;
     }
 
-    public async Task RunSetupAsync(InitialSetupRequest request)
+    public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken cancellationToken = default)
     {
         if (IsSetupCompletedBuffer == true)
         {
@@ -94,16 +93,18 @@ public class InitialSetupService(
                 OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
                 OpenIddictConstants.Permissions.Endpoints.Authorization,
                 OpenIddictConstants.Permissions.Endpoints.Introspection,
+                OpenIddictConstants.Permissions.Endpoints.EndSession,
+                OpenIddictConstants.Permissions.Endpoints.Token,
                 OpenIddictConstants.Permissions.ResponseTypes.Token,
                 OpenIddictConstants.Permissions.ResponseTypes.Code,
             },
             RedirectUris =
             {
-                new Uri(request.GeneralInitialSettings.BaseUri + "/signin-oidc")
+                new Uri("http://localhost:5173/callback")
             },
             PostLogoutRedirectUris =
             {
-                new Uri(request.GeneralInitialSettings.BaseUri + "/signout-callback-oidc")
+                new Uri("http://localhost:5173/")
             }
         });
         
@@ -155,8 +156,8 @@ public class InitialSetupService(
             CoreLogger.LogSystem(CoreLogLevel.Warning, nameof(InitialSetupService), "Admin user not provided, using default root user with a generated password. Please change it after setup. Password: "+ password);
         }
         
-        var newUser = await userService.CreateUserAsync(request.UserInitialSettings.Admin);
-        await userService.AddRoleToUserAsync(newUser.Id.ToString(), "CoreAccess.Admin");
+        var newUser = await userService.CreateUserAsync(request.UserInitialSettings.Admin, cancellationToken: cancellationToken);
+        await userService.AddRoleToUserAsync(newUser.Id.ToString(), "CoreAccess.Admin", cancellationToken: cancellationToken);
         
         CoreLogger.LogSystem(CoreLogLevel.Information, nameof(InitialSetupService), "User '" + request.UserInitialSettings.Admin.Username + "' created successfully.");
 

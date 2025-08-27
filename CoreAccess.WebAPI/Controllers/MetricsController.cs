@@ -7,6 +7,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
 [Route("api/metrics")]
+[CoreAuthorize(Roles = "CoreAccess.Admin")]
 public class MetricsController(IUserService userService, IRoleService roleService) : ControllerBase
 {
     [HttpGet]

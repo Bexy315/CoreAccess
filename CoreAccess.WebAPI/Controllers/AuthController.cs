@@ -58,6 +58,44 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
+        if (request.IsAuthorizationCodeGrantType())
+        {       
+            var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            var principal = result.Principal;
+            if (principal is null)
+                return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+
+            // Optional: Revalidate/rehydrate (User deaktiviert? Rollen geändert?)
+            var userId = principal.GetClaim(OpenIddictConstants.Claims.Subject);
+            var userRes = await userService.SearchUsersAsync(new UserSearchOptions { Id = userId, PageSize = 1 });
+            var user = userRes.Items.FirstOrDefault();
+            if (user is null)
+            {
+                return Forbid(
+                    new AuthenticationProperties(new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Account no longer exists."
+                    }),
+                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
+                );
+            }
+            
+            var freshClaims = openIddictService.GetUserClaims(user);
+            foreach (var c in freshClaims)
+                c.SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken);
+
+            var freshIdentity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType);
+            freshIdentity.AddClaims(freshClaims);
+            var freshPrincipal = new ClaimsPrincipal(freshIdentity);
+
+            freshPrincipal.SetScopes(result.Principal!.GetScopes());
+            freshPrincipal.SetResources("coreaccess-api");
+
+            return SignIn(freshPrincipal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
+
         return BadRequest("Unsupported grant type.");
     }
     
@@ -81,7 +119,7 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         });
         
         var claims = openIddictService.GetUserClaims(user.Items.FirstOrDefault());
-        var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType);
         identity.AddClaims(claims);
 
         // Scopes & Ressourcen übernehmen
@@ -91,6 +129,44 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
 
         // Auth-Response an OpenIddict weiterreichen
         return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+    
+    [HttpGet("~/connect/userinfo"), HttpPost("~/connect/userinfo")]
+    [IgnoreAntiforgeryToken, Produces("application/json")]
+    public async Task<IActionResult> UserInfo()
+    {
+        var userResult = await userService.SearchUsersAsync(new UserSearchOptions()
+        {
+            Id = User.FindFirstValue(OpenIddictConstants.Claims.Subject),
+            PageSize = 1
+        });
+        
+        var user = userResult.Items.FirstOrDefault();
+        
+        if (user is null)
+        {
+            return Challenge(
+                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidToken,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The specified access token is bound to an account that no longer exists."
+                }));
+        }
+        
+        var response = new Dictionary<string, object?>
+        {
+            ["sub"]   = user.Id,          
+            ["name"]  = user.Username,    
+            ["email"] = user.Email
+        };
+        
+        if (user.Roles?.Any() == true)
+        {
+            response["role"] = user.Roles.Select(r => r.Name).ToList();
+        }
+        
+        return Ok(response);
     }
     
     [HttpPost("api/register")]
