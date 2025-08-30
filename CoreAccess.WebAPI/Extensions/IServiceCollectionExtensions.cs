@@ -152,7 +152,8 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
                     .DisableTransportSecurityRequirement()
                     .EnableTokenEndpointPassthrough()
                     .EnableAuthorizationEndpointPassthrough()
-                    .EnableUserInfoEndpointPassthrough();
+                    .EnableUserInfoEndpointPassthrough()
+                    .EnableEndSessionEndpointPassthrough();
 
                 options.AddDevelopmentEncryptionCertificate()
                     .AddDevelopmentSigningCertificate();

@@ -13,7 +13,8 @@ namespace CoreAccess.WebAPI.Controllers;
 [Controller]
 public class AuthController(IAppSettingsService appSettingsService, IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService) : ControllerBase
 {
-    [HttpPost("connect/token")]
+    [HttpPost("~/connect/token")]
+    [IgnoreAntiforgeryToken, Produces("application/json")]
     public async Task<IActionResult> Exchange()
     {
         var request = HttpContext.GetOpenIddictServerRequest();
@@ -99,7 +100,8 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         return BadRequest("Unsupported grant type.");
     }
     
-    [HttpGet("connect/authorize")]
+    [HttpGet("~/connect/authorize")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Authorize()
     {
         var request = HttpContext.GetOpenIddictServerRequest()
@@ -135,9 +137,29 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
     [IgnoreAntiforgeryToken, Produces("application/json")]
     public async Task<IActionResult> UserInfo()
     {
+        var request = HttpContext.GetOpenIddictServerRequest();
+        
+        if (request == null || request.AccessToken == null)
+            throw new InvalidOperationException("OpenIddict request is null.");
+        
+        var claimsPrincipal = await tokenService.ValidateTokenAsync(request.AccessToken);
+        
+        var userId = claimsPrincipal.Claims.FirstOrDefault(x => x.Type == OpenIddictConstants.Claims.Subject);
+        
+        if (userId == null)
+        {
+            return Challenge(
+                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidToken,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The access token is invalid."
+                }));
+        }
+        
         var userResult = await userService.SearchUsersAsync(new UserSearchOptions()
         {
-            Id = User.FindFirstValue(OpenIddictConstants.Claims.Subject),
+            Id = userId.Value,
             PageSize = 1
         });
         
@@ -167,6 +189,33 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         }
         
         return Ok(response);
+    }
+    
+    // ===== /connect/endsession =====  (RP-initiated logout)
+    [HttpGet("~/connect/endsession"), HttpPost("~/connect/endsession")]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> EndSession()
+    {
+        var request = HttpContext.GetOpenIddictServerRequest()
+                      ?? throw new InvalidOperationException("Missing OIDC request.");
+
+        // (1) Kill your local SSO cookie session
+        await HttpContext.SignOutAsync("Cookies");
+
+        // (2) Optional: revoke persisted tokens for this subject (hard logout)
+     /*
+        var subject = User.FindFirst(OpenIddictConstants.Claims.Subject)?.Value;
+        if (!string.IsNullOrEmpty(subject))
+        {
+            await foreach (var token in tokenManager.FindBySubjectAsync(subject))
+            {
+                await tokenManager.TryRevokeAsync(token);
+            }
+        } 
+     */
+
+        // Hand control back so OpenIddict can validate id_token_hint, redirect, etc.
+        return SignOut(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
     
     [HttpPost("api/register")]
