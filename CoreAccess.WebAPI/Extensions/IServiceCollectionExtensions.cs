@@ -13,10 +13,11 @@ public static class IServiceCollectionExtensions
 {
     private static readonly string Environment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")??"Production";
     private static readonly bool IsDevelopment = Environment == "Development";
+    private static readonly bool IsDebugMode = System.Environment.GetEnvironmentVariable("COREACCESS_DEBUGMODE") == "True";
     
 public static IServiceCollection AddCoreAccessCors(this IServiceCollection services)
     {
-        if (IsDevelopment)
+        if (IsDevelopment || IsDebugMode)
         {
             services.AddCors(options =>
             {

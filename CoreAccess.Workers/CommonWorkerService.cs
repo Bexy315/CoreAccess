@@ -9,7 +9,8 @@ public class CommonWorkerService(IServiceProvider serviceProvider) : BackgroundS
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+        if(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" || 
+           Environment.GetEnvironmentVariable("COREACCESS_DEBUGMODE") == "True")
         {
             using var scope = serviceProvider.CreateScope();
             var initialSetupService = scope.ServiceProvider.GetRequiredService<IInitialSetupService>();
