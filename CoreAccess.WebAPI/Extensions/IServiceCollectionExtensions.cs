@@ -1,6 +1,7 @@
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.DataLayer.Repositories;
+using CoreAccess.Models;
 using CoreAccess.Workers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;

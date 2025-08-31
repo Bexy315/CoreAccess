@@ -191,7 +191,6 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         return Ok(response);
     }
     
-    // ===== /connect/endsession =====  (RP-initiated logout)
     [HttpGet("~/connect/endsession"), HttpPost("~/connect/endsession")]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> EndSession()
@@ -218,7 +217,7 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         return SignOut(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
     
-    [HttpPost("api/register")]
+    [HttpPost("~/api/register")]
     [Produces(typeof(UserDto))]
     public async Task<IActionResult> Register([FromBody] RegisterRequest dto, CancellationToken cancellationToken = default)
     {
