@@ -56,6 +56,32 @@ public class CoreAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
                 return Task.CompletedTask;
             }
         }
+        
+        if (!string.IsNullOrWhiteSpace(Permissions))
+        {
+            var permissions = Permissions.Split(',').Select(r => r.Trim()).ToList();
+            var userRoles = claimsPrincipal.Claims
+                .Where(c => c.Type == "role")
+                .Select(c => c.Value)
+                .ToList();
+
+            if (userRoles.Any())
+            {
+                var roleService = httpContext.RequestServices.GetService<IPermissionService>();
+                
+                var userPermissions = roleService.GetPermissionsByRolesAsync(userRoles).Result;
+                
+                if (!permissions.Any(permission => userPermissions.Any(up => up.Name == permission)))
+                {
+                    context.Result = new ObjectResult("Forbidden") { StatusCode = StatusCodes.Status403Forbidden };
+                    return Task.CompletedTask;
+                }
+            }
+            else{
+                context.Result = new ObjectResult("Forbidden") { StatusCode = StatusCodes.Status403Forbidden };
+                return Task.CompletedTask;
+            }
+        }
 
         return Task.CompletedTask;
     }

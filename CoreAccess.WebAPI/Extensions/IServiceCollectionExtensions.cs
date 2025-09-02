@@ -114,6 +114,7 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IOpenIddictService, OpenIddictService>();
         services.AddScoped<IInitialSetupService, InitialSetupService>();
 

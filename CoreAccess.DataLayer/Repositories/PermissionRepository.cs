@@ -6,6 +6,7 @@ namespace CoreAccess.DataLayer.Repositories;
 
 public interface IPermissionRepository
 {
+    Task<List<Permission>> SearchPermissionsAsync(string? nameFilter = null, List<string>? roleFilters = null, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
     Task<List<Permission>> GetAllPermissionsAsync();
     Task<Permission> GetPermissionByNameAsync(string permissionName);
     Task<Permission?> GetPermissionByIdAsync(Guid id);
@@ -14,6 +15,26 @@ public interface IPermissionRepository
 }
 public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepository
 {
+    public async Task<List<Permission>> SearchPermissionsAsync(string? nameFilter = null, List<string>? roleFilters = null, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+    {
+        var query = context.Permissions.AsQueryable();
+        
+        if (!string.IsNullOrWhiteSpace(nameFilter))
+        {
+            query = query.Where(p => p.Name.Contains(nameFilter));
+        }
+        
+        if (roleFilters != null && roleFilters.Count > 0)
+        {
+            query = query.Where(p => p.Roles.Any(r => roleFilters.Contains(r.Name)));
+        }
+        
+        return await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken: cancellationToken);
+    }
+
     public async Task<List<Permission>> GetAllPermissionsAsync()
     {
         return await context.Permissions.ToListAsync();
