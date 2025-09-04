@@ -6,7 +6,7 @@ namespace CoreAccess.DataLayer.Repositories;
 
 public interface IPermissionRepository
 {
-    Task<List<Permission>> SearchPermissionsAsync(string? nameFilter = null, List<string>? roleFilters = null, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
+    Task<List<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default);
     Task<List<Permission>> GetAllPermissionsAsync();
     Task<Permission> GetPermissionByNameAsync(string permissionName);
     Task<Permission?> GetPermissionByIdAsync(Guid id);
@@ -15,23 +15,38 @@ public interface IPermissionRepository
 }
 public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepository
 {
-    public async Task<List<Permission>> SearchPermissionsAsync(string? nameFilter = null, List<string>? roleFilters = null, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<List<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default)
     {
         var query = context.Permissions.AsQueryable();
         
-        if (!string.IsNullOrWhiteSpace(nameFilter))
+        if (!string.IsNullOrWhiteSpace(options.Search))
         {
-            query = query.Where(p => p.Name.Contains(nameFilter));
+            query = query.Where(p => p.Name.Contains(options.Search) || (p.Description != null && p.Description.Contains(options.Search)));
         }
         
-        if (roleFilters != null && roleFilters.Count > 0)
+        if (!string.IsNullOrWhiteSpace(options.Name))
         {
-            query = query.Where(p => p.Roles.Any(r => roleFilters.Contains(r.Name)));
+            query = query.Where(p => p.Name.Contains(options.Name));
+        }
+        
+        if (options.Roles != null && options.Roles.Count > 0)
+        {
+            query = query.Where(p => p.Roles.Any(r => options.Roles.Contains(r.Name)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.Description))
+        {
+            query = query.Where(p => p.Description != null && p.Description.Contains(options.Description));
+        }
+        
+        if (options.IsSystem.HasValue)
+        {
+            query = query.Where(p => p.IsSystem == options.IsSystem.Value);
         }
         
         return await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((options.Page - 1) * options.PageSize)
+            .Take(options.PageSize)
             .ToListAsync(cancellationToken: cancellationToken);
     }
 

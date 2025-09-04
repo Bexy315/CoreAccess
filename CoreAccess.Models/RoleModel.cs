@@ -27,7 +27,6 @@ public class RoleDto(Role src)
 }
 public class RoleCreateRequest
 {
-    public Guid TenantId { get; set; } = Guid.Empty;
     public string Name { get; set; } = "";
     public string? Description { get; set; }
 }
