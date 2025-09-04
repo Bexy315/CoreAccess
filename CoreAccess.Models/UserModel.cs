@@ -40,6 +40,10 @@ public class UserDto(User src)
     public string? Email { get; set; } = src.Email;
     public string? FirstName { get; set; } = src.FirstName;
     public string? LastName { get; set; } = src.LastName;
+}
+
+public class UserDetailDto(User src) : UserDto(src)
+{
     public string? Phone { get; set; } = src.Phone;
     public string? Address { get; set; } = src.Address;
     public string? City { get; set; } = src.City;

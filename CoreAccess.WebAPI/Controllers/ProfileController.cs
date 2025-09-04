@@ -27,7 +27,7 @@ public class ProfileController(IUserService userService) : ControllerBase
             if (user == null)
                 return NotFound("User not found.");
             
-            return Ok(new UserDto(user));
+            return Ok(user);
         }
         catch(ArgumentException ex)
         {

@@ -23,17 +23,14 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         
         if (request.IsPasswordGrantType())
         {
-            var user = await userService.SearchUsersAsync(new UserSearchOptions()
-            {
-                Username = request.Username,
-                PageSize = 1
-            });
+            var user = await userService.GetUserByUsernameAsync(request.Username);
             
-            if (user == null || user.TotalCount == 0 || !await userService.ValidateCredentialsByUsernameAsync(user.Items.FirstOrDefault().Username, request.Password))
+            if (user == null || !await userService.ValidateCredentialsByUsernameAsync(user.Username, request.Password))
             {
                 return Forbid();
             }
-            var claims = openIddictService.GetUserClaims(user.Items.FirstOrDefault());
+            
+            var claims = openIddictService.GetUserClaims(user);
             
             foreach (var claim in claims)
             {
@@ -68,8 +65,9 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
 
             // Optional: Revalidate/rehydrate (User deaktiviert? Rollen geändert?)
             var userId = principal.GetClaim(OpenIddictConstants.Claims.Subject);
-            var userRes = await userService.SearchUsersAsync(new UserSearchOptions { Id = userId, PageSize = 1 });
-            var user = userRes.Items.FirstOrDefault();
+            
+            var user = await userService.GetUserByIdAsync(userId);
+            
             if (user is null)
             {
                 return Forbid(
@@ -114,13 +112,9 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
         }
         var userId = User.FindFirstValue(OpenIddictConstants.Claims.Subject);
         
-        var user = await userService.SearchUsersAsync(new UserSearchOptions()
-        {
-            Id = userId,
-            PageSize = 1
-        });
+        var user = await userService.GetUserByIdAsync(userId);
         
-        var claims = openIddictService.GetUserClaims(user.Items.FirstOrDefault());
+        var claims = openIddictService.GetUserClaims(user);
         var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType);
         identity.AddClaims(claims);
 
@@ -157,13 +151,7 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
                 }));
         }
         
-        var userResult = await userService.SearchUsersAsync(new UserSearchOptions()
-        {
-            Id = userId.Value,
-            PageSize = 1
-        });
-        
-        var user = userResult.Items.FirstOrDefault();
+        var user = await userService.GetUserByIdAsync(userId.Value);
         
         if (user is null)
         {
@@ -197,49 +185,11 @@ public class AuthController(IAppSettingsService appSettingsService, IUserService
     {
         var request = HttpContext.GetOpenIddictServerRequest()
                       ?? throw new InvalidOperationException("Missing OIDC request.");
-
+        
         // (1) Kill your local SSO cookie session
         await HttpContext.SignOutAsync("Cookies");
-
-        // (2) Optional: revoke persisted tokens for this subject (hard logout)
-     /*
-        var subject = User.FindFirst(OpenIddictConstants.Claims.Subject)?.Value;
-        if (!string.IsNullOrEmpty(subject))
-        {
-            await foreach (var token in tokenManager.FindBySubjectAsync(subject))
-            {
-                await tokenManager.TryRevokeAsync(token);
-            }
-        } 
-     */
-
+        
         // Hand control back so OpenIddict can validate id_token_hint, redirect, etc.
         return SignOut(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-    }
-    
-    [HttpPost("~/api/register")]
-    [Produces(typeof(UserDto))]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest dto, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            if (appSettingsService.Get(AppSettingsKeys.DisableRegistration) == "true")
-                return StatusCode(403, "Registration is disabled.");
-            
-            if (await userService.UsernameExistsAsync(dto.Username, cancellationToken))
-                return BadRequest("Username already exists.");
-
-            var user = await userService.CreateUserAsync(new UserCreateRequest(){Password = dto.Password, Username = dto.Username}, cancellationToken);
-            return Ok(user);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            return StatusCode(500, ex.Message);
-        }
     }
 }

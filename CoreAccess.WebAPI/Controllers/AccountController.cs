@@ -51,11 +51,4 @@ public class AccountController(IUserService userService) : Controller
 
         return Redirect(returnUrl ?? "/");
     }
-
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
-    {
-        await HttpContext.SignOutAsync("Cookies");
-        return Redirect("/");
-    }
 }

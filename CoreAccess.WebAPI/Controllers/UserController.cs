@@ -34,6 +34,30 @@ public class UserController(IUserService userService) : ControllerBase
         }
     }
     
+    [HttpGet]
+    [Route("{userId}")]
+    [Produces(typeof(PagedResult<UserDto>))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
+    public async Task<IActionResult> GetUser([FromRoute]string userId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+          //  var user = await userService.SearchUsersAsync(options, cancellationToken);
+                //TODO: Implement GetUserById in UserService
+            return Ok();
+        }
+        catch(ArgumentException ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while getting user", ex);
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while getting user", ex);
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
     [HttpPost]
     [Produces(typeof(UserDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
@@ -58,6 +82,7 @@ public class UserController(IUserService userService) : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+    
     [HttpPut]
     [Route("{userId}")]
     [Produces(typeof(UserDto))]

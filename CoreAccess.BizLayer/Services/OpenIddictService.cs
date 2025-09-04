@@ -6,13 +6,13 @@ namespace CoreAccess.BizLayer.Services;
 
 public interface IOpenIddictService
 {
-    List<Claim> GetUserClaims(UserDto user);
+    List<Claim> GetUserClaims(UserDetailDto user);
     public Task AddApplicationAsync(OpenIddictApplicationDescriptor application);
 }
 
 public class OpenIddictService(IOpenIddictApplicationManager applicationManager) : IOpenIddictService
 {
-    public List<Claim> GetUserClaims(UserDto user)
+    public List<Claim> GetUserClaims(UserDetailDto user)
     {
         List<Claim> claims = new List<Claim>();
         

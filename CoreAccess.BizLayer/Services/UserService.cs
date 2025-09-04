@@ -7,7 +7,8 @@ namespace CoreAccess.BizLayer.Services;
 public interface IUserService
 {
     Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
-    Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
+    Task<UserDetailDto> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
+    Task<UserDetailDto> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);
     Task<User> GetUserByDto(UserDto dto, CancellationToken cancellationToken = default);
     Task<UserDto> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
     Task<UserDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
@@ -40,7 +41,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         }
     }
 
-    public async Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<UserDetailDto> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId))
         {
@@ -61,7 +62,37 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 throw new KeyNotFoundException("User not found for the provided ID.");
             }
 
-            return user;
+            return new UserDetailDto(user);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<UserDetailDto> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(username))
+        {
+            throw new ArgumentNullException(nameof(username), "Username cannot be null or empty");
+        }
+
+        try
+        {
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions
+            {
+                Username = username,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found for the provided username.");
+            }
+
+            return new UserDetailDto(user);
         }
         catch (Exception ex)
         {
@@ -195,7 +226,13 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
 
         try
         {
-            var user = await GetUserByIdAsync(userId, cancellationToken);
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions()
+            {
+                Id = userId,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+        
             using var memoryStream = new MemoryStream();
             await profilePicture.CopyToAsync(memoryStream, cancellationToken);
             user.ProfilePicture = memoryStream.ToArray();
@@ -222,7 +259,13 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
 
         try
         {
-            var user = await GetUserByIdAsync(userId, cancellationToken);
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions()
+            {
+                Id = userId,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            
             var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions{
                 Name = roleName,
                 Page = 1,
