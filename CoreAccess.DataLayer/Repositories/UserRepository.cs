@@ -98,19 +98,20 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
         
         if (existingUser == null)
         {
-            await context.Set<User>().AddAsync(user, cancellationToken);
-            
+            var newUser = await context.Set<User>().AddAsync(user, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
-            return user;
+            
+            return newUser.Entity;
         }
 
         context.Entry(existingUser).CurrentValues.SetValues(user);
         context.Entry(existingUser).State = EntityState.Modified;
         await context.SaveChangesAsync(cancellationToken);
         
+        existingUser = await context.Set<User>().FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+        
         return existingUser;
     }
-
     public async Task DeleteUserAsync(string id, CancellationToken cancellationToken = default)
     {
         var user = await context.Users.FindAsync(Guid.Parse(id), cancellationToken);

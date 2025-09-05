@@ -15,7 +15,6 @@ public interface IRoleRepository
     public Task<Role> InsertOrUpdateRoleAsync(Role user, CancellationToken cancellationToken = default);
     public Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default);
 }
-
 public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
 {
     public async Task<List<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default)
@@ -56,24 +55,26 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         
         return result;
     }
-
     public async Task<Role> InsertOrUpdateRoleAsync(Role role, CancellationToken cancellationToken = default)
     {
         var existingRole = await context.Set<Role>().FirstOrDefaultAsync(r => r.Id == role.Id, cancellationToken);
         
         if (existingRole == null)
         {
-            context.Set<Role>().Add(role);
+            var newRole = await context.Set<Role>().AddAsync(role, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+            
+            return newRole.Entity;
         }
-        else
-        {
-            context.Entry(existingRole).CurrentValues.SetValues(role);
-        }
-        
-        await context.SaveChangesAsync(cancellationToken);
-        return role;
-    }
 
+        context.Entry(existingRole).CurrentValues.SetValues(role);
+        context.Entry(existingRole).State = EntityState.Modified;
+        await context.SaveChangesAsync(cancellationToken);
+        
+        existingRole = await context.Set<Role>().FirstOrDefaultAsync(r => r.Id == role.Id, cancellationToken);
+        
+        return existingRole;
+    }
     public async Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default)
     {
         var role = await context.Roles.FindAsync(id, cancellationToken);
@@ -86,10 +87,5 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         {
             throw new Exception("Role not found");
         }
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await context.SaveChangesAsync(cancellationToken);
     }
 }

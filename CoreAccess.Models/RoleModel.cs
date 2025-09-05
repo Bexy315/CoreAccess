@@ -16,14 +16,20 @@ public class Role
     public List<User> Users { get; set; }
 }
 
-public class RoleDto(Role src)
+public class RoleDto()
 {
-    public Guid Id { get; set; } = src.Id;
-    public string Name { get; set; } = src.Name;
-    public string? Description { get; set; } = src.Description;
-    public string CreatedAt { get; set; } = src.CreatedAt;
-    public string UpdatedAt { get; set; } = src.UpdatedAt;
-    public bool IsSystem { get; set; } = src.IsSystem;
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public string? Description { get; set; }
+}
+
+public class RoleDetailDto : RoleDto
+{
+    public string CreatedAt { get; set; }
+    public string UpdatedAt { get; set; }
+    public bool IsSystem { get; set; }
+    public List<PermissionDto> Permissions { get; set; }
+    public List<UserDto> Users { get; set; } 
 }
 public class RoleCreateRequest
 {

@@ -1,6 +1,7 @@
 using CoreAccess.BizLayer.Logger;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
+using CoreAccess.Models.Extensions;
 using CoreAccess.WebAPI.Logger;
 using CoreAccess.WebAPI.Logger.Model;
 
@@ -8,23 +9,24 @@ namespace CoreAccess.BizLayer.Services;
 
 public interface IRoleService
 {
-    Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options);
-    Task<RoleDto> CreateRoleAsync(RoleCreateRequest request);
-    Task<RoleDto> UpdateRoleAsync(string userId, RoleUpdateRequest user);
-    Task AddPermissionToRoleAsync(string roleName, string permissionName);
-    Task DeleteRoleAsync(string id);
+    Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default);
+    Task<RoleDetailDto> GetRoleByIdAsync(string id, CancellationToken cancellationToken = default);
+    Task<RoleDetailDto> CreateRoleAsync(RoleCreateRequest request, CancellationToken cancellationToken = default);
+    Task<RoleDetailDto> UpdateRoleAsync(string userId, RoleUpdateRequest user, CancellationToken cancellationToken = default);
+    Task AddPermissionToRoleAsync(string roleName, string permissionName, CancellationToken cancellationToken = default);
+    Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default);
 }
 
 public class RoleService(IRoleRepository roleRepository, IPermissionRepository permissionRepository) : IRoleService
 {
-    public async Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options)
+    public async Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await roleRepository.SearchRolesAsync(options);
+            var result = await roleRepository.SearchRolesAsync(options, cancellationToken);
             var dto = new PagedResult<RoleDto>
             {
-                Items = result.Select(x => new RoleDto(x)).ToList(),
+                Items = result.Select(x => x.ToDto()).ToList(),
                 TotalCount = result.Count,
                 Page = options.Page,
                 PageSize = options.PageSize
@@ -38,7 +40,26 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
     }
 
-    public async Task<RoleDto> CreateRoleAsync(RoleCreateRequest request)
+    public async Task<RoleDetailDto> GetRoleByIdAsync(string id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions() { Id = id }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
+            if (role == null)
+            {
+                return null;
+            }
+
+            return role.ToDetailDto();
+        }
+        catch (Exception ex)
+        {
+            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error getting Role by ID", ex);
+            throw;
+        }
+    }
+
+    public async Task<RoleDetailDto> CreateRoleAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -50,12 +71,12 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
             };
 
-            var createdRole = await roleRepository.InsertOrUpdateRoleAsync(newRole);
+            var createdRole = await roleRepository.InsertOrUpdateRoleAsync(newRole, cancellationToken);
             if (createdRole == null)
             {
                 throw new Exception("Failed to create role");
             }
-            return new RoleDto(createdRole);
+            return createdRole.ToDetailDto();
         }
         catch (Exception ex)
         {
@@ -64,7 +85,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
     }
 
-    public async Task<RoleDto> UpdateRoleAsync(string userId, RoleUpdateRequest user)
+    public async Task<RoleDetailDto> UpdateRoleAsync(string userId, RoleUpdateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -73,7 +94,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 Id = userId,
                 Page = 1,
                 PageSize = 1
-            }).ContinueWith(t => t.Result.FirstOrDefault() ?? null);
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
             
             if (existingRole == null)
             {
@@ -84,12 +105,12 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             existingRole.Description = user.Description ?? existingRole.Description;
             existingRole.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
-            var role = await roleRepository.InsertOrUpdateRoleAsync(existingRole);
+            var role = await roleRepository.InsertOrUpdateRoleAsync(existingRole, cancellationToken);
             if (role == null)
             {
                 throw new Exception("Failed to update role");
             }
-            return new RoleDto(role);
+            return role.ToDetailDto();
         }
         catch (Exception ex)
         {
@@ -98,7 +119,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
     }
 
-    public async Task AddPermissionToRoleAsync(string roleName, string permissionName)
+    public async Task AddPermissionToRoleAsync(string roleName, string permissionName, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -107,14 +128,15 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 Name = roleName,
                 Page = 1,
                 PageSize = 1
-            }).ContinueWith(t => t.Result.FirstOrDefault() ?? null);
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
             
             if (role == null)
             {
                 throw new Exception($"Role '{roleName}' not found");
             }
 
-            var permission = await permissionRepository.GetPermissionByNameAsync(permissionName);
+            var permission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions(){Name = permissionName}, cancellationToken).ContinueWith(x => x.Result.FirstOrDefault() ?? null, cancellationToken);
+            
             if (permission == null)
             {
                 throw new Exception($"Permission '{permissionName}' not found");
@@ -132,11 +154,11 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
     }
 
-    public async Task DeleteRoleAsync(string id)
+    public async Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default)
     {
         try
         {
-            await roleRepository.DeleteRoleAsync(id);
+            await roleRepository.DeleteRoleAsync(id, cancellationToken);
         }
         catch (Exception ex)
         {

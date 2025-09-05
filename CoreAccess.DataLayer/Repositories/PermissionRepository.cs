@@ -1,17 +1,15 @@
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.Models;
 using Microsoft.EntityFrameworkCore;
+using OpenIddict.Abstractions;
 
 namespace CoreAccess.DataLayer.Repositories;
 
 public interface IPermissionRepository
 {
-    Task<List<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default);
-    Task<List<Permission>> GetAllPermissionsAsync();
-    Task<Permission> GetPermissionByNameAsync(string permissionName);
-    Task<Permission?> GetPermissionByIdAsync(Guid id);
-    Task<Permission> CreatePermissionAsync(CreatePermissionRequest request);
-    Task DeletePermissionAsync(Guid id);
+    public Task<List<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<Permission> InsertOrUpdatePermissionAsync(Permission permission, CancellationToken cancellationToken = default);
+    public Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default);
 }
 public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepository
 {
@@ -49,47 +47,37 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
             .Take(options.PageSize)
             .ToListAsync(cancellationToken: cancellationToken);
     }
-
-    public async Task<List<Permission>> GetAllPermissionsAsync()
+    public async Task<Permission> InsertOrUpdatePermissionAsync(Permission permission, CancellationToken cancellationToken = default)
     {
-        return await context.Permissions.ToListAsync();
-    }
-
-    public async Task<Permission> GetPermissionByNameAsync(string permissionName)
-    {
-        return await context.Permissions.FirstOrDefaultAsync(p => p.Name == permissionName)
-               ?? throw new KeyNotFoundException($"Permission '{permissionName}' not found.");
-    }
-
-    public async Task<Permission?> GetPermissionByIdAsync(Guid id)
-    {
-        return await context.Permissions.FindAsync(id);
-    }
-
-    public async Task<Permission> CreatePermissionAsync(CreatePermissionRequest request)
-    {
-        var newPermission = new Permission
+        var existingPermission = await context.Set<Permission>().FirstOrDefaultAsync(p => p.Id == permission.Id, cancellationToken);
+        
+        if (existingPermission == null)
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Description = request.Description,
-            IsSystem = request.IsSystem,
-            CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
-            UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
-        };
+            var newPermission = await context.Set<Permission>().AddAsync(permission, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+            
+            return newPermission.Entity;
+        }
 
-        context.Permissions.Add(newPermission);
-        await context.SaveChangesAsync();
-        return newPermission;
+        context.Entry(existingPermission).CurrentValues.SetValues(permission);
+        context.Entry(existingPermission).State = EntityState.Modified;
+        await context.SaveChangesAsync(cancellationToken);
+        
+        existingPermission = await context.Set<Permission>().FirstOrDefaultAsync(p => p.Id == permission.Id, cancellationToken);
+        
+        return existingPermission;
     }
-
-    public async Task DeletePermissionAsync(Guid id)
+    public async Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default)
     {
-        var permission = await GetPermissionByIdAsync(id);
+        var permission = await context.Permissions.FindAsync(id, cancellationToken);
         if (permission != null)
         {
             context.Permissions.Remove(permission);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            throw new Exception("Role not found");
         }
     }
 }

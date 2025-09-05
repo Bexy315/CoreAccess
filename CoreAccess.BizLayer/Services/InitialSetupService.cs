@@ -18,7 +18,7 @@ public class InitialSetupService(
     IAppSettingsService appSettingsService,
     IUserService userService,
     IRoleService roleService,
-    IPermissionRepository permissionRepository,
+    IPermissionService permissionRepository,
     IOpenIddictService openIddictService) : IInitialSetupService
 {
     private static bool? IsSetupCompletedBuffer { get; set; } 
@@ -135,7 +135,7 @@ public class InitialSetupService(
         
         foreach (var permission in permissions)
         {
-            var createdPermission = await permissionRepository.CreatePermissionAsync(permission);
+            var createdPermission = await permissionRepository.CreatePermissionAsync(permission, cancellationToken: cancellationToken);
             if (createdPermission == null)
             {
                 CoreLogger.LogSystem(CoreLogLevel.Error, nameof(InitialSetupService),$"Failed to create permission: {permission.Name}");

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using CoreAccess.Models.Extensions;
 
 namespace CoreAccess.Models;
 
@@ -14,19 +15,19 @@ public class Permission
     public List<Role> Roles { get; set; } = new();
 }
 
-public class PermissionDto(Permission src)
+public class PermissionDto()
 {
-    public Guid Id { get; set; } = src.Id;
-    public string Name { get; set; } = src.Name;
-    public string? Description { get; set; } = src.Description;
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public string? Description { get; set; }
 }
 
-public class PermissionDetailsDto(Permission src) : PermissionDto(src)
+public class PermissionDetailDto() : PermissionDto()
 {
-    public string CreatedAt { get; set; } = src.CreatedAt;
-    public string UpdatedAt { get; set; } = src.UpdatedAt;
-    public bool IsSystem { get; set; } = src.IsSystem;
-    public List<RoleDto> Roles { get; set; } = src.Roles.Select(r => new RoleDto(r)).ToList();
+    public string CreatedAt { get; set; }
+    public string UpdatedAt { get; set; } 
+    public bool IsSystem { get; set; }
+    public List<RoleDto> Roles { get; set; }
 }
 
 public class PermissionSearchOptions
@@ -46,4 +47,9 @@ public class CreatePermissionRequest
     public string Name { get; set; } = "";
     public string? Description { get; set; }
     public bool IsSystem { get; set; } = false;
+}
+public class UpdatePermissionRequest
+{
+    public string? Name { get; set; }
+    public string? Description { get; set; }
 }

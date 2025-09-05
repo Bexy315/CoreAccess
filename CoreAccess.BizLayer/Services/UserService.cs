@@ -1,5 +1,6 @@
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
+using CoreAccess.Models.Extensions;
 using Microsoft.AspNetCore.Http;
 
 namespace CoreAccess.BizLayer.Services;
@@ -9,9 +10,8 @@ public interface IUserService
     Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
     Task<UserDetailDto> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
     Task<UserDetailDto> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);
-    Task<User> GetUserByDto(UserDto dto, CancellationToken cancellationToken = default);
-    Task<UserDto> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
-    Task<UserDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
+    Task<UserDetailDto> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
+    Task<UserDetailDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
     Task<UserDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
     Task<UserDto> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
@@ -27,7 +27,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             var result = await userRepository.SearchUsersAsync(options, cancellationToken);
             var dto = new PagedResult<UserDto>
             {
-                Items = result.Select(x => new UserDto(x)).ToList(),
+                Items = result.Select(x => x.ToDto()).ToList(),
                 TotalCount = result.Count,
                 Page = options.Page,
                 PageSize = options.PageSize
@@ -62,7 +62,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 throw new KeyNotFoundException("User not found for the provided ID.");
             }
 
-            return new UserDetailDto(user);
+            return user.ToDetailDto();
         }
         catch (Exception ex)
         {
@@ -92,7 +92,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 throw new KeyNotFoundException("User not found for the provided username.");
             }
 
-            return new UserDetailDto(user);
+            return user.ToDetailDto();
         }
         catch (Exception ex)
         {
@@ -101,37 +101,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         }
     }
 
-    public async Task<User> GetUserByDto(UserDto dto, CancellationToken cancellationToken = default)
-    {
-        if (dto == null)
-        {
-            throw new ArgumentNullException(nameof(dto), "UserDto cannot be null");
-        }
-
-        try
-        {
-            var user = await userRepository.SearchUsersAsync(new UserSearchOptions
-            {
-                Id = dto.Id.ToString(),
-                Page = 1,
-                PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
-            
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found for the provided UserDto.");
-            }
-
-            return user;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            throw;
-        }
-    }
-
-    public async Task<UserDto> CreateUserAsync(UserCreateRequest user, CancellationToken cancellationToken = default)
+    public async Task<UserDetailDto> CreateUserAsync(UserCreateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -158,7 +128,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             {
                 throw new Exception("Failed to create user");
             }
-            return new UserDto(createdUser);
+            return createdUser.ToDetailDto();
         }
         catch (Exception ex)
         {
@@ -167,7 +137,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         }
     }
 
-    public async Task<UserDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default)
+    public async Task<UserDetailDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -203,7 +173,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 throw new Exception("Failed to update user. Updated user not found");
             }
             
-            return new UserDto(updatedUser);
+            return updatedUser.ToDetailDto();
         }
         catch (Exception ex)
         {
@@ -241,7 +211,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
 
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
 
-            return new UserDto(updatedUser);
+            return updatedUser.ToDto();
         }
         catch (Exception ex)
         {
@@ -280,7 +250,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             user.Roles.Add(role);
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
 
-            return new UserDto(updatedUser);
+            return updatedUser.ToDto();
         }
         catch (Exception ex)
         {
