@@ -19,7 +19,7 @@ public static class RoleModelExtensions
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
             IsSystem = entity.IsSystem,
-            Permissions = entity.Permissions.Select(p => p.ToDto()).ToList(),
-            Users = entity.Users.Select(u => u.ToDto()).ToList()
+            Permissions = entity.Permissions?.Select(p => p.ToDto()).ToList() ?? new List<PermissionDto>(),
+            Users = entity.Users?.Select(u => u.ToDto()).ToList() ?? new List<UserDto>()
         };
 }

@@ -8,8 +8,9 @@ public interface IPermissionService
 {
     Task<PagedResult<PermissionDto> > SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default);
     Task<PermissionDetailDto> GetPermissionByIdAsync(string id, CancellationToken cancellationToken = default);
-    Task<PermissionDetailDto> CreatePermissionAsync(CreatePermissionRequest request, CancellationToken cancellationToken = default);
-    Task<PermissionDetailDto> UpdatePermissionAsync(string id, UpdatePermissionRequest request, CancellationToken cancellationToken = default);
+    Task<PermissionDetailDto> CreatePermissionAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default);
+    Task<PermissionDetailDto> UpdatePermissionAsync(string id, PermissionUpdateRequest request, CancellationToken cancellationToken = default);
+    Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default);
     Task<List<PermissionDto>> GetPermissionsByRolesAsync(List<string> roles, CancellationToken cancellationToken = default);
 }
 
@@ -44,7 +45,7 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
         return permission.FirstOrDefault().ToDetailDto();
     }
 
-    public async Task<PermissionDetailDto> CreatePermissionAsync(CreatePermissionRequest request, CancellationToken cancellationToken = default)
+    public async Task<PermissionDetailDto> CreatePermissionAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default)
     {
         var newPermission = new Permission
         {
@@ -62,7 +63,7 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
         return createdPermission.ToDetailDto();
     }
 
-    public async Task<PermissionDetailDto> UpdatePermissionAsync(string id, UpdatePermissionRequest request, CancellationToken cancellationToken = default)
+    public async Task<PermissionDetailDto> UpdatePermissionAsync(string id, PermissionUpdateRequest request, CancellationToken cancellationToken = default)
     {
         var existingPermission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions() { Id = id }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
         if (existingPermission == null)
@@ -86,6 +87,11 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
             throw new Exception("Failed to update permission");
         }
         return updatedPermission.ToDetailDto();
+    }
+
+    public async Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default)
+    {
+        await permissionRepository.DeletePermissionAsync(id, cancellationToken);
     }
 
     public async Task<List<PermissionDto>> GetPermissionsByRolesAsync(List<string> roles, CancellationToken cancellationToken = default)

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CoreAccess.WebAPI.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("api/setup")]
 public class InitialSetupController(IInitialSetupService initialSetupService) : ControllerBase
 {

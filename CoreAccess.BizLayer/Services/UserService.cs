@@ -12,8 +12,8 @@ public interface IUserService
     Task<UserDetailDto> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);
     Task<UserDetailDto> CreateUserAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
     Task<UserDetailDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
-    Task<UserDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
-    Task<UserDto> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
+    Task<UserDetailDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
+    Task<UserDetailDto> AddRoleToUserAsync(string userId, string roleId, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
     Task<bool> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
@@ -182,7 +182,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         }
     }
 
-    public async Task<UserDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default)
+    public async Task<UserDetailDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId))
         {
@@ -211,7 +211,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
 
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
 
-            return updatedUser.ToDto();
+            return updatedUser.ToDetailDto();
         }
         catch (Exception ex)
         {
@@ -220,13 +220,8 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         }
     }
 
-    public async Task<UserDto> AddRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default)
+    public async Task<UserDetailDto> AddRoleToUserAsync(string userId, string roleId, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleName))
-        {
-            throw new ArgumentException("User ID and Role Name must be provided.");
-        }
-
         try
         {
             var user = await userRepository.SearchUsersAsync(new UserSearchOptions()
@@ -236,21 +231,26 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 PageSize = 1
             }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found for the provided ID.");
+            }
+            
             var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions{
-                Name = roleName,
+                Id = roleId,
                 Page = 1,
                 PageSize = 1
             }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
-            if (user == null || role == null)
+            if (role == null)
             {
-                throw new KeyNotFoundException("User or Role not found for the provided IDs.");
+                throw new KeyNotFoundException("Role not found for the provided ID.");
             }
 
             user.Roles.Add(role);
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
 
-            return updatedUser.ToDto();
+            return updatedUser.ToDetailDto();
         }
         catch (Exception ex)
         {

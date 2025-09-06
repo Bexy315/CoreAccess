@@ -19,6 +19,6 @@ public static class PermissionModelExtensions
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
             IsSystem = entity.IsSystem,
-            Roles = entity.Roles.Select(r => r.ToDto()).ToList()
+            Roles = entity.Roles?.Select(r => r.ToDto()).ToList() ?? new List<RoleDto>()
         };
 }

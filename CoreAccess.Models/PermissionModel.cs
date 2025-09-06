@@ -42,13 +42,13 @@ public class PermissionSearchOptions
     public int PageSize { get; set; } = 10;
 }
 
-public class CreatePermissionRequest
+public class PermissionCreateRequest
 {
     public string Name { get; set; } = "";
     public string? Description { get; set; }
     public bool IsSystem { get; set; } = false;
 }
-public class UpdatePermissionRequest
+public class PermissionUpdateRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }

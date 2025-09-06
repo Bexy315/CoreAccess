@@ -7,6 +7,7 @@ using OpenIddict.Abstractions;
 
 namespace CoreAccess.WebAPI.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("account")]
 public class AccountController(IUserService userService) : Controller
 {

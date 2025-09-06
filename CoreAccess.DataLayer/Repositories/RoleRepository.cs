@@ -29,10 +29,9 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
                                      (r.Description != null && r.Description.ToLower().Contains(options.Search.ToLower())));
         }
 
-        if (!string.IsNullOrEmpty(options.Id))
+        if (!string.IsNullOrEmpty(options.Id) && Guid.TryParse(options.Id, out var guidId))
         {
-            var idLower = options.Id.ToLower();
-            query = query.Where(r => r.Id.ToString().ToLower() == idLower);
+            query = query.Where(p => p.Id == guidId);
         }
 
         if (!string.IsNullOrEmpty(options.Name))

@@ -31,6 +31,6 @@ public static class UserModelExtensions
             Status = entity.Status,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
-            Roles = entity.Roles.Select(r => r.ToDto()).ToList()
+            Roles = entity.Roles?.Select(r => r.ToDto()).ToList() ?? new List<RoleDto>()
         };
 }

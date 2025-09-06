@@ -22,6 +22,11 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
             query = query.Where(p => p.Name.Contains(options.Search) || (p.Description != null && p.Description.Contains(options.Search)));
         }
         
+        if (!string.IsNullOrEmpty(options.Id) && Guid.TryParse(options.Id, out var guidId))
+        {
+            query = query.Where(p => p.Id == guidId);
+        }
+        
         if (!string.IsNullOrWhiteSpace(options.Name))
         {
             query = query.Where(p => p.Name.Contains(options.Name));

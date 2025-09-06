@@ -1,10 +1,8 @@
-using CoreAccess.BizLayer.Logger;
 using CoreAccess.BizLayer.Middleware;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.WebAPI.Extensions;
-using CoreAccess.WebAPI.Logger.Sinks;
 using CoreAccess.Workers;
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
@@ -30,11 +28,6 @@ builder.Services
     .AddCoreAccessOpenIddict();
 
 var app = builder.Build();
-
-CoreLogger.Initialize(new List<ILogSink>
-{
-    new ConsoleSink()
-});
 
 using (var scope = app.Services.CreateScope())
 {

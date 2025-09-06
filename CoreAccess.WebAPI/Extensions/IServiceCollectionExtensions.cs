@@ -122,6 +122,13 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
 
         return services;
     }
+    
+    public static IServiceCollection AddLogger(this IServiceCollection services)
+    {
+        
+
+        return services;
+    }
 
     public static IServiceCollection AddCoreAccessOpenIddict(this IServiceCollection services)
     {

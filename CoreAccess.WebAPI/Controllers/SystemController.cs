@@ -1,10 +1,7 @@
 using CoreAccess.BizLayer.Decorator;
-using CoreAccess.BizLayer.Logger;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.Models;
-using CoreAccess.WebAPI.Logger;
-using CoreAccess.WebAPI.Logger.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
@@ -39,12 +36,11 @@ public class SystemController(IAppSettingsService appSettingsService, IOpenIddic
         
         if (healthResponse.Status == "Unhealthy")
         {
-            CoreLogger.LogSystem(CoreLogLevel.Warning, nameof(SystemController), "System health check failed", 
-                new Exception("One or more checks failed"));
+            Console.WriteLine("System is Unhealthy");
         }
         else
         {
-            CoreLogger.LogSystem(CoreLogLevel.Information, nameof(SystemController), "System health check passed.");
+            Console.WriteLine("System is Healthy");
         }
         
         healthResponse.Timestamp = DateTime.UtcNow;
@@ -72,7 +68,6 @@ public class SystemController(IAppSettingsService appSettingsService, IOpenIddic
 
                 }
             });
-            CoreLogger.LogSystem(CoreLogLevel.Information,nameof(SystemController), "Cool Debug message!!!", new Exception("Test exception"));
             
             return Ok();
         }

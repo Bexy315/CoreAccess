@@ -1,8 +1,6 @@
 using CoreAccess.BizLayer.Decorator;
-using CoreAccess.BizLayer.Logger;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.Models;
-using CoreAccess.WebAPI.Logger.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoreAccess.WebAPI.Controllers;
@@ -24,12 +22,10 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while getting user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while getting user", ex);
             return StatusCode(500, ex.Message);
         }
     }
@@ -38,22 +34,25 @@ public class UserController(IUserService userService) : ControllerBase
     [Route("{userId}")]
     [Produces(typeof(PagedResult<UserDto>))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
-    public async Task<IActionResult> GetUser([FromRoute]string userId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetUserById([FromRoute]string userId, CancellationToken cancellationToken = default)
     {
         try
         {
-          //  var user = await userService.SearchUsersAsync(options, cancellationToken);
-                //TODO: Implement GetUserById in UserService
-            return Ok();
+            if(string.IsNullOrEmpty(userId))
+                return BadRequest("User ID cannot be null or empty.");
+            
+            var user = await userService.GetUserByIdAsync(userId, cancellationToken);
+            if(user == null)
+                return NotFound($"User with ID {userId} not found.");
+            
+            return Ok(user);
         }
         catch(ArgumentException ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while getting user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while getting user", ex);
             return StatusCode(500, ex.Message);
         }
     }
@@ -73,12 +72,10 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while creating user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while creating user", ex);
             return StatusCode(500, ex.Message);
         }
     }
@@ -99,12 +96,10 @@ public class UserController(IUserService userService) : ControllerBase
         }
         catch(ArgumentException ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while updating user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while updating user", ex);
             return StatusCode(500, ex.Message);
         }
     }
@@ -116,40 +111,42 @@ public class UserController(IUserService userService) : ControllerBase
     {
         try
         {
+            if(string.IsNullOrEmpty(userId))
+                return BadRequest("User ID cannot be null or empty.");
+            
             await userService.DeleteUserAsync(userId, cancellationToken);
             return Ok();
         }
         catch(ArgumentException ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while deleting user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while deleting user", ex);
             return StatusCode(500, ex.Message);
         }
     }
         
     [HttpPost]
-    [Route("{userId}/role/{roleName}")]
+    [Route("{userId}/role/{roleId}")]
     [Produces(typeof(UserDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
-    public async Task<IActionResult> AddRoleToUser([FromRoute]string userId, [FromRoute]string roleName, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> AddRoleToUser([FromRoute]string userId, [FromRoute]string roleId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var user = await userService.AddRoleToUserAsync(userId, roleName, cancellationToken);
+            if(string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleId))
+                return BadRequest("User ID and Role ID cannot be null or empty.");
+            
+            var user = await userService.AddRoleToUserAsync(userId, roleId, cancellationToken);
             return Ok(user);
         }
         catch(ArgumentException ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while adding role to user", ex);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(ProfileController), "Error while adding role to user", ex);
             return StatusCode(500, ex.Message);
         }
     }

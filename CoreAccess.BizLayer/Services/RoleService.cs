@@ -1,9 +1,6 @@
-using CoreAccess.BizLayer.Logger;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
 using CoreAccess.Models.Extensions;
-using CoreAccess.WebAPI.Logger;
-using CoreAccess.WebAPI.Logger.Model;
 
 namespace CoreAccess.BizLayer.Services;
 
@@ -13,7 +10,7 @@ public interface IRoleService
     Task<RoleDetailDto> GetRoleByIdAsync(string id, CancellationToken cancellationToken = default);
     Task<RoleDetailDto> CreateRoleAsync(RoleCreateRequest request, CancellationToken cancellationToken = default);
     Task<RoleDetailDto> UpdateRoleAsync(string userId, RoleUpdateRequest user, CancellationToken cancellationToken = default);
-    Task AddPermissionToRoleAsync(string roleName, string permissionName, CancellationToken cancellationToken = default);
+    Task<RoleDetailDto> AddPermissionToRoleAsync(string roleId, string permissionId, CancellationToken cancellationToken = default);
     Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default);
 }
 
@@ -35,7 +32,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error searching Roles", ex);
             throw;
         }
     }
@@ -54,7 +50,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error getting Role by ID", ex);
             throw;
         }
     }
@@ -80,7 +75,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error creating Role", ex);
             throw;
         }
     }
@@ -114,42 +108,50 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error updating Role", ex);
             throw;
         }
     }
 
-    public async Task AddPermissionToRoleAsync(string roleName, string permissionName, CancellationToken cancellationToken = default)
+    public async Task<RoleDetailDto> AddPermissionToRoleAsync(string roleId, string permissionId, CancellationToken cancellationToken = default)
     {
         try
         {
             var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
             {
-                Name = roleName,
+                Id = roleId,
                 Page = 1,
                 PageSize = 1
             }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
             
             if (role == null)
             {
-                throw new Exception($"Role '{roleName}' not found");
+                throw new Exception($"Role '{roleId}' not found");
             }
 
-            var permission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions(){Name = permissionName}, cancellationToken).ContinueWith(x => x.Result.FirstOrDefault() ?? null, cancellationToken);
+            var permission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions()
+            {
+                Id = permissionId,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(x => x.Result.FirstOrDefault() ?? null, cancellationToken);
             
             if (permission == null)
             {
-                throw new Exception($"Permission '{permissionName}' not found");
+                throw new Exception($"Permission '{permissionId}' not found");
             }
 
-            if (role.Permissions.All(p => p.Name != permission.Name))
+            if (role.Permissions.Count != 0 && role.Permissions.Contains(permission))
             {
-                role.Permissions.Add(permission);
+                throw new Exception($"Role {role.Name} already has permission {permission.Name}");
             }
+            
+            role.Permissions.Add(permission);
+            var updatedRole = await roleRepository.InsertOrUpdateRoleAsync(role, cancellationToken);
+
+            return updatedRole.ToDetailDto();
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error adding Permission to Role",ex);
             throw;
         }
     }
@@ -162,7 +164,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
         }
         catch (Exception ex)
         {
-            CoreLogger.LogSystem(CoreLogLevel.Error, nameof(RoleService), "Error deleting Role", ex);
             throw;
         }
     }
