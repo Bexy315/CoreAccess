@@ -25,9 +25,13 @@ public class InitialSetupService(
     {   
         if (!IsBufferInitialized)
         {
-          //var filePath = Path.Combine(AppContext.BaseDirectory, "data", "etc", "init_setup_completed.txt"); 
-            var filePath = "E:\\data\\etc\\init_setup_completed.txt";
-            IsSetupCompletedBuffer = File.Exists(filePath) && File.ReadAllText(filePath).Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+            var completed = settingsService.GetAsync(SettingsKeys.InitSetupCompleted).Result;
+            
+            if(completed == null)
+                completed = "false";
+            
+            IsSetupCompletedBuffer = completed == "true";
+            
             IsBufferInitialized = true;
         } 
         return IsSetupCompletedBuffer == true;
@@ -189,22 +193,7 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
 
     private async Task SaveCompletedAsync()
     {
-        var filePath = Path.Combine(AppContext.BaseDirectory, "/data/etc/init_setup_completed.txt");
-        
-        if (File.Exists(filePath))
-        {
-            await File.WriteAllTextAsync(filePath, "true");
-            IsSetupCompletedBuffer = true;
-            return;
-        }
-
-        var directory = Path.GetDirectoryName(filePath);
-        if (!string.IsNullOrWhiteSpace(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        await File.WriteAllTextAsync(filePath, "true");
+        await settingsService.SetAsync(SettingsKeys.InitSetupCompleted, "true", false);
         IsSetupCompletedBuffer = true;
     }
 }

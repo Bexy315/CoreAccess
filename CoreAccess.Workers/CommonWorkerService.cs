@@ -64,7 +64,7 @@ public class CommonWorkerService(IServiceProvider serviceProvider) : BackgroundS
                     LastName = "User"
                 }, cancellationToken: stoppingToken);
                 await userService.AddRoleToUserAsync(newTestUser.Id.ToString(), "User", cancellationToken: stoppingToken);
-            }
+            } 
         }
         
         while (!stoppingToken.IsCancellationRequested)
