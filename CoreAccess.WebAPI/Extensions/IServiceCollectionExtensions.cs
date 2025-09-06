@@ -101,6 +101,7 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
 
     public static IServiceCollection AddCoreAccessRepositories(this IServiceCollection services)
     {
+        services.AddScoped<ISettingsRepository, SettingsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
@@ -110,22 +111,17 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
 
     public static IServiceCollection AddCoreAccessServices(this IServiceCollection services)
     {
-        services.AddScoped<IAppSettingsService, AppSettingsService>();
+        services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IOpenIddictService, OpenIddictService>();
         services.AddScoped<IInitialSetupService, InitialSetupService>();
+        
+        services.AddSingleton<ISecretProtector, SecretProtector>();
 
         services.AddHostedService<CommonWorkerService>();
-
-        return services;
-    }
-    
-    public static IServiceCollection AddLogger(this IServiceCollection services)
-    {
-        
 
         return services;
     }

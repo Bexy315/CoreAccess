@@ -19,34 +19,6 @@ namespace CoreAccess.DataLayer.Migrations
                 .HasDefaultSchema("coreaccess")
                 .HasAnnotation("ProductVersion", "9.0.6");
 
-            modelBuilder.Entity("CoreAccess.Models.AppSetting", b =>
-                {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
-
-                    b.Property<bool>("IsEncrypted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsSystem")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Key")
-                        .IsUnique();
-
-                    b.ToTable("AppSettings", "coreaccess");
-                });
-
             modelBuilder.Entity("CoreAccess.Models.Permission", b =>
                 {
                     b.Property<byte[]>("Id")
@@ -103,6 +75,36 @@ namespace CoreAccess.DataLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles", "coreaccess");
+                });
+
+            modelBuilder.Entity("CoreAccess.Models.Setting", b =>
+                {
+                    b.Property<byte[]>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("EncryptedValue")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSecret")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("Settings", "coreaccess");
                 });
 
             modelBuilder.Entity("CoreAccess.Models.User", b =>

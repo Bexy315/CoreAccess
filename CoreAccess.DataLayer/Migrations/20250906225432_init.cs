@@ -15,22 +15,6 @@ namespace CoreAccess.DataLayer.Migrations
                 name: "coreaccess");
 
             migrationBuilder.CreateTable(
-                name: "AppSettings",
-                schema: "coreaccess",
-                columns: table => new
-                {
-                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    Key = table.Column<string>(type: "TEXT", nullable: false),
-                    Value = table.Column<string>(type: "TEXT", nullable: false),
-                    IsEncrypted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppSettings", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "OpenIddictApplications",
                 schema: "coreaccess",
                 columns: table => new
@@ -109,6 +93,23 @@ namespace CoreAccess.DataLayer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Settings",
+                schema: "coreaccess",
+                columns: table => new
+                {
+                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    Value = table.Column<string>(type: "TEXT", nullable: true),
+                    EncryptedValue = table.Column<string>(type: "TEXT", nullable: true),
+                    IsSecret = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Settings", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -257,13 +258,6 @@ namespace CoreAccess.DataLayer.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AppSettings_Key",
-                schema: "coreaccess",
-                table: "AppSettings",
-                column: "Key",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_OpenIddictApplications_ClientId",
                 schema: "coreaccess",
                 table: "OpenIddictApplications",
@@ -309,6 +303,13 @@ namespace CoreAccess.DataLayer.Migrations
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Settings_Key",
+                schema: "coreaccess",
+                table: "Settings",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
                 schema: "coreaccess",
                 table: "UserRoles",
@@ -326,10 +327,6 @@ namespace CoreAccess.DataLayer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AppSettings",
-                schema: "coreaccess");
-
-            migrationBuilder.DropTable(
                 name: "OpenIddictScopes",
                 schema: "coreaccess");
 
@@ -339,6 +336,10 @@ namespace CoreAccess.DataLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "RolePermissions",
+                schema: "coreaccess");
+
+            migrationBuilder.DropTable(
+                name: "Settings",
                 schema: "coreaccess");
 
             migrationBuilder.DropTable(

@@ -10,7 +10,7 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
-    public DbSet<AppSetting> AppSettings { get; set; }
+    public DbSet<Setting> Settings { get; set; }
 
    protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
@@ -78,8 +78,8 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     
     #endregion
 
-    #region AppSetting
-    var settingBuilder = modelBuilder.Entity<AppSetting>();
+    #region Settings
+    var settingBuilder = modelBuilder.Entity<Setting>();
     settingBuilder.HasKey(s => s.Id);
     
     settingBuilder.HasIndex(s => s.Key).IsUnique();

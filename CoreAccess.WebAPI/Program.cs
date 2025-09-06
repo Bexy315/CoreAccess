@@ -3,8 +3,10 @@ using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.WebAPI.Extensions;
+using CoreAccess.WebAPI.Helpers;
 using CoreAccess.Workers;
 using dotenv.net;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -15,9 +17,23 @@ if (builder.Environment.IsDevelopment())
     DotEnv.Load();
 }
 
+builder.Logging.AddCoreAccessLogging(builder.Configuration);
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddRazorPages();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDataProtection();
+}else
+{
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/var/lib/coreaccess/dpkeys"))
+        .SetApplicationName("CoreAccess");
+}
+
+builder.Services.AddMemoryCache();
 
 builder.Services
     .AddCoreAccessCors()
@@ -28,6 +44,12 @@ builder.Services
     .AddCoreAccessOpenIddict();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    StartupLogger.LogStartupInfo(logger, app);
+}
 
 using (var scope = app.Services.CreateScope())
 {
@@ -53,6 +75,7 @@ else
     app.MapFallbackToFile("index.html");
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<InitialSetupGuardMiddleware>();
 
 app.UseAuthentication();

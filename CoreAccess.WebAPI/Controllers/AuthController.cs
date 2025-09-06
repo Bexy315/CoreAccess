@@ -11,7 +11,7 @@ using OpenIddict.Server.AspNetCore;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
-public class AuthController(IAppSettingsService appSettingsService, IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService) : ControllerBase
+public class AuthController(IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService) : ControllerBase
 {
     [HttpPost("~/connect/token")]
     [IgnoreAntiforgeryToken, Produces("application/json")]

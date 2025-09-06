@@ -1,5 +1,6 @@
 using CoreAccess.Models;
 using CoreAccess.WebAPI.Helpers;
+using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
 
 namespace CoreAccess.BizLayer.Services;
@@ -10,11 +11,12 @@ public interface IInitialSetupService
     Task RunSetupAsync(InitialSetupRequest request, CancellationToken cancellationToken = default);
 }
 public class InitialSetupService(
-    IAppSettingsService appSettingsService,
+    ISettingsService settingsService,
     IUserService userService,
     IRoleService roleService,
     IPermissionService permissionRepository,
-    IOpenIddictService openIddictService) : IInitialSetupService
+    IOpenIddictService openIddictService,
+    ILogger<InitialSetupService> logger) : IInitialSetupService
 {
     private static bool? IsSetupCompletedBuffer { get; set; } 
     private static bool IsBufferInitialized { get; set; }
@@ -31,149 +33,159 @@ public class InitialSetupService(
         return IsSetupCompletedBuffer == true;
     }
 
-    public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken cancellationToken = default)
+public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken cancellationToken = default)
+{
+    logger.LogInformation("Starting initial setup...");
+
+    if (IsSetupCompletedBuffer == true)
     {
-        if (IsSetupCompletedBuffer == true)
-        {
-            throw new ArgumentException("Initial setup already completed.");
-        }
-
-        if (request == null)
-        {
-            throw new ArgumentException(nameof(request), "Initial setup request cannot be null.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.GeneralInitialSettings.BaseUri))
-        {
-            throw new ArgumentException(nameof(request.GeneralInitialSettings.BaseUri),
-                "BaseUri is required for initial setup.");
-        }
-
-        appSettingsService.Set(AppSettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel,
-            isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration,
-            isSystem: true);
-
-        if (string.IsNullOrWhiteSpace(request.JwtInitialSettings.JwtSecret))
-            request.JwtInitialSettings.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
-
-        appSettingsService.Set(AppSettingsKeys.JwtSecretKey, request.JwtInitialSettings.JwtSecret, true, true);
-        appSettingsService.Set(AppSettingsKeys.JwtIssuer, request.JwtInitialSettings.Issuer, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.JwtAudience, request.JwtInitialSettings.Audience, isSystem: true);
-        appSettingsService.Set(AppSettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, isSystem: true);
-
-        await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
-        {
-            ClientId = "coreaccess",
-            DisplayName = "CoreAccess AdminUI (and default) Client",
-            ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
-            ClientType = OpenIddictConstants.ClientTypes.Public,
-            ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
-            Permissions =
-            {
-                OpenIddictConstants.Permissions.GrantTypes.Password,
-                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                OpenIddictConstants.Permissions.Endpoints.Authorization,
-                OpenIddictConstants.Permissions.Endpoints.Introspection,
-                OpenIddictConstants.Permissions.Endpoints.EndSession,
-                OpenIddictConstants.Permissions.Endpoints.Token,
-                OpenIddictConstants.Permissions.ResponseTypes.Token,
-                OpenIddictConstants.Permissions.ResponseTypes.Code,
-            },
-            RedirectUris =
-            {
-                new Uri("http://localhost:5173/callback")
-            },
-            PostLogoutRedirectUris =
-            {
-                new Uri("http://localhost:5173/")
-            }
-        });
-        
-        await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
-        {
-            ClientId = "postman",
-            DisplayName = "Postman Client For API Testing",
-            ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
-            ClientType = OpenIddictConstants.ClientTypes.Public,
-            ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
-            Permissions =
-            {
-                OpenIddictConstants.Permissions.GrantTypes.Password,
-                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                OpenIddictConstants.Permissions.Endpoints.Authorization,
-                OpenIddictConstants.Permissions.Endpoints.Introspection,
-                OpenIddictConstants.Permissions.Endpoints.EndSession,
-                OpenIddictConstants.Permissions.Endpoints.Token,
-                OpenIddictConstants.Permissions.ResponseTypes.Token,
-                OpenIddictConstants.Permissions.ResponseTypes.Code,
-            },
-            RedirectUris =
-            {
-                new Uri("http://localhost:5173/callback")
-            },
-            PostLogoutRedirectUris =
-            {
-                new Uri("http://localhost:5173/")
-            }
-        });
-        
-        
-        var adminRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
-        {
-            Name = "CoreAccess.Admin",
-            Description = "CoreAccess Admin role for administrative access to CoreAccess"
-        }, cancellationToken);
-        
-        await roleService.CreateRoleAsync(new RoleCreateRequest()
-        {
-            Name = "User",
-            Description = "User role for default users"
-        }, cancellationToken);
-        
-        List<PermissionCreateRequest> permissions = new()
-        {
-            new() { Name = "user.read", Description = "Read users", IsSystem = true },
-            new() { Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
-            new() { Name = "role.read", Description = "Read roles", IsSystem = true },
-            new() { Name = "role.write", Description = "Create/update/delete roles", IsSystem = true },
-            new() { Name = "permission.read", Description = "Read permissions", IsSystem = true },
-            new() { Name = "permission.write", Description = "Manage permissions", IsSystem = true },
-            new() { Name = "settings.read", Description = "Read system settings", IsSystem = true },
-            new() { Name = "settings.write", Description = "Update system settings", IsSystem = true }
-        };
-        
-        foreach (var permission in permissions)
-        {
-            var createdPermission = await permissionRepository.CreatePermissionAsync(permission, cancellationToken: cancellationToken);
-            if (createdPermission == null)
-            {
-                throw new Exception($"Failed to create permission: {permission.Name}");
-            }
-            await roleService.AddPermissionToRoleAsync(adminRole.Id.ToString(), createdPermission.Id.ToString(), cancellationToken);
-        }
-
-        if (request.UserInitialSettings.Admin == null)
-        {
-            string password = SecureKeyHelper.GenerateSecurePassword();
-            request.UserInitialSettings.Admin = new UserCreateRequest
-            {
-                Username = "root",
-                Email = "root@coreaccess.com",
-                Password = password,
-            };
-        }
-        
-        var newUser = await userService.CreateUserAsync(request.UserInitialSettings.Admin, cancellationToken: cancellationToken);
-        await userService.AddRoleToUserAsync(newUser.Id.ToString(), adminRole.Id.ToString(), cancellationToken: cancellationToken);
-
-        await SaveCompletedAsync();
-        
-        appSettingsService.Reload();
+        logger.LogWarning("Attempted to run initial setup, but it is already completed.");
+        throw new ArgumentException("Initial setup already completed.");
     }
+
+    if (request == null)
+    {
+        logger.LogError("Initial setup request was null.");
+        throw new ArgumentException(nameof(request), "Initial setup request cannot be null.");
+    }
+
+    if (string.IsNullOrWhiteSpace(request.GeneralInitialSettings.BaseUri))
+    {
+        logger.LogError("Initial setup request missing required BaseUri.");
+        throw new ArgumentException(nameof(request.GeneralInitialSettings.BaseUri),
+            "BaseUri is required for initial setup.");
+    }
+
+    logger.LogInformation("Applying general settings...");
+    await settingsService.SetAsync(SettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri, false, cancellationToken);
+    await settingsService.SetAsync(SettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, false, cancellationToken);
+    await settingsService.SetAsync(SettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, false, cancellationToken);
+
+    if (string.IsNullOrWhiteSpace(request.JwtInitialSettings.JwtSecret))
+    {
+        logger.LogInformation("No JWT secret provided, generating a secure random key...");
+        request.JwtInitialSettings.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
+    }
+
+    logger.LogInformation("Applying JWT settings (issuer: {Issuer}, audience: {Audience}, expiresIn: {ExpiresIn})",
+        request.JwtInitialSettings.Issuer, request.JwtInitialSettings.Audience, request.JwtInitialSettings.ExpiresIn);
+
+    await settingsService.SetAsync(SettingsKeys.JwtSecretKey, request.JwtInitialSettings.JwtSecret, true, cancellationToken);
+    await settingsService.SetAsync(SettingsKeys.JwtIssuer, request.JwtInitialSettings.Issuer, false, cancellationToken);
+    await settingsService.SetAsync(SettingsKeys.JwtAudience, request.JwtInitialSettings.Audience, false, cancellationToken);
+    await settingsService.SetAsync(SettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, false, cancellationToken);
+
+    logger.LogInformation("Registering default OpenIddict applications...");
+    await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
+    {
+        ClientId = "coreaccess",
+        DisplayName = "CoreAccess AdminUI (and default) Client",
+        ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
+        ClientType = OpenIddictConstants.ClientTypes.Public,
+        ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+        Permissions =
+        {
+            OpenIddictConstants.Permissions.GrantTypes.Password,
+            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+            OpenIddictConstants.Permissions.Endpoints.Authorization,
+            OpenIddictConstants.Permissions.Endpoints.Introspection,
+            OpenIddictConstants.Permissions.Endpoints.EndSession,
+            OpenIddictConstants.Permissions.Endpoints.Token,
+            OpenIddictConstants.Permissions.ResponseTypes.Token,
+            OpenIddictConstants.Permissions.ResponseTypes.Code,
+        },
+        RedirectUris = { new Uri("http://localhost:5173/callback") },
+        PostLogoutRedirectUris = { new Uri("http://localhost:5173/") }
+    });
+    logger.LogInformation("Registered default CoreAccess AdminUI client.");
+
+    await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
+    {
+        ClientId = "postman",
+        DisplayName = "Postman Client For API Testing",
+        ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
+        ClientType = OpenIddictConstants.ClientTypes.Public,
+        ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+        Permissions =
+        {
+            OpenIddictConstants.Permissions.GrantTypes.Password,
+            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+            OpenIddictConstants.Permissions.Endpoints.Authorization,
+            OpenIddictConstants.Permissions.Endpoints.Introspection,
+            OpenIddictConstants.Permissions.Endpoints.EndSession,
+            OpenIddictConstants.Permissions.Endpoints.Token,
+            OpenIddictConstants.Permissions.ResponseTypes.Token,
+            OpenIddictConstants.Permissions.ResponseTypes.Code,
+        },
+        RedirectUris = { new Uri("http://localhost:5173/callback") },
+        PostLogoutRedirectUris = { new Uri("http://localhost:5173/") }
+    });
+    logger.LogInformation("Registered Postman client for API testing.");
+
+    logger.LogInformation("Creating default roles...");
+    var adminRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
+    {
+        Name = "CoreAccess.Admin",
+        Description = "CoreAccess Admin role for administrative access to CoreAccess"
+    }, cancellationToken);
+    logger.LogInformation("Created role {RoleName} with id {RoleId}.", adminRole.Name, adminRole.Id);
+
+    var userRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
+    {
+        Name = "User",
+        Description = "User role for default users"
+    }, cancellationToken);
+    logger.LogInformation("Created role {RoleName} with id {RoleId}.", userRole.Name, userRole.Id);
+
+    logger.LogInformation("Creating default system permissions...");
+    List<PermissionCreateRequest> permissions = new()
+    {
+        new() { Name = "user.read", Description = "Read users", IsSystem = true },
+        new() { Name = "user.write", Description = "Create/update/delete users", IsSystem = true },
+        new() { Name = "role.read", Description = "Read roles", IsSystem = true },
+        new() { Name = "role.write", Description = "Create/update/delete roles", IsSystem = true },
+        new() { Name = "permission.read", Description = "Read permissions", IsSystem = true },
+        new() { Name = "permission.write", Description = "Manage permissions", IsSystem = true },
+        new() { Name = "settings.read", Description = "Read system settings", IsSystem = true },
+        new() { Name = "settings.write", Description = "Update system settings", IsSystem = true }
+    };
+
+    foreach (var permission in permissions)
+    {
+        var createdPermission = await permissionRepository.CreatePermissionAsync(permission, cancellationToken: cancellationToken);
+        if (createdPermission == null)
+        {
+            logger.LogError("Failed to create permission {Permission}.", permission.Name);
+            throw new Exception($"Failed to create permission: {permission.Name}");
+        }
+        await roleService.AddPermissionToRoleAsync(adminRole.Id.ToString(), createdPermission.Id.ToString(), cancellationToken);
+        logger.LogInformation("Created permission {Permission} and assigned to role {Role}.", createdPermission.Name, adminRole.Name);
+    }
+
+    if (request.UserInitialSettings.Admin == null)
+    {
+        logger.LogInformation("No admin user provided in setup request. Generating default root user...");
+        string password = SecureKeyHelper.GenerateSecurePassword();
+        request.UserInitialSettings.Admin = new UserCreateRequest
+        {
+            Username = "root",
+            Email = "root@coreaccess.com",
+            Password = password,
+        };
+    }
+
+    var newUser = await userService.CreateUserAsync(request.UserInitialSettings.Admin, cancellationToken: cancellationToken);
+    logger.LogInformation("Created admin user {Username} with id {UserId}.", newUser.Username, newUser.Id);
+
+    await userService.AddRoleToUserAsync(newUser.Id.ToString(), adminRole.Id.ToString(), cancellationToken: cancellationToken);
+    logger.LogInformation("Assigned role {Role} to admin user {Username}.", adminRole.Name, newUser.Username);
+
+    await SaveCompletedAsync();
+    logger.LogInformation("Initial setup completed successfully.");
+}
+
 
     private async Task SaveCompletedAsync()
     {

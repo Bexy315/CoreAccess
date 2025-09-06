@@ -10,11 +10,10 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(IAppSettingsService appSettingsService, IOpenIddictService openIddictService, CoreAccessDbContext db) : ControllerBase
+public class SystemController(ISettingsService settingsService, CoreAccessDbContext db, ILogger<SystemController> logger) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
-    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> GetHealth()
     {
         HealthCheckResponse healthResponse = new();
@@ -29,8 +28,8 @@ public class SystemController(IAppSettingsService appSettingsService, IOpenIddic
             healthResponse.Checks["Database"] = $"ERROR: {ex.Message}";
         }
 
-        var tokenKey = appSettingsService.Get(AppSettingsKeys.JwtSecretKey, decryptIfNeeded: true);
-        healthResponse.Checks["JwtSecretKey"] = string.IsNullOrWhiteSpace(tokenKey) ? "MISSING" : "OK";
+        var tokenKey = await settingsService.GetAsync(SettingsKeys.JwtSecretKey);
+        healthResponse.Checks["JwtSecretKey"] = !String.IsNullOrEmpty(tokenKey) ? "OK" : "MISSING";
 
         healthResponse.Status = healthResponse.Checks.All(kv => kv.Value?.ToString() == "OK") ? "Healthy" : "Unhealthy";
         
@@ -43,43 +42,19 @@ public class SystemController(IAppSettingsService appSettingsService, IOpenIddic
             Console.WriteLine("System is Healthy");
         }
         
+        healthResponse.Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")?? "Production";
         healthResponse.Timestamp = DateTime.UtcNow;
-        healthResponse.Uptime = Environment.TickCount / 1000; // Convert milliseconds to seconds
+        healthResponse.Uptime = Environment.TickCount / 1000; 
 
         return Ok(healthResponse);
     }
     
     [HttpGet]
     [Route("start-debug")]
-    [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task <IActionResult> StartDebug(CancellationToken cancellationToken = default)
     {
-        try
-        {
-            //appSettingsService.TryGet(AppSettingsKeys.SystemLogLevel, out string? systemLogLevel);
-            await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
-            {
-                ClientId = "test-client",
-                DisplayName = "Test Client",
-                Permissions =
-                {
-                    OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
-                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-
-                }
-            });
-            
-            return Ok();
-        }
-        catch(ArgumentException ex)
-        {
-            Console.WriteLine(ex);
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            return StatusCode(500, ex.Message);
-        }
+        throw new Exception("Test exception for debugging purposes.");
+        logger.LogInformation("Starting debug setup...");
+        return Ok();
     }
 }
