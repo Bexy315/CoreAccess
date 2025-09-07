@@ -10,7 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(ISettingsService settingsService, CoreAccessDbContext db, ILogger<SystemController> logger) : ControllerBase
+public class SystemController(CoreAccessDbContext db, ILogger<SystemController> logger) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
@@ -27,9 +27,6 @@ public class SystemController(ISettingsService settingsService, CoreAccessDbCont
         {
             healthResponse.Checks["Database"] = $"ERROR: {ex.Message}";
         }
-
-        var tokenKey = await settingsService.GetAsync(SettingsKeys.JwtSecretKey);
-        healthResponse.Checks["JwtSecretKey"] = !String.IsNullOrEmpty(tokenKey) ? "OK" : "MISSING";
 
         healthResponse.Status = healthResponse.Checks.All(kv => kv.Value?.ToString() == "OK") ? "Healthy" : "Unhealthy";
         

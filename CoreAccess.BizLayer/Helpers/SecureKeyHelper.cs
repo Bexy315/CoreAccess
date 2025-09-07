@@ -1,39 +1,43 @@
 using System.Security.Cryptography;
 using DataJuggler.Cryptography;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace CoreAccess.WebAPI.Helpers;
 
 public static class SecureKeyHelper
 {
     private const string KeyPath = "/data/keys/";
-
+    
     /// <summary>
-    /// Returns a stored Base64-encoded 256-bit key or generates a new one if not present.
+    /// Loads the specified RSA key or creates a new one if not present.
     /// </summary>
-    /// <param name="keyName">Name of the key (filename without extension).</param>
-    /// <returns>A Base64-encoded 256-bit key.</returns>
-    public static string GetOrCreateBase64Key(string keyName)
+    /// <param name="keyName">Name of the RSA key.</param>
+    /// <param name="size">Size of the RSA key in bits (default: 2048).</param>
+    /// <returns>An instance of RsaSecurityKey.</returns>
+    public static SecurityKey LoadOrCreateRsaKey(string keyName, int size = 2048)
     {
-        var keyFilePath = Path.Combine(AppContext.BaseDirectory, KeyPath, $"{keyName}.key");
-
-        if (File.Exists(keyFilePath))
+        var path = Path.Combine(KeyPath, $"{keyName}.jwk");
+        
+        if (File.Exists(path))
         {
-            return File.ReadAllText(keyFilePath);
+            var json = File.ReadAllText(path);
+            return new JsonWebKey(json);
         }
 
-        // 256-bit = 32 bytes random key
-        var keyBytes = RandomNumberGenerator.GetBytes(32);
-        var base64Key = Convert.ToBase64String(keyBytes);
-
-        var directory = Path.GetDirectoryName(keyFilePath);
-        if (!string.IsNullOrWhiteSpace(directory))
+        using var rsa = RSA.Create(size);
+        var key = new RsaSecurityKey(rsa)
         {
-            Directory.CreateDirectory(directory);
-        }
+            KeyId = Guid.NewGuid().ToString("N")
+        };
 
-        File.WriteAllText(keyFilePath, base64Key);
-        return base64Key;
+        var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(key);
+        var jsonString = JsonConvert.SerializeObject(jwk, Formatting.Indented);
+        File.WriteAllText(path, jsonString);
+
+        return key;
     }
+    
     /// <summary>
     /// Returns a random Base64-encoded 256-bit key which is not stored.
     /// </summary>

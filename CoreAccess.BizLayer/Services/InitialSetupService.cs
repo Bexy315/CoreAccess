@@ -65,16 +65,9 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
     await settingsService.SetAsync(SettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, false, cancellationToken);
     await settingsService.SetAsync(SettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, false, cancellationToken);
 
-    if (string.IsNullOrWhiteSpace(request.JwtInitialSettings.JwtSecret))
-    {
-        logger.LogInformation("No JWT secret provided, generating a secure random key...");
-        request.JwtInitialSettings.JwtSecret = SecureKeyHelper.GenerateRandomBase64Key();
-    }
-
     logger.LogInformation("Applying JWT settings (issuer: {Issuer}, audience: {Audience}, expiresIn: {ExpiresIn})",
         request.JwtInitialSettings.Issuer, request.JwtInitialSettings.Audience, request.JwtInitialSettings.ExpiresIn);
 
-    await settingsService.SetAsync(SettingsKeys.JwtSecretKey, request.JwtInitialSettings.JwtSecret, true, cancellationToken);
     await settingsService.SetAsync(SettingsKeys.JwtIssuer, request.JwtInitialSettings.Issuer, false, cancellationToken);
     await settingsService.SetAsync(SettingsKeys.JwtAudience, request.JwtInitialSettings.Audience, false, cancellationToken);
     await settingsService.SetAsync(SettingsKeys.JwtExpiresIn, request.JwtInitialSettings.ExpiresIn, false, cancellationToken);

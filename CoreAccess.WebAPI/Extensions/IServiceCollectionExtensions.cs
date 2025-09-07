@@ -1,10 +1,14 @@
+using System.Security.Cryptography;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
+using CoreAccess.WebAPI.Helpers;
 using CoreAccess.Workers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenIddict.Server;
 
 namespace CoreAccess.WebAPI.Extensions;
 
@@ -161,8 +165,17 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
                     .EnableUserInfoEndpointPassthrough()
                     .EnableEndSessionEndpointPassthrough();
 
-                options.AddDevelopmentEncryptionCertificate()
-                    .AddDevelopmentSigningCertificate();
+                if (IsDevelopment)
+                {
+                    options.AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+                }else
+                {
+                    var encryptionKey = SecureKeyHelper.LoadOrCreateRsaKey("encryption_key");
+                    var signingKey = SecureKeyHelper.LoadOrCreateRsaKey("signing_key");
+                    options.AddEncryptionKey(encryptionKey);
+                    options.AddSigningKey(signingKey);
+                }
 
                 options.RegisterClaims("role", "email", "name");
             })

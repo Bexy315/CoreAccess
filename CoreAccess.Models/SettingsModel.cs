@@ -22,7 +22,6 @@ public static class SettingsKeys
 {
     public const string BaseUri = "CoreAccess:BaseUri";
     public const string InitSetupCompleted = "CoreAccess:InitSetupCompleted";
-    public const string JwtSecretKey = "CoreAccess:Jwt:Secret";
     public const string JwtIssuer = "CoreAccess:Jwt:Issuer";
     public const string JwtAudience = "CoreAccess:Jwt:Audience";
     public const string JwtExpiresIn = "CoreAccess:Jwt:ExpiresIn";

@@ -1,14 +1,10 @@
 using CoreAccess.BizLayer.Middleware;
-using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
-using CoreAccess.DataLayer.Repositories;
 using CoreAccess.WebAPI.Extensions;
 using CoreAccess.WebAPI.Helpers;
-using CoreAccess.Workers;
 using dotenv.net;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +25,7 @@ if (builder.Environment.IsDevelopment())
 }else
 {
     builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo("/var/lib/coreaccess/dpkeys"))
+        .PersistKeysToFileSystem(new DirectoryInfo("/data/keys/dpKeys/"))
         .SetApplicationName("CoreAccess");
 }
 

@@ -14,7 +14,6 @@ public class GeneralInitialSetupRequest
 }
 public class JwtInitialSetupRequest
 {
-    public string JwtSecret { get; set; } = string.Empty;
     public string Issuer { get; set; } = "coreaccess";
     public string Audience { get; set; } = "coreaccess-client";
     public string ExpiresIn { get; set; } = "3600";
