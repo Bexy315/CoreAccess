@@ -1,9 +1,9 @@
 # ---------- Frontend Build ----------
-#FROM node:20-slim AS frontend-build
-#WORKDIR /app
-#COPY CoreAccess.Frontend/coreaccess-webui/ .
-#RUN npm install
-#RUN npm run build
+FROM node:20-slim AS frontend-build
+WORKDIR /app
+COPY CoreAccess.Frontend/coreaccess-webui/ .
+RUN npm install
+RUN npm run build
 
 # ---------- Backend Build ----------
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
@@ -33,7 +33,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 
 # Statische Dateien vom Frontend rein
-#COPY --from=frontend-build /app/dist ./wwwroot
+COPY --from=frontend-build /app/dist ./wwwroot
 
 # Publish-Output ins Runtime-Image
 COPY --from=build /app/publish .

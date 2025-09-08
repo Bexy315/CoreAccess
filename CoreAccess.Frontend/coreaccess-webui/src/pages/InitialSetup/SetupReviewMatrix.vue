@@ -2,11 +2,9 @@
 defineProps<{
   general: {
     baseUri: string
-    systemLogLevel: string
     disableRegistration: string
   }
   jwt: {
-    jwtSecret: string
     issuer: string
     audience: string
     expiresIn: string
@@ -47,13 +45,6 @@ const isMissing = (val: unknown) => {
           </div>
 
           <div>
-            <span class="font-medium">System Log Level*:</span>
-            <div :class="isMissing(general.systemLogLevel) ? 'text-red-500' : ''">
-              {{ general.systemLogLevel || 'Missing value' }}
-            </div>
-          </div>
-
-          <div>
             <span class="font-medium">Disable Registration: </span>
             <Tag :severity="general.disableRegistration === 'true' ? 'danger' : 'success'" class="mt-1">
               {{ general.disableRegistration === 'true' ? 'Yes' : 'No' }}
@@ -70,13 +61,6 @@ const isMissing = (val: unknown) => {
       <template #title>JWT Settings</template>
       <template #content>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <span class="font-medium">JWT Secret*:</span>
-            <div :class="isMissing(jwt.jwtSecret) ? 'text-red-500' : ''">
-              {{ jwt.jwtSecret || 'Missing value' }}
-            </div>
-          </div>
-
           <div>
             <span class="font-medium">Issuer*:</span>
             <div :class="isMissing(jwt.issuer) ? 'text-red-500' : ''">

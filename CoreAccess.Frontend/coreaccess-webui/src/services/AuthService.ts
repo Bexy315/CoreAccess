@@ -5,9 +5,9 @@ import {router} from "../router";
 export const isAuthenticated = ref(false)
 export const currentUser = ref<any>(null)
 
-coreAuth.configure({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || '/api'
-})
+//coreAuth.configure({
+  //  baseUrl: import.meta.env.VITE_API_BASE_URL || '/api'
+//})
 
 coreAuth.onAuthChange((val : boolean) => {
     isAuthenticated.value = val

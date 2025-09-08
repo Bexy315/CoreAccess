@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using CoreAccess.BizLayer.Helpers;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
 using CoreAccess.DataLayer.Repositories;
@@ -17,11 +18,10 @@ public static class IServiceCollectionExtensions
 {
     private static readonly string Environment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")??"Production";
     private static readonly bool IsDevelopment = Environment == "Development";
-    private static readonly bool IsDebugMode = System.Environment.GetEnvironmentVariable("COREACCESS_DEBUGMODE") == "True";
     
 public static IServiceCollection AddCoreAccessCors(this IServiceCollection services)
     {
-        if (IsDevelopment || IsDebugMode)
+        if (IsDevelopment)
         {
             services.AddCors(options =>
             {
@@ -54,7 +54,7 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
             {
                 var sqlitePath = IsDevelopment
                     ? Path.Combine(Directory.GetCurrentDirectory(), "App_Data", "data.sqlite")
-                    : Path.Combine(AppContext.BaseDirectory, "data.sqlite");
+                    : Path.Combine(AppContext.BaseDirectory + "/data", "data.sqlite");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(sqlitePath)!);
 

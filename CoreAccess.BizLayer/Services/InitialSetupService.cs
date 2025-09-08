@@ -1,5 +1,5 @@
+using CoreAccess.BizLayer.Helpers;
 using CoreAccess.Models;
-using CoreAccess.WebAPI.Helpers;
 using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
 
@@ -92,8 +92,8 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
             OpenIddictConstants.Permissions.ResponseTypes.Token,
             OpenIddictConstants.Permissions.ResponseTypes.Code,
         },
-        RedirectUris = { new Uri("http://localhost:8081/callback") },
-        PostLogoutRedirectUris = { new Uri("http://localhost:8081/") }
+        RedirectUris = { new Uri($"{request.GeneralInitialSettings.BaseUri}/callback") },
+        PostLogoutRedirectUris = { new Uri($"{request.GeneralInitialSettings.BaseUri}/") }
     });
     logger.LogInformation("Registered default CoreAccess AdminUI client.");
 

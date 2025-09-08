@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue';
+import {ref, computed} from 'vue';
 import SetupReviewMatrix from './SetupReviewMatrix.vue';
-import {generateRandomBase64Key} from "../../utils/SecurityKeyHelper.ts";
 import {sendInitialSetupData} from "../../services/InitialSetupService.ts";
 
 const isLoading = ref(false)
 
 const generalInitialSettings = ref({
   baseUri: '',
-  systemLogLevel: 'Information',
   disableRegistration: 'true'
 })
 
 const jwtInitialSettings = ref({
-  jwtSecret: '',
   issuer: 'coreaccess',
   audience: 'coreaccess-client',
   expiresIn: '3600'
@@ -34,10 +31,6 @@ const userInitialSettings = ref({
     country: '',
     status: 0
   }
-})
-
-onMounted(() => {
-  refreshJwtSecret();
 })
 
 const disableRegistrationBool = computed({
@@ -75,23 +68,12 @@ const isMissing = (val: unknown) => {
 
 const hasMissingRequired = computed(() => {
   return isMissing(generalInitialSettings.value.baseUri)
-      || isMissing(generalInitialSettings.value.systemLogLevel)
-      || isMissing(jwtInitialSettings.value.jwtSecret)
       || isMissing(jwtInitialSettings.value.issuer)
       || isMissing(jwtInitialSettings.value.audience)
       || isMissing(jwtInitialSettings.value.expiresIn)
       || isMissing(userInitialSettings.value.admin.username)
       || isMissing(userInitialSettings.value.admin.password)
 })
-const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then(() => {
-    console.log('Copied to clipboard:', text);
-  });
-};
-
-const refreshJwtSecret = () => {
-  jwtInitialSettings.value.jwtSecret = generateRandomBase64Key();
-};
 
 const showPassword = ref(false);
 
@@ -125,16 +107,6 @@ const toggleShowPassword = () => {
                 <small class="text-gray-500">Actual CoreAccess URL. Used for email links, redirects etc.</small>
               </div>
 
-              <div>
-                <label class="block mb-1 font-medium">System Log Level</label>
-                <Select
-                    v-model="generalInitialSettings.systemLogLevel"
-                    :options="[ 'Debug', 'Information', 'Warning', 'Error']"
-                    placeholder="Select Log Level"
-                    class="w-full"
-                />
-              </div>
-
               <div class="flex items-center">
                 <Checkbox v-model="disableRegistrationBool" inputId="disableReg" :binary="true" />
                 <label for="disableReg" class="ml-2">Disable User Registration</label>
@@ -153,26 +125,6 @@ const toggleShowPassword = () => {
               <p class="text-gray-500 text-sm">
                 Configure how authentication tokens are generated, including secrets and token expiration.
               </p>
-              <div class="flex items-center gap-2">
-                <div class="flex-grow flex flex-col">
-                  <label class="block mb-1 font-medium">JWT Secret</label>
-                  <InputText v-model="jwtInitialSettings.jwtSecret" class="w-full" />
-                </div>
-                <div class="mt-6">
-                <Button
-                    icon="pi pi-copy"
-                    class="p-button-rounded p-button-text"
-                    @click="copyToClipboard(jwtInitialSettings.jwtSecret)"
-                    v-tooltip="'Copy JWT Secret'"
-                />
-                <Button
-                    icon="pi pi-refresh"
-                    class="p-button-rounded p-button-text"
-                    @click="refreshJwtSecret"
-                    v-tooltip="'Refresh JWT Secret'"
-                />
-                </div>
-                </div>
                 <div>
                   <label class="block mb-1 font-medium">Issuer</label>
                   <InputText v-model="jwtInitialSettings.issuer" class="w-full" />

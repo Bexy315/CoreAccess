@@ -1,13 +1,12 @@
 using System.Security.Cryptography;
-using DataJuggler.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-namespace CoreAccess.WebAPI.Helpers;
+namespace CoreAccess.BizLayer.Helpers;
 
 public static class SecureKeyHelper
 {
-    private const string KeyPath = "/data/keys/";
+    private const string KeyPath = "/app/data/keys/";
     
     /// <summary>
     /// Loads the specified RSA key or creates a new one if not present.
@@ -17,26 +16,41 @@ public static class SecureKeyHelper
     /// <returns>An instance of RsaSecurityKey.</returns>
     public static SecurityKey LoadOrCreateRsaKey(string keyName, int size = 2048)
     {
-        var path = Path.Combine(KeyPath, $"{keyName}.jwk");
-        
-        if (File.Exists(path))
+        var path = Path.Combine(KeyPath, $"{keyName}.pem");
+
+        // Stelle sicher, dass das Verzeichnis existiert
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
         {
-            var json = File.ReadAllText(path);
-            return new JsonWebKey(json);
+            Directory.CreateDirectory(directory);
         }
 
-        using var rsa = RSA.Create(size);
-        var key = new RsaSecurityKey(rsa)
+        RSA rsa;
+
+        if (File.Exists(path))
         {
-            KeyId = Guid.NewGuid().ToString("N")
+            // Private Key aus PEM laden
+            var pem = File.ReadAllText(path);
+            rsa = RSA.Create();
+            rsa.ImportFromPem(pem);
+        }
+        else
+        {
+            // Neuen Key generieren
+            rsa = RSA.Create(size);
+
+            // Private Key als PEM exportieren
+            var privateKeyPem = rsa.ExportRSAPrivateKeyPem();
+            File.WriteAllText(path, privateKeyPem);
+        }
+
+        return new RsaSecurityKey(rsa)
+        {
+            KeyId = keyName
         };
-
-        var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(key);
-        var jsonString = JsonConvert.SerializeObject(jwk, Formatting.Indented);
-        File.WriteAllText(path, jsonString);
-
-        return key;
     }
+
+
     
     /// <summary>
     /// Returns a random Base64-encoded 256-bit key which is not stored.

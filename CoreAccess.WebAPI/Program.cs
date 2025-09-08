@@ -59,8 +59,7 @@ app.MapOpenApi();
 app.UseSwagger();            
 app.UseSwaggerUI();
 
-if (app.Environment.IsDevelopment() || 
-    Environment.GetEnvironmentVariable("COREACCESS_DEBUGMODE") == "True")
+if (app.Environment.IsDevelopment())
 {
     app.UseCors("DevCors");
 }

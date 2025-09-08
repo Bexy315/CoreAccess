@@ -1,7 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import type {RouteRecordRaw} from 'vue-router';
 import Dashboard from "../pages/Dashboard.vue";
-import Login from "../pages/Login.vue";
 import Users from "../pages/Users.vue";
 import Roles from "../pages/Roles.vue";
 import Permissions from "../pages/Permissions.vue";
@@ -15,7 +14,6 @@ import Callback from "../pages/Callback.vue";
 
 const routes: RouteRecordRaw[] = [
     { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, public: false } },
-    { path: '/login', name: 'Login', component: Login, meta: { public: true }, },
     { path: '/callback', name: 'Callbafck', component: Callback, meta: { public: true }, },
     { path: '/users', name: 'Users', component: Users, meta: { requiresAuth: true }, },
     { path: '/roles', name: 'Roles', component: Roles, meta: { requiresAuth: true }, },
@@ -35,20 +33,11 @@ export const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _, next) => {
     const isPublic = to.meta.public === true
     console.log(isAuthenticated())
     if (!isAuthenticated() && !isPublic) {
             login()
-    } else if (isAuthenticated() && to.path === "/login") {
-        const fallbackPath =
-            from?.fullPath && from.fullPath !== "/login" ? from.fullPath : "/"
-        next(fallbackPath)
-    }else if(!isAuthenticated() && to.path === "/login" && !to.query.redirect) {
-        next({
-            path: to.path,
-            query: { redirect: '/' }
-        })
     }else {
         next()
     }

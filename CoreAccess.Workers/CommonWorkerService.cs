@@ -21,7 +21,7 @@ public class CommonWorkerService(IServiceProvider serviceProvider) : BackgroundS
                 {
                     GeneralInitialSettings = new GeneralInitialSetupRequest
                     {
-                        BaseUri = "http://localhost:5000",
+                        BaseUri = "http://localhost:8082",
                         DisableRegistration = "false",
                     },
                     JwtInitialSettings = new JwtInitialSetupRequest
