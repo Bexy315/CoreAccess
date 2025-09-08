@@ -9,7 +9,6 @@ public class InitialSetupRequest
 public class GeneralInitialSetupRequest
 {
     public string BaseUri { get; set; } = String.Empty;
-    public string SystemLogLevel { get; set; } = "Information";
     public string DisableRegistration { get; set; } = "false";
 }
 public class JwtInitialSetupRequest

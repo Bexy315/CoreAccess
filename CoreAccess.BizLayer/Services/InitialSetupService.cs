@@ -62,8 +62,8 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
 
     logger.LogInformation("Applying general settings...");
     await settingsService.SetAsync(SettingsKeys.BaseUri, request.GeneralInitialSettings.BaseUri, false, cancellationToken);
-    await settingsService.SetAsync(SettingsKeys.SystemLogLevel, request.GeneralInitialSettings.SystemLogLevel, false, cancellationToken);
     await settingsService.SetAsync(SettingsKeys.DisableRegistration, request.GeneralInitialSettings.DisableRegistration, false, cancellationToken);
+    await settingsService.SetAsync(SettingsKeys.DatabaseProvider, "Sqlite", false, cancellationToken);
 
     logger.LogInformation("Applying JWT settings (issuer: {Issuer}, audience: {Audience}, expiresIn: {ExpiresIn})",
         request.JwtInitialSettings.Issuer, request.JwtInitialSettings.Audience, request.JwtInitialSettings.ExpiresIn);

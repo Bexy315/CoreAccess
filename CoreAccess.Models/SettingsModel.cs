@@ -20,11 +20,11 @@ public class SettingSearchOptions
 
 public static class SettingsKeys
 {
-    public const string BaseUri = "CoreAccess:BaseUri";
-    public const string InitSetupCompleted = "CoreAccess:InitSetupCompleted";
+    public const string BaseUri = "CoreAccess:Common:BaseUri";
+    public const string InitSetupCompleted = "CoreAccess:Common:InitSetupCompleted";
     public const string JwtIssuer = "CoreAccess:Jwt:Issuer";
     public const string JwtAudience = "CoreAccess:Jwt:Audience";
     public const string JwtExpiresIn = "CoreAccess:Jwt:ExpiresIn";
     public const string DisableRegistration = "CoreAccess:Common:DisableRegistration";
-    public const string SystemLogLevel = "CoreAccess:Logging:SystemLogLevel";
+    public const string DatabaseProvider = "CoreAccess:Database:DatabaseProvider";
 }
