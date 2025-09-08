@@ -8,13 +8,15 @@ import Permissions from "../pages/Permissions.vue";
 import SystemLogs from "../pages/SystemLogs.vue";
 import AuditLogs from "../pages/AuditLogs.vue";
 import AppSettings from "../pages/AppSettings.vue";
-import {isAuthenticated} from "../services/AuthService.ts";
+import {isAuthenticated, login} from "../services/auth.ts";
 import MetricsHub from "../pages/MetricsHub.vue";
 import InitialSetup from "../pages/InitialSetup/InitialSetup.vue";
+import Callback from "../pages/Callback.vue";
 
 const routes: RouteRecordRaw[] = [
-    { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
+    { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, public: false } },
     { path: '/login', name: 'Login', component: Login, meta: { public: true }, },
+    { path: '/callback', name: 'Callbafck', component: Callback, meta: { public: true }, },
     { path: '/users', name: 'Users', component: Users, meta: { requiresAuth: true }, },
     { path: '/roles', name: 'Roles', component: Roles, meta: { requiresAuth: true }, },
     { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true }, },
@@ -35,17 +37,14 @@ export const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const isPublic = to.meta.public === true
-
-    if (!isAuthenticated.value && !isPublic) {
-        next({
-            path: "/login",
-            query: { redirect: to.fullPath },
-        })
-    } else if (isAuthenticated.value && to.path === "/login") {
+    console.log(isAuthenticated())
+    if (!isAuthenticated() && !isPublic) {
+            login()
+    } else if (isAuthenticated() && to.path === "/login") {
         const fallbackPath =
             from?.fullPath && from.fullPath !== "/login" ? from.fullPath : "/"
         next(fallbackPath)
-    }else if(!isAuthenticated.value && to.path === "/login" && !to.query.redirect) {
+    }else if(!isAuthenticated() && to.path === "/login" && !to.query.redirect) {
         next({
             path: to.path,
             query: { redirect: '/' }

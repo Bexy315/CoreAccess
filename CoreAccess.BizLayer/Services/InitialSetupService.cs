@@ -92,8 +92,8 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
             OpenIddictConstants.Permissions.ResponseTypes.Token,
             OpenIddictConstants.Permissions.ResponseTypes.Code,
         },
-        RedirectUris = { new Uri("http://localhost:5173/callback") },
-        PostLogoutRedirectUris = { new Uri("http://localhost:5173/") }
+        RedirectUris = { new Uri("http://localhost:8081/callback") },
+        PostLogoutRedirectUris = { new Uri("http://localhost:8081/") }
     });
     logger.LogInformation("Registered default CoreAccess AdminUI client.");
 

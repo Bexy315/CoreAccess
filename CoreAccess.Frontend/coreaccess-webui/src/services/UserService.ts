@@ -13,7 +13,7 @@ import type {
  * @returns Ein paginierter Satz an Benutzern.
  */
 export async function fetchUsers(options: CoreUserSearchOptions): Promise<PagedResult<CoreUserDto>> {
-    const response = await apiClient.get<PagedResult<CoreUserDto>>('/admin/user', {
+    const response = await apiClient.get<PagedResult<CoreUserDto>>('/user', {
         params: options,
     });
 
@@ -21,15 +21,15 @@ export async function fetchUsers(options: CoreUserSearchOptions): Promise<PagedR
 }
 
 export async function createUser(request: CoreUserCreateRequest): Promise<CoreUserDto> {
-    const response = await apiClient.post<CoreUserDto>('/admin/user', request);
+    const response = await apiClient.post<CoreUserDto>('/user', request);
     return response.data;
 }
 
 export async function updateUser(userId: string, request: CoreUserUpdateRequest): Promise<CoreUserDto>{
-    const response = await apiClient.put<CoreUserDto>(`/admin/user/${userId}`, request);
+    const response = await apiClient.put<CoreUserDto>(`/user/${userId}`, request);
     return response.data;
 }
 
 export async function deleteUser(userId: string): Promise<any> {
-    return await apiClient.delete(`/admin/user/${userId}`);
+    return await apiClient.delete(`/user/${userId}`);
 }

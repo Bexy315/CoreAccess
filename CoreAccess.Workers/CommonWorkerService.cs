@@ -54,6 +54,17 @@ public class CommonWorkerService(IServiceProvider serviceProvider) : BackgroundS
 
             if (existingTestUser.Items.FirstOrDefault() == null)
             {
+                var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
+                var existingUserRoleResult = await roleService.SearchRolesAsync(new RoleSearchOptions(){Name = "User", PageSize = 1, Page = 1}, stoppingToken);
+                var existingUserRole = existingUserRoleResult.Items.FirstOrDefault();
+                if (existingUserRole == null)
+                {
+                    existingUserRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
+                    {
+                        Name = "User",
+                        Description = "Standard user role with limited permissions."
+                    }, stoppingToken);
+                }
                 var newTestUser = await userService.CreateUserAsync(new UserCreateRequest()
                 {
                     Username = "TestUser",
@@ -62,7 +73,7 @@ public class CommonWorkerService(IServiceProvider serviceProvider) : BackgroundS
                     FirstName = "Test",
                     LastName = "User"
                 }, cancellationToken: stoppingToken);
-                await userService.AddRoleToUserAsync(newTestUser.Id.ToString(), "User", cancellationToken: stoppingToken);
+                await userService.AddRoleToUserAsync(newTestUser.Id.ToString(), existingUserRole.Id.ToString(), cancellationToken: stoppingToken);
             } 
         }
         

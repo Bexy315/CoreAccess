@@ -12,7 +12,6 @@ export async function getHealthStatus(): Promise<HealthStatus> {
 }
 
 export async function getDashboardMetrics(): Promise<any> {
-   // TODO: Implement user metrics backend
     const response = await apiClient.get('/metrics/dashboard');
     return response.data;
 }

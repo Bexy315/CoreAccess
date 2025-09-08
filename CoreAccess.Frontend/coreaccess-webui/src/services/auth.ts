@@ -1,4 +1,5 @@
 import axios from "axios";
+import {ref} from "vue";
 
 interface TokenSet {
     access_token: string;
@@ -15,7 +16,7 @@ const config = {
     apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
 };
 
-function getTokens(): TokenSet | null {
+export function getTokens(): TokenSet | null {
     const raw = localStorage.getItem("tokens");
     if (!raw) return null;
     return JSON.parse(raw);
@@ -78,14 +79,6 @@ export async function getAccessToken(): Promise<string | null> {
     return tokens?.access_token || null;
 }
 
-export async function apiGet(path: string) {
-    const token = await getAccessToken();
-    const res = await axios.get(config.apiBaseUrl + path, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    return res.data;
-}
-
 export async function getUserInfo() {
     const token = await getAccessToken();
     if (!token) throw new Error("Not authenticated");
@@ -94,6 +87,14 @@ export async function getUserInfo() {
     });
     return res.data;
 }
+
+export function isAuthenticated(): boolean {
+    const token = getTokens()
+    isAuthenticatedRef.value = !!token
+    return !!token;
+}
+
+export const isAuthenticatedRef = ref(false)
 
 export function logout() {
 

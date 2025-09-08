@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {getAccessToken} from "./AuthService.ts";
+import {getTokens} from "./auth.ts";
 import {coreAuth} from "@coreaccess/client";
 
 const apiClient = axios.create({
@@ -13,7 +13,7 @@ const apiClient = axios.create({
 // Request interceptor to add Authorization header
 apiClient.interceptors.request.use(
     (config) => {
-        const token = getAccessToken();
+        const token = getTokens()?.access_token;
 
         if (token && token !== '') {
             config.headers.Authorization = `Bearer ${token}`;

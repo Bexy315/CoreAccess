@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref} from "vue";
-import {logout} from "../services/AuthService.ts";
+import {logout} from "../services/auth.ts";
 import {useRouter} from "vue-router";
 
 const userMenuRef = ref();

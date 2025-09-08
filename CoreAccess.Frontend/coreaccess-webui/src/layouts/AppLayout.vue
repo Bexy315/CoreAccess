@@ -23,11 +23,11 @@
 
 <script setup lang="ts">
 import {ref, watch} from 'vue';
-import {isAuthenticated} from "../services/AuthService.ts";
+import {isAuthenticatedRef} from "../services/auth.ts";
 
 const isLoggedIn = ref(false);
 
-watch(() => isAuthenticated.value, (newValue) => {
+watch(() => isAuthenticatedRef.value, (newValue) => {
   isLoggedIn.value = newValue;
 }, { immediate: true });
 </script>
