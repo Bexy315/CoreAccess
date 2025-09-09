@@ -11,7 +11,7 @@ using OpenIddict.Server.AspNetCore;
 namespace CoreAccess.WebAPI.Controllers;
 
 [Controller]
-public class AuthController(IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService) : ControllerBase
+public class AuthController(IUserService userService, IOpenIddictService openIddictService, ITokenService tokenService, ISettingsService settingsService) : ControllerBase
 {
     [HttpPost("~/connect/token")]
     [IgnoreAntiforgeryToken, Produces("application/json")]
@@ -39,6 +39,9 @@ public class AuthController(IUserService userService, IOpenIddictService openIdd
 
             var identity = new ClaimsIdentity(claims, TokenValidationParameters.DefaultAuthenticationType);
             var principal = new ClaimsPrincipal(identity);
+            
+            var tokenLifetime = await settingsService.GetTokenLifetimeAsync();
+            principal.SetAccessTokenLifetime(TimeSpan.FromSeconds(tokenLifetime));
 
             principal.SetScopes(OpenIddictConstants.Scopes.OpenId, OpenIddictConstants.Scopes.OfflineAccess);
             principal.SetResources("coreaccess-api");
@@ -52,6 +55,9 @@ public class AuthController(IUserService userService, IOpenIddictService openIdd
             var principal = result.Principal;
             if (principal == null)
                 return Forbid();
+            
+            var tokenLifetime = await settingsService.GetTokenLifetimeAsync();
+            principal.SetAccessTokenLifetime(TimeSpan.FromSeconds(tokenLifetime));
             
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
@@ -87,6 +93,9 @@ public class AuthController(IUserService userService, IOpenIddictService openIdd
             var freshIdentity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType);
             freshIdentity.AddClaims(freshClaims);
             var freshPrincipal = new ClaimsPrincipal(freshIdentity);
+            
+            var tokenLifetime = await settingsService.GetTokenLifetimeAsync();
+            freshPrincipal.SetAccessTokenLifetime(TimeSpan.FromSeconds(tokenLifetime));
 
             freshPrincipal.SetScopes(result.Principal!.GetScopes());
             freshPrincipal.SetResources("coreaccess-api");
