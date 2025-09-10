@@ -79,6 +79,27 @@ export async function getAccessToken(): Promise<string | null> {
     return tokens?.access_token || null;
 }
 
+export async function refreshToken(): Promise<string | null> {
+    const tokens = getTokens();
+    if (!tokens?.refresh_token) return null;
+
+        const res = await axios.post(
+            config.authBaseUrl + "/connect/token",
+            new URLSearchParams({
+                grant_type: "refresh_token",
+                refresh_token: tokens.refresh_token,
+                client_id: config.clientId,
+            }),
+            { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+
+        saveTokens(res.data);
+        const newTokens = getTokens();
+        return newTokens?.access_token || null;
+
+}
+
+
 export async function getUserInfo() {
     const token = await getAccessToken();
     if (!token) throw new Error("Not authenticated");

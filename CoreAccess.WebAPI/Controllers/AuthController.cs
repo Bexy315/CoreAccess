@@ -96,7 +96,7 @@ public class AuthController(IUserService userService, IOpenIddictService openIdd
             
             var tokenLifetime = await settingsService.GetTokenLifetimeAsync();
             freshPrincipal.SetAccessTokenLifetime(TimeSpan.FromSeconds(tokenLifetime));
-
+           
             freshPrincipal.SetScopes(result.Principal!.GetScopes());
             freshPrincipal.SetResources("coreaccess-api");
 

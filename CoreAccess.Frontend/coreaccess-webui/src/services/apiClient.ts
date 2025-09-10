@@ -1,6 +1,5 @@
 import axios from 'axios';
-import {getTokens} from "./auth.ts";
-import {coreAuth} from "@coreaccess/client";
+import {getTokens, logout, refreshToken} from "./auth.ts";
 
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -36,14 +35,14 @@ apiClient.interceptors.response.use(
         ) {
             originalRequest._retry = true
             try {
-                const refreshResponse = await coreAuth.refreshAccessToken();
+                const refreshResponse = await refreshToken();
 
                 if (originalRequest.headers)
                     originalRequest.headers.Authorization = `Bearer ${refreshResponse}`;
 
                 return apiClient(originalRequest)
             } catch (refreshError) {
-                coreAuth.logout();
+                logout();
                 return Promise.reject(refreshError)
             }
         }
