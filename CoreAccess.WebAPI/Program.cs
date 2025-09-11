@@ -26,7 +26,7 @@ if (builder.Environment.IsDevelopment())
 }else
 {
     builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo("/data/keys/dpKeys/"))
+        .PersistKeysToFileSystem(new DirectoryInfo("/app/data/keys/dpKeys/"))
         .SetApplicationName("CoreAccess");
 }
 

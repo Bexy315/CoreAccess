@@ -10,7 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(CoreAccessDbContext db, ILogger<SystemController> logger) : ControllerBase
+public class SystemController(CoreAccessDbContext db,ISettingsService settingsService, ILogger<SystemController> logger) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
@@ -50,8 +50,9 @@ public class SystemController(CoreAccessDbContext db, ILogger<SystemController> 
     [Route("start-debug")]
     public async Task <IActionResult> StartDebug(CancellationToken cancellationToken = default)
     {
-        throw new Exception("Test exception for debugging purposes.");
-        logger.LogInformation("Starting debug setup...");
-        return Ok();
+        logger.LogInformation("Starting debug...");
+
+        var value = await settingsService.GetAsync("Debug:TestEncryptedSetting", cancellationToken);
+        return Ok(value);
     }
 }

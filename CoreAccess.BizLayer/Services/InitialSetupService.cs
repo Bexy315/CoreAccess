@@ -116,8 +116,8 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
             OpenIddictConstants.Permissions.ResponseTypes.Token,
             OpenIddictConstants.Permissions.ResponseTypes.Code,
         },
-        RedirectUris = { new Uri("http://localhost:5173/callback") },
-        PostLogoutRedirectUris = { new Uri("http://localhost:5173/") }
+        RedirectUris = { new Uri("http://localhost:5000/callback") },
+        PostLogoutRedirectUris = { new Uri("http://localhost:5000/") }
     });
     logger.LogInformation("Registered Postman client for API testing.");
 
@@ -178,6 +178,9 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
 
     await userService.AddRoleToUserAsync(newUser.Id.ToString(), adminRole.Id.ToString(), cancellationToken: cancellationToken);
     logger.LogInformation("Assigned role {Role} to admin user {Username}.", adminRole.Name, newUser.Username);
+    
+    logger.LogDebug("Adding Encrypted Test Database setting for testing purposes.");
+    await settingsService.SetAsync("Debug:TestEncryptedSetting", "TestEncryptedValue", true, cancellationToken);
 
     await SaveCompletedAsync();
     logger.LogInformation("Initial setup completed successfully.");
