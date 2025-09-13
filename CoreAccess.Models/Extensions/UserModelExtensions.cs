@@ -9,7 +9,8 @@ public static class UserModelExtensions
             Username = entity.Username,
             Email = entity.Email,
             FirstName = entity.FirstName,
-            LastName = entity.LastName
+            LastName = entity.LastName,
+            Status = entity.Status
         };
 
     public static UserDetailDto ToDetailDto(this User entity) =>
@@ -28,7 +29,6 @@ public static class UserModelExtensions
             Country = entity.Country,
             ProfilePicture = entity.ProfilePicture,
             ProfilePictureContentType = entity.ProfilePictureContentType,
-            Status = entity.Status,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
             Roles = entity.Roles?.Select(r => r.ToDto()).ToList() ?? new List<RoleDto>()

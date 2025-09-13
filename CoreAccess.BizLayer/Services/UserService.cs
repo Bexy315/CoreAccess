@@ -2,6 +2,7 @@ using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
 using CoreAccess.Models.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace CoreAccess.BizLayer.Services;
 
@@ -18,7 +19,7 @@ public interface IUserService
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
     Task<bool> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
 }
-public class UserService(IUserRepository userRepository, IRoleRepository roleRepository, IRoleService roleService) : IUserService
+public class UserService(IUserRepository userRepository, IRoleRepository roleRepository, ILogger<IUserService> logger) : IUserService
 {
     public async Task<PagedResult<UserDto>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default)
     {
@@ -307,7 +308,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 PageSize = 1
             }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            if (user == null || user.Status != UserStatus.Active || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 return false;
             }
@@ -316,7 +317,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            logger.LogError(ex, "Error validating credentials for user {Username}", username);
             return false;
         }
     }

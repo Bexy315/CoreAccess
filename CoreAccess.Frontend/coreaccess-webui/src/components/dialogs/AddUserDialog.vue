@@ -1,59 +1,13 @@
 <template>
-  <Dialog v-model:visible="visible" modal header="Create User" style="width: 80%; height: 100%">
-    <Stepper value="1">
-      <StepList>
-        <Step value="1">Basic</Step>
-        <Step value="4">Overview</Step>
-      </StepList>
-
-      <StepPanels>
-        <!-- Step 1: Basic -->
-        <StepPanel v-slot="{ activateCallback }" value="1">
-          <div>
-            <span class="mb-2">Credentials:</span>
+  <Dialog v-model:visible="visible" modal header="Create User">
+          <div class="pb-4">
+            <span>Credentials:</span>
             <div class="flex flex-row gap-3 mt-2">
               <InputText v-model="user.username" placeholder="Username" />
               <Password v-model="user.password" placeholder="Password" toggleMask />
             </div>
           </div>
-          <div class="mt-2 flex flex-col gap-3">
-            <span class="mt-2 mb-2">Optional:</span>
-            <InputText v-model="user.email" placeholder="Email" />
-            <InputText v-model="user.firstName" placeholder="First Name" />
-            <InputText v-model="user.lastName" placeholder="Last Name" />
-            <InputText v-model="user.phone" placeholder="Phone" />
-            <InputText v-model="user.address" placeholder="Address" />
-            <InputText v-model="user.city" placeholder="City" />
-            <InputText v-model="user.state" placeholder="State" />
-            <InputText v-model="user.zip" placeholder="ZIP Code" />
-            <InputText v-model="user.country" placeholder="Country" />
-          </div>
-          <div class="flex justify-end pt-4 absolute bottom-2 pr-12 w-full">
-            <Button label="Next" icon="pi pi-arrow-right" @click="activateCallback('4')" />
-          </div>
-        </StepPanel>
-
-        <!-- Step 4: Overview -->
-        <StepPanel v-slot="{ activateCallback }" value="4">
-          <div class="space-y-2">
-            <p><b>Username:</b> {{ user.username }}</p>
-            <p><b>Email:</b> {{ user.email }}</p>
-            <p><b>First Name:</b> {{ user.firstName }}</p>
-            <p><b>Last Name:</b> {{ user.lastName }}</p>
-            <p><b>Phone:</b> {{ user.phone }}</p>
-            <p><b>Address:</b> {{ user.address }}</p>
-            <p><b>City:</b> {{ user.city }}</p>
-            <p><b>State:</b> {{ user.state }}</p>
-            <p><b>ZIP Code:</b> {{ user.zip }}</p>
-            <p><b>Country:</b> {{ user.country }}</p>
-          </div>
-          <div class="flex justify-end pt-4 absolute bottom-2 pr-12 w-full">
-            <Button class="mr-2" label="Back" icon="pi pi-arrow-left" @click="activateCallback('1')" />
-            <Button label="Create" icon="pi pi-check" @click="submit()" severity="success" />
-          </div>
-        </StepPanel>
-      </StepPanels>
-    </Stepper>
+    <Button label="Create" icon="pi pi-check" @click="submit()" severity="success" />
   </Dialog>
 </template>
 

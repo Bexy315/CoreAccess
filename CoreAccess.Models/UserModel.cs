@@ -40,6 +40,7 @@ public class UserDto
     public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public UserStatus Status { get; set; }
 }
 
 public class UserDetailDto : UserDto
@@ -52,7 +53,6 @@ public class UserDetailDto : UserDto
     public string? Country { get; set; }
     public byte[]? ProfilePicture { get; set; }
     public string? ProfilePictureContentType { get; set; }
-    public UserStatus Status { get; set; }
     public string CreatedAt { get; set; }
     public string UpdatedAt { get; set; }
     public List<RoleDto> Roles { get; set; }
