@@ -57,7 +57,7 @@ public class SettingsRepository(CoreAccessDbContext context) : ISettingsReposito
 
     public async Task DeleteSettingAsync(string id, CancellationToken cancellationToken = default)
     {
-        var setting = await context.Settings.FindAsync(id, cancellationToken);
+        var setting = await context.Set<Setting>().FirstOrDefaultAsync(s => s.Id == Guid.Parse(id), cancellationToken);
         if (setting != null)
         {
             context.Settings.Remove(setting);
@@ -65,7 +65,7 @@ public class SettingsRepository(CoreAccessDbContext context) : ISettingsReposito
         }
         else
         {
-            throw new Exception("Role not found");
+            throw new KeyNotFoundException($"Setting with id {id} not found");
         }
     }
 }

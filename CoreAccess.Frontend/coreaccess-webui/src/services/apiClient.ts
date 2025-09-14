@@ -1,4 +1,5 @@
 import axios from 'axios';
+import qs from 'qs';
 import {getTokens, logout, refreshToken} from "./auth.ts";
 
 const apiClient = axios.create({
@@ -7,9 +8,11 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    paramsSerializer: (params) => {
+        return qs.stringify(params, { arrayFormat: 'repeat' })
+    }
 });
 
-// Request interceptor to add Authorization header
 apiClient.interceptors.request.use(
     (config) => {
         const token = getTokens()?.access_token;

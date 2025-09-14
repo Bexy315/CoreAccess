@@ -1,7 +1,7 @@
 import apiClient from './apiClient';
 import type {PagedResult} from '../model/CommonModel.ts';
 import type {
-    CoreUserCreateRequest,
+    CoreUserCreateRequest, CoreUserDetailDto,
     CoreUserDto,
     CoreUserSearchOptions,
     CoreUserUpdateRequest
@@ -13,9 +13,18 @@ import type {
  * @returns Ein paginierter Satz an Benutzern.
  */
 export async function fetchUsers(options: CoreUserSearchOptions): Promise<PagedResult<CoreUserDto>> {
-    const response = await apiClient.get<PagedResult<CoreUserDto>>('/user', {
-        params: options,
-    });
+    const params: Record<string, any> = { ...options }
+
+    if (options.status && options.status.length > 0) {
+        params.status = options.status
+    }
+
+    const response = await apiClient.get<PagedResult<CoreUserDto>>('/user', { params })
+    return response.data;
+}
+
+export async function fetchUser(id: string): Promise<CoreUserDetailDto> {
+    const response = await apiClient.get<CoreUserDetailDto>('/user/' + id);
 
     return response.data;
 }

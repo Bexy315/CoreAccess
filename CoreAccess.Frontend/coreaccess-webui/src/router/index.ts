@@ -11,11 +11,13 @@ import {isAuthenticated, login} from "../services/auth.ts";
 import MetricsHub from "../pages/MetricsHub.vue";
 import InitialSetup from "../pages/InitialSetup/InitialSetup.vue";
 import Callback from "../pages/Callback.vue";
+import UserDetailDialogWrapper from "../components/dialogs/UserDetailDialogWrapper.vue";
 
 const routes: RouteRecordRaw[] = [
     { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, public: false } },
     { path: '/callback', name: 'Callbafck', component: Callback, meta: { public: true }, },
-    { path: '/users', name: 'Users', component: Users, meta: { requiresAuth: true }, },
+    { path: '/users', name: 'Users', component: Users, meta: { requiresAuth: true },
+        children: [{ path: ':id', component: UserDetailDialogWrapper } ]},
     { path: '/roles', name: 'Roles', component: Roles, meta: { requiresAuth: true }, },
     { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true }, },
     { path: '/settings', name: 'AppSettings', component: AppSettings, meta: { requiresAuth: true }, },
@@ -26,7 +28,6 @@ const routes: RouteRecordRaw[] = [
     { path: '/dashboard', redirect: '/' },
     { path: '/:pathMatch(.*)*', redirect: '/' }
 ];
-
 
 export const router = createRouter({
     history: createWebHistory(),

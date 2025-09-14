@@ -81,9 +81,9 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
             query = query.Where(u => u.Country.ToLower().Contains(options.Country.ToLower()));
         }
 
-        if (options.Status.HasValue)
+        if (options.Status != null && options.Status.Length != 0)
         {
-            query = query.Where(u => u.Status == options.Status.Value);
+            query = query.Where(u => u.Status != null && options.Status.Contains(u.Status));
         }
 
         var skip = (options.Page - 1) * options.PageSize;
@@ -113,8 +113,7 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
     }
     public async Task DeleteUserAsync(string id, CancellationToken cancellationToken = default)
     {
-        var user = await context.Users.FindAsync(Guid.Parse(id), cancellationToken);
-        
+        var user = await context.Set<User>().FirstOrDefaultAsync(u => u.Id == Guid.Parse(id), cancellationToken);
         
         if (user != null)
         {
@@ -128,7 +127,7 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
         }
         else
         {
-            throw new Exception("User not found");
+            throw new KeyNotFoundException($"User with id {id} not found");
         }
     }
 }

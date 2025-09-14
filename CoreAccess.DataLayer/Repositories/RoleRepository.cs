@@ -76,7 +76,7 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
     }
     public async Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default)
     {
-        var role = await context.Roles.FindAsync(id, cancellationToken);
+        var role = await context.Set<Role>().FirstOrDefaultAsync(r => r.Id == Guid.Parse(id), cancellationToken);
         if (role != null)
         {
             context.Roles.Remove(role);
@@ -84,7 +84,7 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         }
         else
         {
-            throw new Exception("Role not found");
+            throw new KeyNotFoundException($"Role with id {id} not found");
         }
     }
 }

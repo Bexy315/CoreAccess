@@ -74,7 +74,7 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
     }
     public async Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default)
     {
-        var permission = await context.Permissions.FindAsync(id, cancellationToken);
+        var permission = await context.Set<Permission>().FirstOrDefaultAsync(p => p.Id == Guid.Parse(id), cancellationToken);
         if (permission != null)
         {
             context.Permissions.Remove(permission);
@@ -82,7 +82,7 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
         }
         else
         {
-            throw new Exception("Role not found");
+            throw new KeyNotFoundException($"Permission with id {id} not found");
         }
     }
 }

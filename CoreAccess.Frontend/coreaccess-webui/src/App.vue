@@ -17,7 +17,6 @@ onMounted(async () => {
     if (toastRef.value) {
       registerGlobalToast(toastRef.value);
     }
-    //restoreAuth();
     const appConfigResponse = await getAppConfig().catch((error => {
       throw error;
     }));
@@ -40,11 +39,11 @@ onMounted(async () => {
   <div>
     <div v-if="loading" class="flex items-center justify-center h-screen">
       <ProgressSpinner />
-      <Toast ref="toastRef" position="bottom-left" />
     </div>
     <div v-if="!loading">
       <AppLayout />
     </div>
+    <Toast ref="toastRef" position="bottom-right" />
   </div>
 </template>
 

@@ -103,7 +103,7 @@ public class UserSearchOptions
     public string? State { get; set; }
     public string? Zip { get; set; }
     public string? Country { get; set; }
-    public UserStatus? Status { get; set; }
+    public UserStatus[]? Status { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 }

@@ -19,12 +19,20 @@ export interface CoreUserSearchOptions {
     state?: string;
     zip?: string;
     country?: string;
-    status?: CoreUserStatus;
+    status?: string[];
     page?: number;
     pageSize?: number;
 }
 
 export interface CoreUserDto {
+    id: string;
+    username: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    status: CoreUserStatus;
+}
+export interface CoreUserDetailDto {
     id: string;
     username: string;
     email?: string;

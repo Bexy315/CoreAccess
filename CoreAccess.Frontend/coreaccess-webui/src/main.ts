@@ -45,9 +45,12 @@ import Dialog from "primevue/dialog";
 import InputNumber from 'primevue/inputnumber';
 import InputSwitch from 'primevue/toggleswitch';
 import MultiSelect from 'primevue/multiselect';
+import ConfirmDialog from 'primevue/confirmdialog';
+import ConfirmationService from 'primevue/confirmationservice'
 
 
 import AddUserDialog from "./components/dialogs/AddUserDialog.vue";
+import UserDetailDialogWrapper from "./components/dialogs/UserDetailDialogWrapper.vue";
 
 import CoreAccessPreset from "./assets/theme.ts";
 
@@ -66,6 +69,7 @@ app.use(PrimeVue, { theme: {
     }
 }});
 app.use(ToastService);
+app.use(ConfirmationService);
 
 app.use(VueSidebarMenu);
 
@@ -101,9 +105,10 @@ app.component('Dialog', Dialog);
 app.component('InputNumber', InputNumber);
 app.component('InputSwitch', InputSwitch);
 app.component('MultiSelect', MultiSelect);
-
+app.component('ConfirmDialog', ConfirmDialog);
 
 app.component('AddUserDialog', AddUserDialog);
+app.component('UserDetailDialogWrapper', UserDetailDialogWrapper);
 
 app.directive('Tooltip', Tooltip);
 

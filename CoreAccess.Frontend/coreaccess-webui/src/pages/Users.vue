@@ -4,7 +4,17 @@ import {deleteUser, fetchUsers} from '../services/UserService';
 import type { CoreUserDto } from "../model/CoreUserModel.ts";
 import { CoreUserStatus } from "../model/CoreUserModel.ts";
 import AddUserDialog from "../components/dialogs/AddUserDialog.vue";
-import {showError} from "../utils/toast.ts";
+import {showError, showSuccess} from "../utils/toast.ts";
+import {useConfirm} from "primevue";
+import {router} from "../router";
+import {useRoute} from "vue-router";
+
+const route = useRoute()
+
+const search = ref<string>(String(route.query.search || ''))
+const statuses = ref<string[]>(Array.isArray(route.query.status) ? route.query.status as string[] : route.query.status ? [String(route.query.status)] : [])
+const page = ref<number>(Number(route.query.page || 1))
+const pageSize = ref<number>(Number(route.query.pageSize || 10))
 
 const users = ref<CoreUserDto[]>([]);
 const selectedUsers = ref<CoreUserDto[]>([]);
@@ -13,14 +23,33 @@ const rows = ref(10);
 const first = ref(0)
 const totalRecords = ref(0);
 const loading = ref(false);
+const confirm = useConfirm();
 
 const addUserDialogVisible = ref(false);
+
+const loadUsers = async (page = 0, pageSize = 10) => {
+  loading.value = true
+  try {
+    const response = await fetchUsers({
+      page: page,
+      pageSize: pageSize,
+      search: search.value || undefined,
+      status: statuses.value
+    })
+    users.value = response.items
+    totalRecords.value = response.totalCount
+  } catch (err) {
+    console.error('Failed to load users', err)
+  } finally {
+    loading.value = false
+  }
+}
 
 const menuDeleteItem = ref({
   label: 'Delete',
   icon: 'pi pi-trash',
   command: async () => {
-    await deleteSelectedUsers();
+    confirmDelete();
   }
 })
 
@@ -41,6 +70,25 @@ const menuItems = ref([
     }
   }
 ]);
+
+watch(
+    () => route.query,
+    (q) => {
+      search.value = String(q.search || '')
+      page.value = Number(q.page || 1)
+      pageSize.value = Number(q.pageSize || 10)
+
+      if (Array.isArray(q.status)) {
+        statuses.value = q.status as string[]
+      } else if (q.status) {
+        statuses.value = [String(q.status)]
+      } else {
+        statuses.value = []
+      }
+
+      loadUsers()
+    }
+)
 
 watch(selectedUsers, () => {
   if(selectedUsers.value.length == 1) {
@@ -65,13 +113,10 @@ const deleteSelectedUsers = async () => {
   }
 
   try {
-    // Assuming deleteUsers is a function that handles the deletion of users
-    await deleteUser(selectedUsers.value[0].id).catch(error => {
-      console.error('Error deleting user:', error);
-      showError('Fehler beim Löschen des Benutzers. Bitte versuchen Sie es später erneut.');
-    });
+    await deleteUser(selectedUsers.value[0].id);
     selectedUsers.value = [];
     await loadUsers(first.value / rows.value, rows.value);
+    showSuccess('Benutzer erfolgreich gelöscht');
   } catch (error) {
     console.error('Failed to delete users', error);
     showError('Fehler beim Löschen des Benutzers. Bitte versuchen Sie es später erneut.');
@@ -79,31 +124,42 @@ const deleteSelectedUsers = async () => {
 }
 
 onMounted(async () => {
-  await loadUsers(0, rows.value);
+  await loadUsers(page.value, pageSize.value);
 });
 
-const loadUsers = async (page = 0, pageSize = 10) => {
-  loading.value = true
-  try {
-    const response = await fetchUsers({
-      page: page + 1,
-      pageSize: pageSize
-    })
-    users.value = response.items
-    totalRecords.value = response.totalCount
-  } catch (err) {
-    console.error('Failed to load users', err)
-  } finally {
-    loading.value = false
-  }
+function updateQuery(params: Record<string, any> = {}) {
+  router.replace({
+    query: {
+      search: search.value || undefined,
+      status: statuses.value.length > 0 ? statuses.value : undefined,
+      page: page.value.toString(),
+      pageSize: pageSize.value.toString(),
+      ...params
+    }
+  })
 }
 
-const onPage = (event: any) => {
-  first.value = event.first
-  rows.value = event.rows
-  const page = event.page
-  loadUsers(page, event.rows)
+function onSearchChange() {
+  page.value = 1
+  updateQuery({})
 }
+
+function onStatusChange() {
+  page.value = 1
+  updateQuery({})
+}
+
+function onPageChange(event: any) {
+  page.value = event.page + 1
+  pageSize.value = event.rows
+  updateQuery({})
+}
+
+const statusOptions = [
+  { label: 'Aktiv', value: String(CoreUserStatus.Active) },
+  { label: 'Inaktiv', value: String(CoreUserStatus.Inactive) },
+  { label: 'Gesperrt', value: String(CoreUserStatus.Suspended) }
+]
 
 function formatStatus(status: CoreUserStatus): string {
   switch (status) {
@@ -118,10 +174,40 @@ function formatStatus(status: CoreUserStatus): string {
   }
 }
 
+function openDetailsDialog(user: CoreUserDto) {
+  router.push({
+    path: `/users/${user.id}`
+  })
+}
+
 function addedUser(){
   addUserDialogVisible.value = false;
   loadUsers(first.value / rows.value, rows.value);
 }
+
+const confirmDelete = () => {
+  confirm.require({
+    message: 'Do you want to delete this record?',
+    header: 'Danger Zone',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancel',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger'
+    },
+    accept: () => {
+      deleteSelectedUsers();
+    },
+    reject: () => {
+      console.log("rejected");
+    }
+  });
+};
 </script>
 
 <template>
@@ -133,18 +219,51 @@ function addedUser(){
                :lazy="true"
                v-model:selection="selectedUsers"
                :first="first"
-               @page="onPage"
+               @page="onPageChange"
                :totalRecords="totalRecords"
                paginator
-               :rows="rows"
+               :rows="pageSize"
                :rowsPerPageOptions="rowsPerPageOptions"
                :loading="loading"
                stripedRows
                responsiveLayout="scroll"
                removableSort
     >
+
       <template #header>
-        <Menubar :model="menuItems" class="!bg-white"></Menubar>
+        <Menubar :model="menuItems" class="!bg-white">
+          <!-- Links: Menü-Items -->
+          <template #start>
+            <span class="font-semibold">Users</span>
+          </template>
+
+          <!-- Rechts: Suche + Filter -->
+          <template #end>
+            <div class="flex gap-2 items-center">
+              <!-- Search -->
+              <span class="p-input-icon-left">
+          <i class="pi pi-search" />
+          <InputText
+              v-model="search"
+              placeholder="Search users..."
+              @input="onSearchChange"
+          />
+        </span>
+
+              <!-- Status Filter -->
+              <MultiSelect
+                  v-model="statuses"
+                  :options="statusOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Filter status"
+                  display="chip"
+                  class="w-56"
+                  @change="onStatusChange"
+              />
+            </div>
+          </template>
+        </Menubar>
       </template>
       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column field="username" header="Username" />
@@ -159,11 +278,9 @@ function addedUser(){
           {{ formatStatus(data.status) }}
         </template>
       </Column>
-      <Column header="Roles">
+      <Column class="w-24 !text-end" header="Actions">
         <template #body="{ data }">
-          <div class="flex flex-wrap gap-2">
-            <Tag v-for="role in data.roles" :key="role.id" :value="role.name" severity="info" />
-          </div>
+          <Button icon="pi pi-search" @click="openDetailsDialog(data)" severity="secondary" rounded></Button>
         </template>
       </Column>
     </DataTable>
@@ -174,7 +291,9 @@ function addedUser(){
           v-on:submit="addedUser"
       />
     </div>
+    <router-view />
   </div>
+  <ConfirmDialog></ConfirmDialog>
 </template>
 
 <style scoped></style>
