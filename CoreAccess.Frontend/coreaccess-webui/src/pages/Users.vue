@@ -53,14 +53,6 @@ const menuDeleteItem = ref({
   }
 })
 
-const menuEditItem = ref({
-  label: 'Edit',
-  icon: 'pi pi-pencil',
-  command: () => {
-    console.log('Edit user:', selectedUsers.value[0]);
-  }
-});
-
 const menuItems = ref([
   {
     label: 'New',
@@ -93,10 +85,9 @@ watch(
 watch(selectedUsers, () => {
   if(selectedUsers.value.length == 1) {
     menuItems.value.push(menuDeleteItem.value);
-    menuItems.value.push(menuEditItem.value)
   } else {
     if(menuItems.value.includes(menuDeleteItem.value)) {
-      menuItems.value = menuItems.value.filter(item => (item !== menuDeleteItem.value && item !== menuEditItem.value));
+      menuItems.value = menuItems.value.filter(item => (item !== menuDeleteItem.value));
     }
   }
 });
@@ -176,7 +167,8 @@ function formatStatus(status: CoreUserStatus): string {
 
 function openDetailsDialog(user: CoreUserDto) {
   router.push({
-    path: `/users/${user.id}`
+    path: `/users/${user.id}`,
+    query: route.query
   })
 }
 
@@ -232,17 +224,13 @@ const confirmDelete = () => {
 
       <template #header>
         <Menubar :model="menuItems" class="!bg-white">
-          <!-- Links: Menü-Items -->
           <template #start>
             <span class="font-semibold">Users</span>
           </template>
 
-          <!-- Rechts: Suche + Filter -->
           <template #end>
             <div class="flex gap-2 items-center">
-              <!-- Search -->
               <span class="p-input-icon-left">
-          <i class="pi pi-search" />
           <InputText
               v-model="search"
               placeholder="Search users..."

@@ -47,6 +47,12 @@ import InputSwitch from 'primevue/toggleswitch';
 import MultiSelect from 'primevue/multiselect';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice'
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+import PickList from 'primevue/picklist';
 
 
 import AddUserDialog from "./components/dialogs/AddUserDialog.vue";
@@ -106,6 +112,12 @@ app.component('InputNumber', InputNumber);
 app.component('InputSwitch', InputSwitch);
 app.component('MultiSelect', MultiSelect);
 app.component('ConfirmDialog', ConfirmDialog);
+app.component('Tabs', Tabs);
+app.component('TabList', TabList);
+app.component('Tab', Tab);
+app.component('TabPanels', TabPanels);
+app.component('TabPanel', TabPanel);
+app.component('PickList', PickList);
 
 app.component('AddUserDialog', AddUserDialog);
 app.component('UserDetailDialogWrapper', UserDetailDialogWrapper);
