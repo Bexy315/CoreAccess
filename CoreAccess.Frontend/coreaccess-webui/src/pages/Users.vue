@@ -45,24 +45,6 @@ const loadUsers = async (page = 0, pageSize = 10) => {
   }
 }
 
-const menuDeleteItem = ref({
-  label: 'Delete',
-  icon: 'pi pi-trash',
-  command: async () => {
-    confirmDelete();
-  }
-})
-
-const menuItems = ref([
-  {
-    label: 'New',
-    icon: 'pi pi-plus',
-    command: () => {
-      addUserDialogVisible.value = true;
-    }
-  }
-]);
-
 watch(
     () => route.query,
     (q) => {
@@ -81,16 +63,6 @@ watch(
       loadUsers()
     }
 )
-
-watch(selectedUsers, () => {
-  if(selectedUsers.value.length == 1) {
-    menuItems.value.push(menuDeleteItem.value);
-  } else {
-    if(menuItems.value.includes(menuDeleteItem.value)) {
-      menuItems.value = menuItems.value.filter(item => (item !== menuDeleteItem.value));
-    }
-  }
-});
 
 const deleteSelectedUsers = async () => {
   if (selectedUsers.value.length === 0) {
@@ -223,20 +195,31 @@ const confirmDelete = () => {
     >
 
       <template #header>
-        <Menubar :model="menuItems" class="!bg-white">
+        <Toolbar class="!bg-white">
           <template #start>
-            <span class="font-semibold">Users</span>
+            <div class="flex gap-2">
+              <!-- New User Button -->
+              <Button label="New" icon="pi pi-plus" @click="addUserDialogVisible = true" variant="text" severity="secondary"/>
+
+              <!-- Delete Button nur anzeigen, wenn 1 User ausgewählt -->
+              <Button v-if="selectedUsers.length === 1"
+                      label="Delete"
+                      icon="pi pi-trash"
+                      severity="danger"
+                      @click="confirmDelete" />
+            </div>
           </template>
 
           <template #end>
             <div class="flex gap-2 items-center">
+              <!-- Search -->
               <span class="p-input-icon-left">
-          <InputText
-              v-model="search"
-              placeholder="Search users..."
-              @input="onSearchChange"
-          />
-        </span>
+                <InputText
+                    v-model="search"
+                    placeholder="Search users..."
+                    @input="onSearchChange"
+                />
+              </span>
 
               <!-- Status Filter -->
               <MultiSelect
@@ -251,11 +234,12 @@ const confirmDelete = () => {
               />
             </div>
           </template>
-        </Menubar>
+        </Toolbar>
       </template>
+
       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column field="username" header="Username" />
-      <Column header="Name" >
+      <Column header="Name">
         <template #body="{ data }">
           {{ data.firstName }} {{ data.lastName }}
         </template>
@@ -268,7 +252,7 @@ const confirmDelete = () => {
       </Column>
       <Column class="w-24 !text-end" header="Actions">
         <template #body="{ data }">
-          <Button icon="pi pi-search" @click="openDetailsDialog(data)" severity="secondary" rounded></Button>
+          <Button icon="pi pi-search" @click="openDetailsDialog(data)" severity="secondary" rounded />
         </template>
       </Column>
     </DataTable>
@@ -283,5 +267,6 @@ const confirmDelete = () => {
   </div>
   <ConfirmDialog></ConfirmDialog>
 </template>
+
 
 <style scoped></style>

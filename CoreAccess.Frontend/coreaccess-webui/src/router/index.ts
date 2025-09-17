@@ -38,7 +38,7 @@ router.beforeEach((to, _, next) => {
     const isPublic = to.meta.public === true
     console.log(isAuthenticated())
     if (!isAuthenticated() && !isPublic) {
-            login()
+            login(to.fullPath)
     }else {
         next()
     }

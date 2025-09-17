@@ -34,12 +34,13 @@ function saveTokens(tokens: any) {
     );
 }
 
-export function login() {
+export function login(state: string = "") {
     const url = new URL(config.authBaseUrl + "/connect/authorize");
     url.searchParams.set("client_id", config.clientId);
     url.searchParams.set("redirect_uri", config.redirectUri);
     url.searchParams.set("response_type", "code");
     url.searchParams.set("scope", config.scopes);
+    url.searchParams.set("state", state);
     window.location.href = url.toString();
 }
 
