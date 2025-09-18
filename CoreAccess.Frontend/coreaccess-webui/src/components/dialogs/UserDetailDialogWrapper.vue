@@ -4,6 +4,7 @@
       modal
       header="User Details"
       @hide="closeDialog"
+      class="w-10/12 md:w-3/4 lg:w-1/2 h-10/12 md:h-3/4 lg:h-2/3"
   >
     <template v-if="loading">
       <ProgressSpinner />
@@ -29,25 +30,39 @@
             </TabPanel>
             <TabPanel value="1">
               <div class="flex flex-col gap-4">
-                <PickList
-                    v-model="picklistValue"
-                    dataKey="id"
-                    listStyle="height:300px"
-                >
-                  <template #sourceheader>Available Roles</template>
-                  <template #targetheader>Assigned Roles</template>
+                <div>
+                  <h3 class="font-semibold mb-2">Assigned Roles</h3>
+                  <div class="flex flex-wrap gap-2">
+                    <Chip
+                        v-for="role in assignedRoles"
+                        :key="role.id"
+                        :label="role.name"
+                        removable
+                        @remove="removeRole(role)"
+                        :class="{'bg-green-100': role._new}"
+                    />
+                  </div>
+                </div>
 
-                  <template #item="slotProps">
-                    <div class="flex items-center">
-                      <i class="pi pi-users mr-2"></i>
-                      <span>{{ slotProps.item.name }}</span>
-                    </div>
-                  </template>
-                </PickList>
+                <div>
+                  <h3 class="font-semibold mb-2">Add Role</h3>
+                  <AutoComplete
+                      v-model="selectedRole"
+                      :suggestions="filteredRoles"
+                      optionLabel="name"
+                      placeholder="Search roles..."
+                      @complete="searchRoles"
+                      @item-select="addRole"
+                  />
+                </div>
 
-                <div class="flex justify-end gap-2">
-                  <Button label="Cancel" severity="secondary" @click="closeDialog" />
-                  <Button label="Save" icon="pi pi-save" @click="saveRoles" />
+                <div class="flex justify-end">
+                  <Button
+                      label="Save Changes"
+                      icon="pi pi-save"
+                      :disabled="!dirty"
+                      @click="saveRoles"
+                  />
                 </div>
               </div>
             </TabPanel>
@@ -65,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {fetchUser} from "../../services/UserService.ts";
 import {CoreUserStatus} from "../../model/CoreUserModel.ts";
@@ -86,19 +101,38 @@ const allRoles = ref([
 
 const assignedRoles = ref<any[]>([])
 
-const availableRoles = computed(() => {
-  if (!user.value) return allRoles.value
-  return allRoles.value.filter(
-      r => !assignedRoles.value.some((ar: any) => ar.id === r.id)
-  )
-})
+const selectedRole = ref<any | null>(null)
+const filteredRoles = ref<any[]>([])
 
-const picklistValue = ref<[any[], any[]]>([[], []])
+// Flag ob Änderungen ungespeichert sind
+const dirty = ref(false)
+
+// Suche im Autocomplete
+function searchRoles(event: any) {
+  const query = event.query.toLowerCase()
+  filteredRoles.value = allRoles.value.filter(
+      r =>
+          r.name.toLowerCase().includes(query) &&
+          !assignedRoles.value.some(ar => ar.id === r.id)
+  )
+}
+
+// Rolle hinzufügen (markiert als neu)
+function addRole(event: any) {
+  assignedRoles.value.push({ ...event.value, _new: true })
+  selectedRole.value = null
+  dirty.value = true
+}
+
+// Rolle entfernen
+function removeRole(role: any) {
+  assignedRoles.value = assignedRoles.value.filter(r => r.id !== role.id)
+  dirty.value = true
+}
 
 watch(user, (u) => {
   if (!u) return
   assignedRoles.value = u.roles || []
-  picklistValue.value = [availableRoles.value, assignedRoles.value]
 })
 
 const loadUser = async () => {
@@ -125,8 +159,7 @@ function formatStatus(status: CoreUserStatus): string {
 }
 
 const saveRoles = async () => {
-  const roleIds = picklistValue.value[1].map(r => r.id)
-  console.log('Saving roles for user', user.value.id, roleIds)
+  console.log('Saving roles for user', user.value.id)
   // später: await updateUserRoles(user.value.id, roleIds)
 }
 
