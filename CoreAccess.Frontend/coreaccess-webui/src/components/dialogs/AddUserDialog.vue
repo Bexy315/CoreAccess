@@ -14,7 +14,7 @@
 <script lang="ts" setup>
 import { ref, reactive, watch } from 'vue';
 import {type CoreUserCreateRequest, CoreUserStatus} from "../../model/CoreUserModel.ts";
-import {type CoreRole } from "../../model/CoreRoleModel.ts";
+import {type RoleDto } from "../../model/CoreRoleModel.ts";
 import {createUser} from "../../services/UserService.ts";
 import {showError} from "../../utils/toast.ts";
 
@@ -37,7 +37,7 @@ const user = reactive<CoreUserCreateRequest>({
   status: CoreUserStatus.Active
 });
 
-const selectedRoles = ref([] as CoreRole[]);
+const selectedRoles = ref([] as RoleDto[]);
 
 const selectedStatus =ref({ label: 'Aktiv', value: CoreUserStatus.Active });
 

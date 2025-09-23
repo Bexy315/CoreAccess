@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue';
 import {deleteUser, fetchUsers} from '../services/UserService';
-import type { CoreUserDto } from "../model/CoreUserModel.ts";
+import type { UserDto } from "../model/CoreUserModel.ts";
 import { CoreUserStatus } from "../model/CoreUserModel.ts";
 import AddUserDialog from "../components/dialogs/AddUserDialog.vue";
 import {showError, showSuccess} from "../utils/toast.ts";
@@ -16,8 +16,8 @@ const statuses = ref<string[]>(Array.isArray(route.query.status) ? route.query.s
 const page = ref<number>(Number(route.query.page || 1))
 const pageSize = ref<number>(Number(route.query.pageSize || 10))
 
-const users = ref<CoreUserDto[]>([]);
-const selectedUsers = ref<CoreUserDto[]>([]);
+const users = ref<UserDto[]>([]);
+const selectedUsers = ref<UserDto[]>([]);
 const rowsPerPageOptions = ref([5, 10, 20, 50]);
 const rows = ref(10);
 const first = ref(0)
@@ -137,7 +137,7 @@ function formatStatus(status: CoreUserStatus): string {
   }
 }
 
-function openDetailsDialog(user: CoreUserDto) {
+function openDetailsDialog(user: UserDto) {
   router.push({
     path: `/users/${user.id}`,
     query: route.query
