@@ -97,30 +97,6 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
     });
     logger.LogInformation("Registered default CoreAccess AdminUI client.");
 
-    await openIddictService.AddApplicationAsync(new OpenIddictApplicationDescriptor()
-    {
-        ClientId = "postman",
-        DisplayName = "Postman Client For API Testing",
-        ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
-        ClientType = OpenIddictConstants.ClientTypes.Public,
-        ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
-        Permissions =
-        {
-            OpenIddictConstants.Permissions.GrantTypes.Password,
-            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-            OpenIddictConstants.Permissions.Endpoints.Authorization,
-            OpenIddictConstants.Permissions.Endpoints.Introspection,
-            OpenIddictConstants.Permissions.Endpoints.EndSession,
-            OpenIddictConstants.Permissions.Endpoints.Token,
-            OpenIddictConstants.Permissions.ResponseTypes.Token,
-            OpenIddictConstants.Permissions.ResponseTypes.Code,
-        },
-        RedirectUris = { new Uri("http://localhost:5000/callback") },
-        PostLogoutRedirectUris = { new Uri("http://localhost:5000/") }
-    });
-    logger.LogInformation("Registered Postman client for API testing.");
-
     logger.LogInformation("Creating default roles...");
     var adminRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
     {

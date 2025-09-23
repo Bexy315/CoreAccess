@@ -22,7 +22,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     var userBuilder = modelBuilder.Entity<User>();
 
     userBuilder.HasKey(u => u.Id);
-    if (isSqlite) ConfigureGuidAsBlob(userBuilder, u => u.Id);
     
     userBuilder.Property(u => u.Username)
         .IsRequired()
@@ -53,8 +52,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     var roleBuilder = modelBuilder.Entity<Role>();
     roleBuilder.HasKey(r => r.Id);
     
-    if (isSqlite) ConfigureGuidAsBlob(roleBuilder, r => r.Id);
-    
     roleBuilder.HasMany(r => r.Permissions)
         .WithMany(p => p.Roles)
         .UsingEntity<Dictionary<string, object>>(
@@ -74,7 +71,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     #region Permission
     var permissionBuilder = modelBuilder.Entity<Permission>();
     permissionBuilder.HasKey(p => p.Id);
-    if (isSqlite) ConfigureGuidAsBlob(permissionBuilder, u => u.Id);
     
     #endregion
 
@@ -84,7 +80,6 @@ public class CoreAccessDbContext(DbContextOptions<CoreAccessDbContext> options) 
     
     settingBuilder.HasIndex(s => s.Key).IsUnique();
 
-    if (isSqlite) ConfigureGuidAsBlob(settingBuilder, s => s.Id);
     #endregion
 
     base.OnModelCreating(modelBuilder);

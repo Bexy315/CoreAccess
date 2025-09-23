@@ -36,7 +36,7 @@ namespace CoreAccess.Tests
         public async Task GetUserByIdAsync_ReturnsUserDetailDto_WhenUserExists()
         {
             // Arrange
-            var userId = Guid.NewGuid();
+            var userId = Guid.NewGuid().ToString();
             var user = new User { Id = userId, Username = "testuser", PasswordHash = "hash", Status = UserStatus.Active };
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Id == userId.ToString()), It.IsAny<CancellationToken>()))
@@ -75,7 +75,7 @@ namespace CoreAccess.Tests
             };
             var createdUser = new User
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 Username = request.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Email = request.Email,
@@ -99,7 +99,7 @@ namespace CoreAccess.Tests
         {
             // Arrange
             var username = "exists";
-            var users = new List<User> { new User { Id = Guid.NewGuid(), Username = username } };
+            var users = new List<User> { new User { Id = Guid.NewGuid().ToString(), Username = username } };
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Username == username), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(users);
@@ -135,7 +135,7 @@ namespace CoreAccess.Tests
             var password = "password123";
             var hash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            var user = new User { Id = Guid.NewGuid(), Username = username, PasswordHash = hash, Status = UserStatus.Active };
+            var user = new User { Id = Guid.NewGuid().ToString(), Username = username, PasswordHash = hash, Status = UserStatus.Active };
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Username == username), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<User> { user });
@@ -154,7 +154,7 @@ namespace CoreAccess.Tests
             var username = "validuser";
             var user = new User
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("otherpass"),
                 Status = UserStatus.Active

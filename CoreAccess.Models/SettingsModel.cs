@@ -2,7 +2,7 @@ namespace CoreAccess.Models;
 
 public class Setting
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Key { get; set; } = default!;
     public string? Value { get; set; }           // Klartext (nicht geheim)
     public string? EncryptedValue { get; set; } // Verschlüsselt (wenn geheim)

@@ -39,6 +39,11 @@ export async function updateUser(userId: string, request: CoreUserUpdateRequest)
     return response.data;
 }
 
+export async function assignRoleToUser(userId: string, roleId: string): Promise<CoreUserDto> {
+    const response = await apiClient.post<CoreUserDto>(`/user/${userId}/role/${roleId}`);
+    return response.data;
+}
+
 export async function deleteUser(userId: string): Promise<any> {
     return await apiClient.delete(`/user/${userId}`);
 }

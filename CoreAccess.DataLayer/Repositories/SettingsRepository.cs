@@ -57,7 +57,7 @@ public class SettingsRepository(CoreAccessDbContext context) : ISettingsReposito
 
     public async Task DeleteSettingAsync(string id, CancellationToken cancellationToken = default)
     {
-        var setting = await context.Set<Setting>().FirstOrDefaultAsync(s => s.Id == Guid.Parse(id), cancellationToken);
+        var setting = await context.Set<Setting>().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         if (setting != null)
         {
             context.Settings.Remove(setting);

@@ -31,9 +31,9 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
                                      u.LastName.ToLower().Contains(options.Search.ToLower()));
         }
 
-        if (!string.IsNullOrEmpty(options.Id) && Guid.TryParse(options.Id, out var guidId))
+        if (!string.IsNullOrEmpty(options.Id))
         {
-            query = query.Where(p => p.Id == guidId);
+            query = query.Where(p => p.Id == options.Id);
         }
         
         if (!string.IsNullOrEmpty(options.Username))
@@ -113,7 +113,7 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
     }
     public async Task DeleteUserAsync(string id, CancellationToken cancellationToken = default)
     {
-        var user = await context.Set<User>().FirstOrDefaultAsync(u => u.Id == Guid.Parse(id), cancellationToken);
+        var user = await context.Set<User>().FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         
         if (user != null)
         {

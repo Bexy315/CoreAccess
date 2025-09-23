@@ -22,9 +22,9 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
             query = query.Where(p => p.Name.Contains(options.Search) || (p.Description != null && p.Description.Contains(options.Search)));
         }
         
-        if (!string.IsNullOrEmpty(options.Id) && Guid.TryParse(options.Id, out var guidId))
+        if (!string.IsNullOrEmpty(options.Id))
         {
-            query = query.Where(p => p.Id == guidId);
+            query = query.Where(p => p.Id == options.Id);
         }
         
         if (!string.IsNullOrWhiteSpace(options.Name))
@@ -74,7 +74,7 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
     }
     public async Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default)
     {
-        var permission = await context.Set<Permission>().FirstOrDefaultAsync(p => p.Id == Guid.Parse(id), cancellationToken);
+        var permission = await context.Set<Permission>().FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         if (permission != null)
         {
             context.Permissions.Remove(permission);

@@ -82,8 +82,9 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {fetchUser} from "../../services/UserService.ts";
+import {assignRoleToUser, fetchUser} from "../../services/UserService.ts";
 import {CoreUserStatus} from "../../model/CoreUserModel.ts";
+import {showError} from "../../utils/toast.ts";
 
 const route = useRoute()
 const router = useRouter()
@@ -93,13 +94,14 @@ const loading = ref(true)
 const user = ref<any | null>(null)
 
 const allRoles = ref([
-  { id: '7861f005-9a1c-4083-9bcd-2204aa9c9736', name: 'CoreAccess.Admin' },
-  { id: '9812f774-eb7e-2c44-8b1f-943afcaa4459', name: 'User' },
+  { id: '482f4063-dc92-4d8d-9f8c-c18525b53757', name: 'CoreAccess.Admin' },
+  { id: '83ba7428-25ea-453b-8aab-7f0271a75a16', name: 'User' },
   { id: 'viewer', name: 'Viewer' },
   { id: 'auditor', name: 'Auditor' },
 ])
 
 const assignedRoles = ref<any[]>([])
+const removedRoles = ref<any[]>([])
 
 const selectedRole = ref<any | null>(null)
 const filteredRoles = ref<any[]>([])
@@ -117,16 +119,17 @@ function searchRoles(event: any) {
   )
 }
 
-// Rolle hinzufügen (markiert als neu)
 function addRole(event: any) {
   assignedRoles.value.push({ ...event.value, _new: true })
   selectedRole.value = null
   dirty.value = true
 }
 
-// Rolle entfernen
 function removeRole(role: any) {
   assignedRoles.value = assignedRoles.value.filter(r => r.id !== role.id)
+  if (!role._new) {
+    removedRoles.value.push(role)
+  }
   dirty.value = true
 }
 
@@ -139,6 +142,8 @@ const loadUser = async () => {
   loading.value = true
   user.value = await fetchUser(route.params.id as string)
   loading.value = false
+
+  console.log(user);
 }
 
 onMounted(loadUser)
@@ -160,7 +165,19 @@ function formatStatus(status: CoreUserStatus): string {
 
 const saveRoles = async () => {
   console.log('Saving roles for user', user.value.id)
-  // später: await updateUserRoles(user.value.id, roleIds)
+  console.log(removedRoles.value)
+  console.log(assignedRoles.value.filter(r => r._new))
+
+  for(const role of assignedRoles.value.filter(r => r._new)) {
+    console.log(`Adding role ${role.name} (ID: ${role.id}) to user ${user.value.id}`)
+    await assignRoleToUser(user.value.id, role.id).catch(error => {
+      console.error('Error assigning role:', error)
+      showError(error, 'Failed to assign role. Please try again.')
+    })
+  }
+  await loadUser()
+
+  console.log('Roles saved')
 }
 
 const closeDialog = () => {

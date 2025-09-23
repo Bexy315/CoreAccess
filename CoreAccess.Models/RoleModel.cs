@@ -4,7 +4,7 @@ namespace CoreAccess.Models;
 
 public class Role
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = "";
     public string? Description { get; set; }
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
@@ -18,7 +18,7 @@ public class Role
 
 public class RoleDto()
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
 }

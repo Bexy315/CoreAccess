@@ -21,9 +21,8 @@ namespace CoreAccess.DataLayer.Migrations
 
             modelBuilder.Entity("CoreAccess.Models.Permission", b =>
                 {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedAt")
                         .IsRequired()
@@ -50,9 +49,8 @@ namespace CoreAccess.DataLayer.Migrations
 
             modelBuilder.Entity("CoreAccess.Models.Role", b =>
                 {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedAt")
                         .IsRequired()
@@ -79,9 +77,8 @@ namespace CoreAccess.DataLayer.Migrations
 
             modelBuilder.Entity("CoreAccess.Models.Setting", b =>
                 {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("EncryptedValue")
                         .HasColumnType("TEXT");
@@ -109,9 +106,8 @@ namespace CoreAccess.DataLayer.Migrations
 
             modelBuilder.Entity("CoreAccess.Models.User", b =>
                 {
-                    b.Property<byte[]>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BLOB");
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Address")
                         .HasColumnType("TEXT");
@@ -388,11 +384,11 @@ namespace CoreAccess.DataLayer.Migrations
 
             modelBuilder.Entity("RolePermissions", b =>
                 {
-                    b.Property<byte[]>("RoleId")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("PermissionId")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("PermissionId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -403,11 +399,11 @@ namespace CoreAccess.DataLayer.Migrations
 
             modelBuilder.Entity("UserRoles", b =>
                 {
-                    b.Property<byte[]>("UserId")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("RoleId")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "RoleId");
 

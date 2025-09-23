@@ -66,7 +66,7 @@ namespace CoreAccess.DataLayer.Migrations
                 schema: "coreaccess",
                 columns: table => new
                 {
-                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
@@ -83,7 +83,7 @@ namespace CoreAccess.DataLayer.Migrations
                 schema: "coreaccess",
                 columns: table => new
                 {
-                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<string>(type: "TEXT", nullable: false),
@@ -100,7 +100,7 @@ namespace CoreAccess.DataLayer.Migrations
                 schema: "coreaccess",
                 columns: table => new
                 {
-                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
                     Value = table.Column<string>(type: "TEXT", nullable: true),
                     EncryptedValue = table.Column<string>(type: "TEXT", nullable: true),
@@ -117,7 +117,7 @@ namespace CoreAccess.DataLayer.Migrations
                 schema: "coreaccess",
                 columns: table => new
                 {
-                    Id = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
                     Username = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: true),
                     FirstName = table.Column<string>(type: "TEXT", nullable: true),
@@ -172,8 +172,8 @@ namespace CoreAccess.DataLayer.Migrations
                 schema: "coreaccess",
                 columns: table => new
                 {
-                    RoleId = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    PermissionId = table.Column<byte[]>(type: "BLOB", nullable: false)
+                    RoleId = table.Column<string>(type: "TEXT", nullable: false),
+                    PermissionId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -199,8 +199,8 @@ namespace CoreAccess.DataLayer.Migrations
                 schema: "coreaccess",
                 columns: table => new
                 {
-                    UserId = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    RoleId = table.Column<byte[]>(type: "BLOB", nullable: false)
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

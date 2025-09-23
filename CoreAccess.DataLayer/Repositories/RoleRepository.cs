@@ -29,9 +29,9 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
                                      (r.Description != null && r.Description.ToLower().Contains(options.Search.ToLower())));
         }
 
-        if (!string.IsNullOrEmpty(options.Id) && Guid.TryParse(options.Id, out var guidId))
+        if (!string.IsNullOrEmpty(options.Id))
         {
-            query = query.Where(p => p.Id == guidId);
+            query = query.Where(p => p.Id == options.Id);
         }
 
         if (!string.IsNullOrEmpty(options.Name))
@@ -76,7 +76,7 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
     }
     public async Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default)
     {
-        var role = await context.Set<Role>().FirstOrDefaultAsync(r => r.Id == Guid.Parse(id), cancellationToken);
+        var role = await context.Set<Role>().FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         if (role != null)
         {
             context.Roles.Remove(role);

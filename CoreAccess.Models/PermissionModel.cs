@@ -5,7 +5,7 @@ namespace CoreAccess.Models;
 
 public class Permission
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = "";
     public string? Description { get; set; }
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
@@ -17,7 +17,7 @@ public class Permission
 
 public class PermissionDto()
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
 }

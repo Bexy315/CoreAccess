@@ -30,8 +30,8 @@ namespace CoreAccess.Tests
             // Arrange
             var roles = new List<Role>
             {
-                new Role { Id = Guid.NewGuid(), Name = "Admin" },
-                new Role { Id = Guid.NewGuid(), Name = "User" }
+                new Role { Id = Guid.NewGuid().ToString(), Name = "Admin" },
+                new Role { Id = Guid.NewGuid().ToString(), Name = "User" }
             };
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
@@ -50,7 +50,7 @@ namespace CoreAccess.Tests
         {
             // Arrange
             var roleId = Guid.NewGuid().ToString();
-            var role = new Role { Id = Guid.Parse(roleId), Name = "Manager" };
+            var role = new Role { Id = roleId, Name = "Manager" };
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.Is<RoleSearchOptions>(o => o.Id == roleId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<Role> { role });
@@ -83,7 +83,7 @@ namespace CoreAccess.Tests
         {
             // Arrange
             var request = new RoleCreateRequest { Name = "Tester", Description = "Testing role" };
-            var role = new Role { Id = Guid.NewGuid(), Name = request.Name, Description = request.Description };
+            var role = new Role { Id = Guid.NewGuid().ToString(), Name = request.Name, Description = request.Description };
             _roleRepositoryMock
                 .Setup(r => r.InsertOrUpdateRoleAsync(It.IsAny<Role>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(role);
@@ -115,8 +115,8 @@ namespace CoreAccess.Tests
             var roleId = Guid.NewGuid().ToString();
             var permissionId = Guid.NewGuid().ToString();
 
-            var role = new Role { Id = Guid.Parse(roleId), Name = "Admin", Permissions = new List<Permission>() };
-            var permission = new Permission { Id = Guid.Parse(permissionId), Name = "CanEdit" };
+            var role = new Role { Id = roleId, Name = "Admin", Permissions = new List<Permission>() };
+            var permission = new Permission { Id = permissionId, Name = "CanEdit" };
 
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
