@@ -183,9 +183,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - COREACCESS_DEBUGMODE=true
     ports:
-      - "5000:80"
+      - "80:80"
     volumes:
-      - coreaccess-data:/var/coreaccess
+      - coreaccess-data:/app/data
 volumes:
   coreaccess-data:
 ```
