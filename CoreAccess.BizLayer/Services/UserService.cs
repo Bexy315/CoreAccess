@@ -15,6 +15,7 @@ public interface IUserService
     Task<UserDetailDto> UpdateUserAsync(string userId, UserUpdateRequest user, CancellationToken cancellationToken = default);
     Task<UserDetailDto> UpdateUserProfilePicutre(string userId, IFormFile profilePicture, CancellationToken cancellationToken = default);
     Task<UserDetailDto> AddRoleToUserAsync(string userId, string roleId, CancellationToken cancellationToken = default);
+    Task<UserDetailDto> RemoveRoleFromUserAsync(string userId, string roleId, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
     Task<bool> ValidateCredentialsByUsernameAsync(string username, string password, CancellationToken cancellationToken = default);
@@ -249,6 +250,45 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             }
 
             user.Roles.Add(role);
+            var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
+
+            return updatedUser.ToDetailDto();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<UserDetailDto> RemoveRoleFromUserAsync(string userId, string roleId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await userRepository.SearchUsersAsync(new UserSearchOptions()
+            {
+                Id = userId,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found for the provided ID.");
+            }
+            
+            var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions{
+                Id = roleId,
+                Page = 1,
+                PageSize = 1
+            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            
+            if (role == null)
+            {
+                throw new KeyNotFoundException("Role not found for the provided ID.");
+            }
+
+            user.Roles.RemoveAll(r => r.Id == role.Id);
             var updatedUser = await userRepository.InsertOrUpdateUserAsync(user, cancellationToken);
 
             return updatedUser.ToDetailDto();

@@ -1,3 +1,5 @@
+import type {RoleDto} from "./CoreRoleModel.ts";
+
 export const CoreUserStatus = {
     Active: 0,
     Inactive: 1,
@@ -24,7 +26,7 @@ export interface CoreUserSearchOptions {
     pageSize?: number;
 }
 
-export interface CoreUserDto {
+export interface UserDto {
     id: string;
     username: string;
     email?: string;
@@ -32,24 +34,21 @@ export interface CoreUserDto {
     lastName?: string;
     status: CoreUserStatus;
 }
-export interface CoreUserDetailDto {
-    id: string;
-    username: string;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
+
+export interface UserDetailDto extends UserDto {
     phone?: string;
     address?: string;
     city?: string;
     state?: string;
     zip?: string;
     country?: string;
-    profilePicture?: string; // Base64 encoded string
+    profilePicture?: Uint8Array;
     profilePictureContentType?: string;
-    status: CoreUserStatus;
-    createdAt: string; // ISO-8601
+    createdAt: string;
     updatedAt: string;
+    roles: RoleDto[];
 }
+
 
 export interface CoreUserCreateRequest {
     username: string;

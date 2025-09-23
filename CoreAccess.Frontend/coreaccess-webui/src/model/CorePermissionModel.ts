@@ -1,8 +1,14 @@
-export interface CorePermission {
-    id: string; // Guid in C# is mapped to string in TypeScript
+import type {RoleDto} from "./CoreRoleModel.ts";
+
+export interface PermissionDto {
+    id: string;
     name: string;
     description?: string;
-    createdAt: string; // ISO-8601 or formatted string
+}
+
+export interface PermissionDetailDto extends PermissionDto {
+    createdAt: string;
     updatedAt: string;
     isSystem: boolean;
+    roles: RoleDto[];
 }

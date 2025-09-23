@@ -1,11 +1,16 @@
-import type { CorePermission } from './CorePermissionModel';
+import type {PermissionDto} from './CorePermissionModel';
+import type {UserDto} from "./CoreUserModel.ts";
 
-export interface CoreRole {
+export interface RoleDto {
     id: string;
     name: string;
     description?: string;
+}
+
+export interface RoleDetailDto extends RoleDto {
     createdAt: string;
     updatedAt: string;
     isSystem: boolean;
-    permissions: CorePermission[];
+    permissions: PermissionDto[];
+    users: UserDto[];
 }

@@ -82,7 +82,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {assignRoleToUser, fetchUser} from "../../services/UserService.ts";
+import {assignRoleToUser, fetchUser, removeRoleFromUser} from "../../services/UserService.ts";
 import {CoreUserStatus} from "../../model/CoreUserModel.ts";
 import {showError} from "../../utils/toast.ts";
 
@@ -175,6 +175,15 @@ const saveRoles = async () => {
       showError(error, 'Failed to assign role. Please try again.')
     })
   }
+
+  for(const role of removedRoles.value) {
+    console.log(`Removing role ${role.name} (ID: ${role.id}) from user ${user.value.id}`)
+    await removeRoleFromUser(user.value.id, role.id).catch(error => {
+      console.error('Error removing role:', error)
+      showError(error, 'Failed to remove role. Please try again.')
+    })
+  }
+
   await loadUser()
 
   console.log('Roles saved')

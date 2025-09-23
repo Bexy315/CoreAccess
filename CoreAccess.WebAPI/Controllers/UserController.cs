@@ -32,7 +32,7 @@ public class UserController(IUserService userService) : ControllerBase
     
     [HttpGet]
     [Route("{userId}")]
-    [Produces(typeof(PagedResult<UserDto>))]
+    [Produces(typeof(UserDetailDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> GetUserById([FromRoute]string userId, CancellationToken cancellationToken = default)
     {
@@ -58,7 +58,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
     
     [HttpPost]
-    [Produces(typeof(UserDto))]
+    [Produces(typeof(UserDetailDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> CreateUser([FromBody]UserCreateRequest request, CancellationToken cancellationToken = default)
     {
@@ -82,7 +82,7 @@ public class UserController(IUserService userService) : ControllerBase
     
     [HttpPut]
     [Route("{userId}")]
-    [Produces(typeof(UserDto))]
+    [Produces(typeof(UserDetailDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> UpdateUser([FromRoute]string userId, [FromBody]UserUpdateRequest request, CancellationToken cancellationToken = default)
     {
@@ -129,7 +129,7 @@ public class UserController(IUserService userService) : ControllerBase
         
     [HttpPost]
     [Route("{userId}/role/{roleId}")]
-    [Produces(typeof(UserDto))]
+    [Produces(typeof(UserDetailDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
     public async Task<IActionResult> AddRoleToUser([FromRoute]string userId, [FromRoute]string roleId, CancellationToken cancellationToken = default)
     {
@@ -139,6 +139,30 @@ public class UserController(IUserService userService) : ControllerBase
                 return BadRequest("User ID and Role ID cannot be null or empty.");
             
             var user = await userService.AddRoleToUserAsync(userId, roleId, cancellationToken);
+            return Ok(user);
+        }
+        catch(ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
+    [HttpDelete]
+    [Route("{userId}/role/{roleId}")]
+    [Produces(typeof(UserDetailDto))]
+    [CoreAuthorize(Roles = "CoreAccess.Admin")]
+    public async Task<IActionResult> RemoveRoleFromUser([FromRoute]string userId, [FromRoute]string roleId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if(string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleId))
+                return BadRequest("User ID and Role ID cannot be null or empty.");
+            
+            var user = await userService.RemoveRoleFromUserAsync(userId, roleId, cancellationToken);
             return Ok(user);
         }
         catch(ArgumentException ex)
