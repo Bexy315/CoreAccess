@@ -12,10 +12,10 @@ CoreAccess is a lightweight OpenID Connect identity provider and small Identity 
 - Startup supports creating dummy data if `COREACCESS_DEBUGMODE=true`.
 - User / Role / Permission model is prototyped; API endpoints are defined but not fully complete.
 - Admin UI (Vue 3 + Vite + TypeScript + Pinia + PrimeVue) scaffold exists; CRUD views are being implemented.
-- Basic system logging via `ILogger` exists. Audit and access logging are planned but not fully implemented.
+- Basic system logging via `ILogger` exists. Audit and access logging are planned but not implemented.
 - SettingsService exists (DB + IMemoryCache) and can be used to provide runtime configuration (e.g. token lifetimes).
 - Persistent cryptographic key handling: helper(s) exist to generate and persist RSA keys (PEM/JWK) on disk so OpenIddict has a signing key after restarts — important for production.
-- PKCE support for SPA flows is implemented at the frontend design level (code_verifier / code_challenge).
+- PKCE support for SPA flows is currently beeing implemented at the frontend design level (code_verifier / code_challenge).
 - Plans and designs exist for: Service Accounts / Client Credentials, user-bound API keys, realtime log streaming to the Admin UI (SignalR/WebSocket), and a reusable `@coreaccess/client` SDK for frontends.
 
 ## Project goals
