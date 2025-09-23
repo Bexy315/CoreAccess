@@ -202,23 +202,5 @@ volumes:
 
 ---
 
-# Contributing and how to help
-- Implement missing user/role endpoints and the mapping tests.  
-- Build the Admin UI CRUD pages and the Setup Wizard UI (multi-step).  
-- Implement Audit/Access log tables, endpoints and an Admin UI page to query them.  
-- Add unit tests for TokenService and SettingsService.
-
----
-
-# Important operational notes and gotchas
-- Ensure persistent storage for DB and key files — ephemeral containers without mounts will lose critical state.
-- Never store or log secrets in plaintext.
-- Always persist key material for signing tokens. If OpenIddict starts without a signing key, it will throw and refuse to start.
-- Use IMemoryCache (with invalidation) to prevent per-request DB hits for settings used in hot paths (e.g. token issuance).
-- Be defensive in mapping code (use `?.Select(...) ?? new List<T>()` when reading navigation collections).
-
----
-
 # Contact
-For design decisions and development context, refer to internal project notes and the active conversation logs in the project chat.
-
+Feel free to start threads in the Discussions section
