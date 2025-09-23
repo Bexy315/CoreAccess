@@ -44,8 +44,6 @@ CoreAccess is a lightweight OpenID Connect identity provider and small Identity 
   - Persist runtime-configurable settings in DB (Key-Value table).
   - Use an abstraction `ISecretProtector` (Data Protection or AES-GCM) to encrypt sensitive settings on write and decrypt on read.
   - Use `IMemoryCache` in `SettingsService` to avoid DB calls on hot paths (e.g. token issuance).
-- Token issuance customization:
-  - Hook into OpenIddict events (especially `ProcessSignInContext`) to set access/refresh token lifetimes, issuer, audiences and custom claims at runtime using values from `SettingsService`.
 
 ---
 
