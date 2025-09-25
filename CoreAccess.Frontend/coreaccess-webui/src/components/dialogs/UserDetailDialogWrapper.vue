@@ -9,10 +9,10 @@
     <template v-if="loading">
       <ProgressSpinner />
     </template>
-
     <template v-else>
       <div v-if="user">
-        <Tabs value="0">
+        <!-- Mit v-model:value binden wir das aktive Tab -->
+        <Tabs v-model:value="activeTab">
           <TabList>
             <Tab value="0">General</Tab>
             <Tab value="1">Roles and Permissions</Tab>
@@ -20,43 +20,123 @@
           </TabList>
           <TabPanels>
             <TabPanel value="0">
-              <p><strong>ID:</strong> {{ user.id }}</p>
-              <p><strong>Username:</strong> {{ user.username }}</p>
-              <p><strong>Email:</strong> {{ user.email }}</p>
-              <p><strong>Full Name:</strong> {{ user.firstName }} {{ user.lastName }}</p>
-              <p><strong>Status:</strong> {{ formatStatus(user.status) }}</p>
-              <p><strong>Created At:</strong> {{ new Date(user.createdAt).toLocaleString() }} <i>(UTC)</i></p>
-              <p><strong>Updated At:</strong> {{ new Date(user.updatedAt).toLocaleString() }} <i>(UTC)</i></p>
-            </TabPanel>
-            <TabPanel value="1">
-              <div class="flex flex-col gap-4">
-                <div>
-                  <h3 class="font-semibold mb-2">Assigned Roles</h3>
-                  <div class="flex flex-wrap gap-2">
-                    <Chip
-                        v-for="role in assignedRoles"
-                        :key="role.id"
-                        :label="role.name"
-                        removable
-                        @remove="removeRole(role)"
-                        :class="{'bg-green-100': role._new}"
+              <div class="flex flex-col gap-6">
+                <!-- View Mode -->
+                <div v-if="!editingGeneral">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div><strong>ID:</strong> {{ user.id }}</div>
+                    <div><strong>Username:</strong> {{ user.username }}</div>
+                    <div><strong>Email:</strong> {{ user.email }}</div>
+                    <div><strong>First Name:</strong> {{ user.firstName }}</div>
+                    <div><strong>Last Name:</strong> {{ user.lastName }}</div>
+                    <div><strong>Created At:</strong> {{ new Date(user.createdAt).toLocaleString() }} <i>(UTC)</i></div>
+                    <div><strong>Updated At:</strong> {{ new Date(user.updatedAt).toLocaleString() }} <i>(UTC)</i></div>
+                  </div>
+                  <div class="flex justify-end mt-4">
+                    <Button
+                        label="Edit"
+                        icon="pi pi-pencil"
+                        @click="editingGeneral = true"
                     />
                   </div>
                 </div>
 
+                <!-- Edit Mode -->
+                <div v-else>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="font-medium">Username</label>
+                      <InputText v-model="generalForm.username" class="w-full" />
+                    </div>
+                    <div>
+                      <label class="font-medium">Email</label>
+                      <InputText v-model="generalForm.email" class="w-full" />
+                    </div>
+                    <div>
+                      <label class="font-medium">First Name</label>
+                      <InputText v-model="generalForm.firstName" class="w-full" />
+                    </div>
+                    <div>
+                      <label class="font-medium">Last Name</label>
+                      <InputText v-model="generalForm.lastName" class="w-full" />
+                    </div>
+                  </div>
+
+                  <!-- Save/Cancel -->
+                  <div class="flex justify-end gap-2 mt-6">
+                    <Button
+                        label="Cancel"
+                        icon="pi pi-times"
+                        severity="secondary"
+                        @click="cancelGeneralEdit"
+                    />
+                    <Button
+                        label="Save Changes"
+                        icon="pi pi-save"
+                        :disabled="!dirtyGeneral"
+                        @click="saveGeneral"
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabPanel>
+            <TabPanel value="1">
+              <div class="flex flex-col gap-6">
+                <!-- Assigned Roles -->
                 <div>
-                  <h3 class="font-semibold mb-2">Add Role</h3>
-                  <AutoComplete
-                      v-model="selectedRole"
-                      :suggestions="filteredRoles"
-                      optionLabel="name"
-                      placeholder="Search roles..."
-                      @complete="searchRoles"
-                      @item-select="addRole"
-                  />
+                  <h3 class="font-semibold mb-3">Assigned Roles</h3>
+                  <DataTable
+                      :value="assignedRoles"
+                      class="p-datatable-sm"
+                      responsiveLayout="scroll"
+                  >
+                    <Column field="name" header="Role"></Column>
+                    <Column header="Actions" bodyStyle="text-align:right">
+                      <template #body="slotProps">
+                        <Button
+                            icon="pi pi-trash"
+                            severity="danger"
+                            text
+                            @click="removeRole(slotProps.data)"
+                        />
+                      </template>
+                    </Column>
+                  </DataTable>
+                  <p v-if="assignedRoles.length === 0" class="text-gray-500 text-sm mt-2">
+                    No roles assigned yet.
+                  </p>
                 </div>
 
-                <div class="flex justify-end">
+                <!-- Add Role -->
+                <div>
+                  <h3 class="font-semibold mb-3">Add Role</h3>
+                    <div class="flex gap-2">
+                          <AutoComplete
+                              v-model="selectedRole"
+                              :suggestions="filteredRoles"
+                              optionLabel="name"
+                              placeholder="Search roles..."
+                              @complete="searchRoles"
+                              class="w-full"
+                          />
+                          <Button
+                              label="Add"
+                              icon="pi pi-plus"
+                              :disabled="!selectedRole"
+                              @click="addRole(selectedRole)"
+                          />
+                    </div>
+                </div>
+
+                <!-- Save/Cancel -->
+                <div class="flex justify-end gap-2">
+                  <Button
+                      label="Cancel"
+                      icon="pi pi-times"
+                      severity="secondary"
+                      :disabled="!dirty"
+                      @click="resetRoles"
+                  />
                   <Button
                       label="Save Changes"
                       icon="pi pi-save"
@@ -68,8 +148,7 @@
             </TabPanel>
             <TabPanel value="2">
               <p class="m-0">
-                At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
+                At vero eos et accusamus et iusto odio dignissimos ...
               </p>
             </TabPanel>
           </TabPanels>
@@ -80,12 +159,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {assignRoleToUser, fetchUser, removeRoleFromUser} from "../../services/UserService.ts";
-import {CoreUserStatus} from "../../model/CoreUserModel.ts";
-import {showError} from "../../utils/toast.ts";
+import {fetchUser, assignRoleToUser, removeRoleFromUser, updateUser} from '../../services/UserService'
+import { type CoreUserUpdateRequest} from '../../model/CoreUserModel'
+import {showError, showSuccess} from '../../utils/toast'
+import type {RoleDto} from "../../model/CoreRoleModel.ts";
+import {fetchRoles} from "../../services/RoleService.ts";
 
+// Zustand & Router
 const route = useRoute()
 const router = useRouter()
 
@@ -93,103 +175,166 @@ const visible = ref(true)
 const loading = ref(true)
 const user = ref<any | null>(null)
 
-const allRoles = ref([
-  { id: '482f4063-dc92-4d8d-9f8c-c18525b53757', name: 'CoreAccess.Admin' },
-  { id: '83ba7428-25ea-453b-8aab-7f0271a75a16', name: 'User' },
-  { id: 'viewer', name: 'Viewer' },
-  { id: 'auditor', name: 'Auditor' },
-])
+const allRoles = ref<RoleDto[] | null>(null)
 
+// Rollen-Handling
 const assignedRoles = ref<any[]>([])
-const removedRoles = ref<any[]>([])
-
+const initialRoles = ref<any[]>([]) // für Vergleich + Reset
 const selectedRole = ref<any | null>(null)
 const filteredRoles = ref<any[]>([])
-
-// Flag ob Änderungen ungespeichert sind
 const dirty = ref(false)
 
-// Suche im Autocomplete
+// Der aktive Tab (über URL steuerbar)
+const activeTab = ref<string>((route.query.tab as string) ?? '0')
+
+// Funktion, um den User zu laden
+const loadUser = async () => {
+  loading.value = true
+  user.value = await fetchUser(route.params.id as string)
+  loading.value = false
+
+  initialRoles.value = [...(user.value?.roles || [])]
+  assignedRoles.value = [...(user.value?.roles || [])]
+  dirty.value = false
+}
+
+// beim Mounten und bei id-Param-Änderung
+onMounted(loadUser)
+onMounted(loadRoles)
+
+function loadRoles() {
+  fetchRoles().then(roles => {
+    allRoles.value = roles.items
+  }).catch(error => {
+    showError(error, 'Failed to load roles. Role management might not work properly.')
+  })
+}
+
+watch(() => route.params.id, loadUser)
+
+// Synchronisation: wenn activeTab sich ändert → Query aktualisieren
+watch(activeTab, (val) => {
+  if (route.query.tab === val) return
+  router.replace({
+    path: route.path,
+    query: {
+      ...route.query,
+      tab: val
+    }
+  }).catch(() => {})
+})
+
+// Synchronisation: wenn sich Query.tab ändert
+watch(
+    () => route.query.tab,
+    (val) => {
+      if (val != null && val !== activeTab.value) {
+        activeTab.value = val as string
+      }
+    }
+)
+
+// Rollenverwaltung
 function searchRoles(event: any) {
   const query = event.query.toLowerCase()
-  filteredRoles.value = allRoles.value.filter(
+  filteredRoles.value = allRoles.value?.filter(
       r =>
           r.name.toLowerCase().includes(query) &&
           !assignedRoles.value.some(ar => ar.id === r.id)
-  )
+  ) ?? []
 }
 
-function addRole(event: any) {
-  assignedRoles.value.push({ ...event.value, _new: true })
+function addRole(role: any) {
+  if (!role) return
+  assignedRoles.value.push(role)
   selectedRole.value = null
   dirty.value = true
 }
 
 function removeRole(role: any) {
   assignedRoles.value = assignedRoles.value.filter(r => r.id !== role.id)
-  if (!role._new) {
-    removedRoles.value.push(role)
-  }
   dirty.value = true
 }
 
-watch(user, (u) => {
-  if (!u) return
-  assignedRoles.value = u.roles || []
-})
-
-const loadUser = async () => {
-  loading.value = true
-  user.value = await fetchUser(route.params.id as string)
-  loading.value = false
-
-  console.log(user);
+function resetRoles() {
+  assignedRoles.value = [...initialRoles.value]
+  dirty.value = false
 }
 
-onMounted(loadUser)
+async function saveRoles() {
+  const added = assignedRoles.value.filter(
+      r => !initialRoles.value.some(ir => ir.id === r.id)
+  )
+  const removed = initialRoles.value.filter(
+      ir => !assignedRoles.value.some(r => r.id === ir.id)
+  )
 
-watch(() => route.params.id, loadUser)
-
-function formatStatus(status: CoreUserStatus): string {
-  switch (status) {
-    case CoreUserStatus.Active:
-      return 'Aktiv';
-    case CoreUserStatus.Inactive:
-      return 'Inaktiv';
-    case CoreUserStatus.Suspended:
-      return 'Gesperrt';
-    default:
-      return 'Unbekannt';
-  }
-}
-
-const saveRoles = async () => {
-  console.log('Saving roles for user', user.value.id)
-  console.log(removedRoles.value)
-  console.log(assignedRoles.value.filter(r => r._new))
-
-  for(const role of assignedRoles.value.filter(r => r._new)) {
-    console.log(`Adding role ${role.name} (ID: ${role.id}) to user ${user.value.id}`)
+  for (const role of added) {
     await assignRoleToUser(user.value.id, role.id).catch(error => {
-      console.error('Error assigning role:', error)
       showError(error, 'Failed to assign role. Please try again.')
     })
   }
 
-  for(const role of removedRoles.value) {
-    console.log(`Removing role ${role.name} (ID: ${role.id}) from user ${user.value.id}`)
+  for (const role of removed) {
     await removeRoleFromUser(user.value.id, role.id).catch(error => {
-      console.error('Error removing role:', error)
       showError(error, 'Failed to remove role. Please try again.')
     })
   }
 
   await loadUser()
-
-  console.log('Roles saved')
 }
+
+// General Tab Edit-State
+const editingGeneral = ref(false)
+const generalForm = ref({
+  username: '',
+  email: '',
+  firstName: '',
+  lastName: '',
+} as CoreUserUpdateRequest)
+const dirtyGeneral = ref(false)
+
+const resetGeneralForm = () => {
+  generalForm.value = {
+    username: user.value?.username ?? '',
+    email: user.value?.email ?? '',
+    firstName: user.value?.firstName ?? '',
+    lastName: user.value?.lastName ?? '',
+  }
+  editingGeneral.value = false
+  dirtyGeneral.value = false
+}
+
+watch(generalForm, () => {
+  dirtyGeneral.value = true
+}, { deep: true })
+
+const saveGeneral = async () => {
+  console.log('Saving general user data...', generalForm.value)
+  await updateUser(user.value.id, generalForm.value).catch(e => {
+    showError(e, 'Failed to update user details. Please try again.')
+  })
+  user.value = { ...user.value, ...generalForm.value }
+  showSuccess('User details updated successfully.')
+  resetGeneralForm()
+}
+
+const cancelGeneralEdit = () => {
+  resetGeneralForm()
+}
+
+// beim Laden auch Formular initialisieren
+watch(user, () => {
+  if (user.value) resetGeneralForm()
+})
+
 
 const closeDialog = () => {
-  router.push({ path: '/users', query: route.query })
+  const { tab, ...rest } = route.query
+  router.push({
+    path: '/users',
+    query: rest
+  })
 }
 </script>
+

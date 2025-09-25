@@ -12,6 +12,7 @@ import MetricsHub from "../pages/MetricsHub.vue";
 import InitialSetup from "../pages/InitialSetup/InitialSetup.vue";
 import Callback from "../pages/Callback.vue";
 import UserDetailDialogWrapper from "../components/dialogs/UserDetailDialogWrapper.vue";
+import Clients from "../pages/Clients.vue";
 
 const routes: RouteRecordRaw[] = [
     { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, public: false } },
@@ -20,6 +21,7 @@ const routes: RouteRecordRaw[] = [
         children: [{ path: ':id', component: UserDetailDialogWrapper } ]},
     { path: '/roles', name: 'Roles', component: Roles, meta: { requiresAuth: true }, },
     { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true }, },
+    { path: '/clients', name: 'Clients', component: Clients, meta: { requiresAuth: true }, },
     { path: '/settings', name: 'AppSettings', component: AppSettings, meta: { requiresAuth: true }, },
     { path: '/metrics', name: 'MetricsHub', component: MetricsHub, meta: { requiresAuth: true }, },
     { path: '/metrics/logs/system', name: 'SystemLogs', component: SystemLogs, meta: { requiresAuth: true }, },

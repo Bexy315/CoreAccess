@@ -19,6 +19,7 @@ const menuItems = [
   },
   { title: 'Roles', icon: 'pi pi-shield', href: '/roles' },
   { title: 'Permissions', icon: 'pi pi-lock', href: '/permissions' },
+  { title: 'Clients', icon: 'pi pi-sitemap', href: '/clients' },
   { title: 'Metrics', icon: 'pi pi-gauge', href: '/metrics',
     children: [
       { title: 'System Logs', icon: 'pi pi-file', href: '/metrics/logs/system' },
