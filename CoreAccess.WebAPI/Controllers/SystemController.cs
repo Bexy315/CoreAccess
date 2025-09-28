@@ -10,7 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(CoreAccessDbContext db,ISettingsService settingsService, ILogger<SystemController> logger) : ControllerBase
+public class SystemController(CoreAccessDbContext db,IRoleService roleService, ILogger<SystemController> logger) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
@@ -52,7 +52,6 @@ public class SystemController(CoreAccessDbContext db,ISettingsService settingsSe
     {
         logger.LogInformation("Starting debug...");
 
-        var value = await settingsService.GetAsync("Debug:TestEncryptedSetting", cancellationToken);
-        return Ok(value);
+        return Ok();
     }
 }
