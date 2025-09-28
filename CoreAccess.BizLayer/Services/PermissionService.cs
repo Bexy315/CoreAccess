@@ -37,7 +37,7 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
     public async Task<PermissionDetailDto> GetPermissionByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         var permission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions(){Id = id}, cancellationToken);
-        if (permission == null)
+        if (permission == null || permission.Count == 0)
         {
             return null;
         }

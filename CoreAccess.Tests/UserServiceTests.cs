@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace CoreAccess.Tests
 {
