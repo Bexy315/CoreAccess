@@ -9,11 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment())
-{
-    DotEnv.Load();
-}
-
 builder.Logging.AddCoreAccessLogging(builder.Configuration);
 
 builder.Services.AddControllers();
