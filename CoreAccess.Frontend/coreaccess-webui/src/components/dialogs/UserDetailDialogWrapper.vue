@@ -118,6 +118,8 @@
                               placeholder="Search roles..."
                               @complete="searchRoles"
                               class="w-full"
+                              dropdown
+                              dropdown-mode="current"
                           />
                           <Button
                               label="Add"
@@ -167,7 +169,6 @@ import {showError, showSuccess} from '../../utils/toast'
 import type {RoleDto} from "../../model/CoreRoleModel.ts";
 import {fetchRoles} from "../../services/RoleService.ts";
 
-// Zustand & Router
 const route = useRoute()
 const router = useRouter()
 
@@ -177,17 +178,14 @@ const user = ref<any | null>(null)
 
 const allRoles = ref<RoleDto[] | null>(null)
 
-// Rollen-Handling
 const assignedRoles = ref<any[]>([])
 const initialRoles = ref<any[]>([]) // für Vergleich + Reset
 const selectedRole = ref<any | null>(null)
 const filteredRoles = ref<any[]>([])
 const dirty = ref(false)
 
-// Der aktive Tab (über URL steuerbar)
 const activeTab = ref<string>((route.query.tab as string) ?? '0')
 
-// Funktion, um den User zu laden
 const loadUser = async () => {
   loading.value = true
   user.value = await fetchUser(route.params.id as string)
@@ -198,12 +196,11 @@ const loadUser = async () => {
   dirty.value = false
 }
 
-// beim Mounten und bei id-Param-Änderung
 onMounted(loadUser)
 onMounted(loadRoles)
 
 function loadRoles() {
-  fetchRoles().then(roles => {
+  fetchRoles(true).then(roles => {
     allRoles.value = roles.items
   }).catch(error => {
     showError(error, 'Failed to load roles. Role management might not work properly.')

@@ -19,40 +19,59 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
 {
     public async Task<List<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default)
     {
-        var users = await context.Roles.ToListAsync(cancellationToken);
+        if (options == null) options = new RoleSearchOptions();
+
+        var page = Math.Max(1, options.Page);
+        var pageSize = options.PageSize <= 0 ? 50 : options.PageSize;
+        var skip = (page - 1) * pageSize;
+
+        IQueryable<Role> query = context.Roles.AsQueryable();
         
-        var query = users.AsQueryable();
-
-        if (!string.IsNullOrEmpty(options.Search))
+        if (!string.IsNullOrWhiteSpace(options.Search))
         {
-            query = query.Where(r => r.Name.ToLower().Contains(options.Search.ToLower()) ||
-                                     (r.Description != null && r.Description.ToLower().Contains(options.Search.ToLower())));
+            var search = options.Search.Trim().ToLowerInvariant();
+            var like = $"%{search}%";
+
+            query = query.Where(r =>
+                EF.Functions.Like(r.Name.ToLower(), like) ||
+                (r.Description != null && EF.Functions.Like(r.Description.ToLower(), like))
+            );
+        }
+        
+        if (!string.IsNullOrWhiteSpace(options.Id))
+        {
+            query = query.Where(r => r.Id == options.Id);
         }
 
-        if (!string.IsNullOrEmpty(options.Id))
+        if (!string.IsNullOrWhiteSpace(options.Name))
         {
-            query = query.Where(p => p.Id == options.Id);
+            var name = options.Name.Trim().ToLowerInvariant();
+            var likeName = $"%{name}%";
+            query = query.Where(r => EF.Functions.Like(r.Name.ToLower(), likeName));
         }
 
-        if (!string.IsNullOrEmpty(options.Name))
+        if (!string.IsNullOrWhiteSpace(options.Description))
         {
-            query = query.Where(r => r.Name.ToLower().Contains(options.Name.ToLower()));
-        }
-
-        if (!string.IsNullOrEmpty(options.Description))
-        {
-            query = query.Where(r => r.Description != null && r.Description.ToLower().Contains(options.Description.ToLower()));
+            var desc = options.Description.Trim().ToLowerInvariant();
+            var likeDesc = $"%{desc}%";
+            query = query.Where(r => r.Description != null && EF.Functions.Like(r.Description.ToLower(), likeDesc));
         }
 
         if (options.IsSystem.HasValue)
         {
             query = query.Where(r => r.IsSystem == options.IsSystem.Value);
         }
-
-        var skip = (options.Page - 1) * options.PageSize;
-        var result = query.Skip(skip).Take(options.PageSize).ToList();
         
-        return result;
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        query = query.OrderBy(r => r.Name).ThenBy(r => r.Id);
+
+        var items = await query
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return items;
     }
     public async Task<Role> InsertOrUpdateRoleAsync(Role role, CancellationToken cancellationToken = default)
     {

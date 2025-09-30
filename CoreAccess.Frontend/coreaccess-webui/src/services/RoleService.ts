@@ -10,8 +10,8 @@ import type {
  * Ruft alle Rollen ab (Admin-Only).
  * @returns Eine Liste aller Rollen.
  */
-export async function fetchRoles(): Promise<PagedResult<RoleDto>> {
-    const response = await apiClient.get<PagedResult<RoleDto>>('/role');
+export async function fetchRoles(includeUsers: boolean = false): Promise<PagedResult<RoleDto>> {
+    const response = await apiClient.get<PagedResult<RoleDto>>('/role' + (includeUsers ? '?includeUsers=true' : ''));
     return response.data;
 }
 export async function fetchRole(roleId: string): Promise<RoleDetailDto> {

@@ -52,6 +52,11 @@ public class SystemController(CoreAccessDbContext db,IRoleService roleService, I
     {
         logger.LogInformation("Starting debug...");
 
+        await roleService.SearchRolesAsync(new RoleSearchOptions()
+        {
+            Name = "CoreAccess.Admin"
+        }, cancellationToken);
+        
         return Ok();
     }
 }

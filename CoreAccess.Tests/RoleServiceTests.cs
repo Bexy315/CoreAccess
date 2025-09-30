@@ -53,7 +53,7 @@ namespace CoreAccess.Tests
             var role = new Role { Id = roleId, Name = "Manager" };
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.Is<RoleSearchOptions>(o => o.Id == roleId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Role> { role });
+                .ReturnsAsync([role]);
 
             // Act
             var result = await _roleService.GetRoleByIdAsync(roleId);
@@ -69,7 +69,7 @@ namespace CoreAccess.Tests
             // Arrange
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Role>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _roleService.GetRoleByIdAsync(Guid.NewGuid().ToString());
@@ -102,7 +102,7 @@ namespace CoreAccess.Tests
             // Arrange
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Role>());
+                .ReturnsAsync([]);
 
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _roleService.UpdateRoleAsync(Guid.NewGuid().ToString(), new RoleUpdateRequest()));
@@ -120,7 +120,7 @@ namespace CoreAccess.Tests
 
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Role> { role });
+                .ReturnsAsync([role]);
             _permissionRepositoryMock
                 .Setup(p => p.SearchPermissionsAsync(It.IsAny<PermissionSearchOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<Permission> { permission });

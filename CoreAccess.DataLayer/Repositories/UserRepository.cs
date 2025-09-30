@@ -93,22 +93,19 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
     }
     public async Task<User> InsertOrUpdateUserAsync(User user, CancellationToken cancellationToken = default)
     {
-        var existingUser = await context.Set<User>().FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
-        
+        var existingUser = await context.Users
+            .FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+
         if (existingUser == null)
         {
-            var newUser = await context.Set<User>().AddAsync(user, cancellationToken);
+            var entry = await context.Users.AddAsync(user, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
-            
-            return newUser.Entity;
+            return entry.Entity; 
         }
-
+        
         context.Entry(existingUser).CurrentValues.SetValues(user);
-        context.Entry(existingUser).State = EntityState.Modified;
+
         await context.SaveChangesAsync(cancellationToken);
-        
-        existingUser = await context.Set<User>().FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
-        
         return existingUser;
     }
     public async Task DeleteUserAsync(string id, CancellationToken cancellationToken = default)
