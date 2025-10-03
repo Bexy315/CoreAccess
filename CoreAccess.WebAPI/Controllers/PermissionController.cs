@@ -29,14 +29,14 @@ public class PermissionController(IPermissionService permissionService) : Contro
     [Route("{id}")]
     [Produces(typeof(PermissionDetailDto))]
     [CoreAuthorize(Roles = "CoreAccess.Admin")]
-    public async Task<IActionResult> GetPermissionById([FromRoute] string id)
+    public async Task<IActionResult> GetPermissionById([FromRoute] string id,[FromQuery] bool includeRoles = false)
     {
         try
         {
             if (string.IsNullOrEmpty(id))
                 return BadRequest("Permission ID cannot be null or empty.");
 
-            var permission = await permissionService.GetPermissionByIdAsync(id);
+            var permission = await permissionService.GetPermissionByIdAsync(id, includeRoles);
             if (permission == null)
                 return NotFound($"Permission with ID {id} not found.");
 

@@ -66,6 +66,8 @@ import CoreAccessPreset from "./assets/theme.ts";
 import Sidebar from './layouts/Sidebar.vue'
 import Topbar from './layouts/Topbar.vue';
 import AddRoleDialog from "./components/dialogs/Roles/AddRoleDialog.vue";
+import RoleDetailDialogWrapper from "./components/dialogs/Roles/RoleDetailDialogWrapper.vue";
+import AddPermissionDialog from "./components/dialogs/Permissions/AddPermissionDialog.vue";
 
 const app = createApp(App);
 
@@ -130,6 +132,9 @@ app.component('AddUserDialog', AddUserDialog);
 app.component('UserDetailDialogWrapper', UserDetailDialogWrapper);
 
 app.component('AddRoleDialog', AddRoleDialog);
+app.component('RoleDetailDialogWrapper', RoleDetailDialogWrapper)
+
+app.component('AddPermissionDialog', AddPermissionDialog);
 
 app.directive('Tooltip', Tooltip);
 

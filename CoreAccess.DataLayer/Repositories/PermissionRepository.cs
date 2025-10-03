@@ -17,6 +17,9 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
     {
         var query = context.Permissions.AsQueryable();
         
+        if(options.IncludeRoles??false)
+            query = query.Include(p => p.Roles);
+        
         if (!string.IsNullOrWhiteSpace(options.Search))
         {
             query = query.Where(p => p.Name.Contains(options.Search) || (p.Description != null && p.Description.Contains(options.Search)));

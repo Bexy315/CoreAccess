@@ -13,8 +13,8 @@ const menuItems = [
     icon: 'pi pi-users',
     href: '/users',
     children: [
-      { title: 'Active Users', icon: 'pi pi-user-plus', href: '/users' },
-      { title: 'Inactive Users', icon: 'pi pi-user-minus', href: '/users' },
+      { title: 'Active Users', icon: 'pi pi-user-plus', href: '/users?status=0' },
+      { title: 'Inactive Users', icon: 'pi pi-user-minus', href: '/users?status=1' },
     ],
   },
   { title: 'Roles', icon: 'pi pi-shield', href: '/roles' },

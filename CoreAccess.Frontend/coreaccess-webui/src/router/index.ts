@@ -15,6 +15,7 @@ import UserDetailDialogWrapper from "../components/dialogs/Users/UserDetailDialo
 import Applications from "../pages/Applications.vue";
 import ApplicationDetailDialogWrapper from "../components/dialogs/Applications/ApplicationDetailDialogWrapper.vue";
 import RoleDetailDialogWrapper from "../components/dialogs/Roles/RoleDetailDialogWrapper.vue";
+import PermissionDetailDialogWrapper from "../components/dialogs/Permissions/PermissionDetailDialogWrapper.vue";
 
 const routes: RouteRecordRaw[] = [
     { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, public: false } },
@@ -23,7 +24,8 @@ const routes: RouteRecordRaw[] = [
         children: [{ path: ':id', component: UserDetailDialogWrapper } ]},
     { path: '/roles', name: 'Roles', component: Roles, meta: { requiresAuth: true },
         children: [{ path: ':id', component: RoleDetailDialogWrapper } ]},
-    { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true }, },
+    { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true },
+        children: [{ path: ':id', component: PermissionDetailDialogWrapper } ]},
     { path: '/applications', name: 'Applications', component: Applications, meta: { requiresAuth: true },
         children: [{ path: ':id', component: ApplicationDetailDialogWrapper } ]},
     { path: '/settings', name: 'AppSettings', component: AppSettings, meta: { requiresAuth: true }, },

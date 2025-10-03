@@ -18,6 +18,7 @@ onMounted(async () => {
     await getDashboardMetrics().then(res => {
       totalUsers.value = res.totalUsers;
       totalRoles.value = res.totalRoles;
+      totalPermissions.value = res.totalPermissions;
     });
     loading.value = false;
   } catch {
@@ -49,8 +50,7 @@ function formatUptime(seconds: number): string {
 // Dummy stats
 const totalUsers = ref(0);
 const totalRoles = ref(0);
-const activeSessions = 37;
-const failedLoginsToday = 3;
+const totalPermissions = ref(0)
 </script>
 
 <template>
@@ -84,26 +84,14 @@ const failedLoginsToday = 3;
       </template>
     </Card>
 
-    <Card class="bg-white shadow rounded-2xl p-4">
-      <template #title>Active Sessions</template>
+    <Card class="bg-white shadow rounded-2xl p-4 hover:cursor-pointer hover:border-1 hover:border-gray-300" @click="() => $router.push('/permissions')">
+      <template #title>Permissions</template>
       <template #content>
         <div v-if="loading">
           <Skeleton height="2rem" class="mb-2" />
         </div>
         <div v-else>
-        <p class="text-3xl font-bold text-green-600">{{ activeSessions }}</p>
-        </div>
-      </template>
-    </Card>
-
-    <Card class="bg-white shadow rounded-2xl p-4">
-      <template #title>Failed Logins (Today)</template>
-      <template #content>
-        <div v-if="loading">
-          <Skeleton height="2rem" class="mb-2" />
-        </div>
-        <div v-else>
-        <p class="text-3xl font-bold text-red-500">{{ failedLoginsToday }}</p>
+          <p class="text-3xl font-bold text-primary">{{ totalPermissions }}</p>
         </div>
       </template>
     </Card>

@@ -7,7 +7,7 @@ namespace CoreAccess.BizLayer.Services;
 public interface IPermissionService
 {
     Task<PagedResult<PermissionDto> > SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default);
-    Task<PermissionDetailDto> GetPermissionByIdAsync(string id, CancellationToken cancellationToken = default);
+    Task<PermissionDetailDto> GetPermissionByIdAsync(string id, bool includeRoles = false, CancellationToken cancellationToken = default);
     Task<PermissionDetailDto> CreatePermissionAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default);
     Task<PermissionDetailDto> UpdatePermissionAsync(string id, PermissionUpdateRequest request, CancellationToken cancellationToken = default);
     Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default);
@@ -34,9 +34,9 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
         };
     }
 
-    public async Task<PermissionDetailDto> GetPermissionByIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<PermissionDetailDto> GetPermissionByIdAsync(string id,bool includeRoles = false, CancellationToken cancellationToken = default)
     {
-        var permission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions(){Id = id}, cancellationToken);
+        var permission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions(){Id = id, IncludeRoles = includeRoles}, cancellationToken);
         if (permission == null || permission.Count == 0)
         {
             return null;

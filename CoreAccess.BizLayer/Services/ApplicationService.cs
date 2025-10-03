@@ -9,6 +9,7 @@ public interface IApplicationService
 {
     public Task<PagedResult<ApplicationDto>> GetApplications(ApplicationSearchOptions options, CancellationToken cancellationToken = default);
     public Task<ApplicationDetailDto> GetApplication(string applicationId, CancellationToken cancellationToken = default);
+    public Task AddApplicationAsync(OpenIddictApplicationDescriptor application);
 }
 
 public class ApplicationService(IOpenIddictApplicationManager applicationManager) : IApplicationService
@@ -65,5 +66,15 @@ public class ApplicationService(IOpenIddictApplicationManager applicationManager
             return null;
 
         return appEntity.ToDetailDto();
+    }
+    
+    public async Task AddApplicationAsync(OpenIddictApplicationDescriptor application)
+    {
+        if (application == null) throw new ArgumentNullException(nameof(application));
+        
+        var app = await applicationManager.FindByClientIdAsync(application.ClientId);
+        if (app != null) return;
+
+        await applicationManager.CreateAsync(application);
     }
 }

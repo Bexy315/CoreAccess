@@ -37,6 +37,7 @@ public class PermissionSearchOptions
     public string? Name { get; set; }
     public string? Description { get; set; }
     public bool? IsSystem { get; set; }
+    public bool? IncludeRoles { get; set; }
     public List<string> Roles { get; set; } = new();
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
