@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {showError} from "../../../utils/toast.ts";
-import {createRole} from "../../../services/RoleService.ts";
 import {ref, watch} from "vue";
 import {createPermission} from "../../../services/PermissionService.ts";
 
