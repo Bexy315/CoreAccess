@@ -21,13 +21,13 @@ public class RoleDto()
     public string Id { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
+    public bool IsSystem { get; set; }
 }
 
 public class RoleDetailDto : RoleDto
 {
     public string CreatedAt { get; set; }
     public string UpdatedAt { get; set; }
-    public bool IsSystem { get; set; }
     public List<PermissionDto> Permissions { get; set; }
     public List<UserDto> Users { get; set; } 
 }

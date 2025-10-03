@@ -12,7 +12,7 @@ import MetricsHub from "../pages/MetricsHub.vue";
 import InitialSetup from "../pages/InitialSetup/InitialSetup.vue";
 import Callback from "../pages/Callback.vue";
 import UserDetailDialogWrapper from "../components/dialogs/Users/UserDetailDialogWrapper.vue";
-import Clients from "../pages/Clients.vue";
+import Applications from "../pages/Applications.vue";
 import ApplicationDetailDialogWrapper from "../components/dialogs/Applications/ApplicationDetailDialogWrapper.vue";
 import RoleDetailDialogWrapper from "../components/dialogs/Roles/RoleDetailDialogWrapper.vue";
 
@@ -24,7 +24,7 @@ const routes: RouteRecordRaw[] = [
     { path: '/roles', name: 'Roles', component: Roles, meta: { requiresAuth: true },
         children: [{ path: ':id', component: RoleDetailDialogWrapper } ]},
     { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true }, },
-    { path: '/clients', name: 'Clients', component: Clients, meta: { requiresAuth: true },
+    { path: '/applications', name: 'Applications', component: Applications, meta: { requiresAuth: true },
         children: [{ path: ':id', component: ApplicationDetailDialogWrapper } ]},
     { path: '/settings', name: 'AppSettings', component: AppSettings, meta: { requiresAuth: true }, },
     { path: '/metrics', name: 'MetricsHub', component: MetricsHub, meta: { requiresAuth: true }, },

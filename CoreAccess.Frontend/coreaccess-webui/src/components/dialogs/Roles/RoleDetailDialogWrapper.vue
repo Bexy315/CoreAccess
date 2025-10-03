@@ -2,7 +2,7 @@
   <Dialog
       v-model:visible="visible"
       modal
-      header="Role Details"
+      header='Role Details'
       @hide="closeDialog"
       class="w-10/12 md:w-3/4 lg:w-1/2 h-10/12 md:h-3/4 lg:h-2/3"
   >
@@ -49,7 +49,7 @@
                     </div>
                     <div class="md:col-span-2">
                       <label class="font-medium">Description</label>
-                      <InputTextarea v-model="generalForm.description" rows="3" class="w-full" />
+                      <InputText v-model="generalForm.description" rows="3" class="w-full" />
                     </div>
                   </div>
 
@@ -162,7 +162,12 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {assignPermissionToRole, fetchRole, removePermissionFromRole} from "../../../services/RoleService.ts";
+import {
+  assignPermissionToRole,
+  fetchRole,
+  removePermissionFromRole,
+  updateRole
+} from "../../../services/RoleService.ts";
 import type {RoleDetailDto} from "../../../model/CoreRoleModel.ts";
 import type {PermissionDto} from "../../../model/CorePermissionModel.ts";
 import type {UserDto} from "../../../model/CoreUserModel.ts";
@@ -243,8 +248,15 @@ async function fetchAllPermissions(){
     allPermissions.value = data.items;
   });
 }
-function saveGeneral() {
-  role.value = { ...role.value!, ...generalForm.value, updatedAt: new Date().toISOString() };
+async function saveGeneral() {
+  role.value = await updateRole(route.params.id as string, {
+    Name: generalForm.value.name,
+    Description: generalForm.value.description
+  }).catch(error => {
+    showError(error, 'Failed to update role. Please try again.')
+    return role.value;
+  });
+
   editingGeneral.value = false;
   dirtyGeneral.value = false;
 }

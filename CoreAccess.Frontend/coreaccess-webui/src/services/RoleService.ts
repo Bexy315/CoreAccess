@@ -3,7 +3,7 @@ import type {PagedResult} from '../model/CommonModel.ts';
 
 import type {
     RoleDetailDto,
-    RoleDto
+    RoleDto, UpdateRoleRequest
 } from '../model/CoreRoleModel.ts';
 
 /**
@@ -33,7 +33,7 @@ export async function createRole(roleName: string, description: string): Promise
     const response = await apiClient.post<RoleDetailDto>('/role', { name: roleName, description: description });
     return response.data;
 }
-export async function updateRole(roleId: string, roleName: string): Promise<RoleDetailDto> {
-    const response = await apiClient.put<RoleDetailDto>(`/role/${roleId}`, { name: roleName });
+export async function updateRole(roleId: string, request: UpdateRoleRequest): Promise<RoleDetailDto> {
+    const response = await apiClient.put<RoleDetailDto>(`/role/${roleId}`, { name: request.Name, description: request.Description });
     return response.data;
 }

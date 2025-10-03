@@ -8,6 +8,7 @@ public static class RoleModelExtensions
             Id = entity.Id,
             Name = entity.Name,
             Description = entity.Description,
+            IsSystem = entity.IsSystem
         };
 
     public static RoleDetailDto ToDetailDto(this Role entity) =>

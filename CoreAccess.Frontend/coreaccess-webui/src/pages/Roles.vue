@@ -5,13 +5,7 @@ import { router } from "../router";
 import { useRoute } from "vue-router";
 import {deleteRole, getRoles} from "../services/RoleService.ts";
 import {showError} from "../utils/toast.ts";
-
-// RoleDto model
-type RoleDto = {
-  id: string;
-  name: string;
-  description?: string;
-};
+import type {RoleDto} from "../model/CoreRoleModel.ts";
 
 const route = useRoute();
 
@@ -170,7 +164,7 @@ function addedRole(){
 
               <!-- Delete -->
               <Button
-                  v-if="selectedRoles.length === 1"
+                  v-if="selectedRoles.length === 1 && selectedRoles[0].isSystem !== true"
                   label="Delete"
                   icon="pi pi-trash"
                   severity="danger"
@@ -197,6 +191,18 @@ function addedRole(){
       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column field="name" header="Name" />
       <Column field="description" header="Description" />
+      <Column field="isSystem" header="System Role">
+        <template #body="{ data }">
+          <i
+              :class="[
+                'pi',
+                data.isSystem ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500',
+                'text-lg'
+              ]"
+              :title="data.isSystem ? 'Yes' : 'No'"
+          ></i>
+        </template>
+      </Column>
       <Column class="w-24 !text-end" header="Actions">
         <template #body="{ data }">
           <Button

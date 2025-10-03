@@ -5,12 +5,17 @@ export interface RoleDto {
     id: string;
     name: string;
     description?: string;
-    permissions: PermissionDto[];
-    users: UserDto[];
+    isSystem: boolean;
 }
 
 export interface RoleDetailDto extends RoleDto {
     createdAt: string;
     updatedAt: string;
-    isSystem: boolean;
+    permissions: PermissionDto[];
+    users: UserDto[];
+}
+
+export interface UpdateRoleRequest {
+    Name?: string;
+    Description?: string;
 }

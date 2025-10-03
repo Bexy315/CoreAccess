@@ -136,7 +136,7 @@ const confirmDelete = () => {
 
 function openDetailsDialog(app: ApplicationDto) {
   router.push({
-    path: `/clients/${app.id}`,
+    path: `/applications/${app.id}`,
     query: route.query,
   });
 }
@@ -148,8 +148,8 @@ function createNewApplication() {
 
 <template>
   <div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">Client Management</h1>
-    <p class="mb-4">Here you can manage clients (Applications).</p>
+    <h1 class="text-2xl font-bold mb-4">Application Management</h1>
+    <p class="mb-4">Here you can manage your Applications.</p>
 
     <DataTable
         :value="applications"

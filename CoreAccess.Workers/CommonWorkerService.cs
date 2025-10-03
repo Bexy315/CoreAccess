@@ -63,7 +63,7 @@ public class CommonWorkerService(IServiceProvider serviceProvider) : BackgroundS
                     {
                         Name = "User",
                         Description = "Standard user role with limited permissions."
-                    }, stoppingToken);
+                    },false, stoppingToken);
                 }
                 var newTestUser = await userService.CreateUserAsync(new UserCreateRequest()
                 {

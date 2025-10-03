@@ -183,7 +183,7 @@ const cancelGeneralEdit = () => {
 const closeDialog = () => {
   const { tab, ...rest } = route.query;
   router.push({
-    path: "/clients",
+    path: "/applications",
     query: rest
   });
 };

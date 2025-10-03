@@ -12,14 +12,34 @@ const loading = ref(true)
 const appStateStore = useAppStateStore();
 const router = useRouter();
 
+
+const retryGetAppConfig = async (retries = 3, delay = 1000) => {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      return await getAppConfig();
+    } catch (error) {
+      if (attempt < retries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        throw error;
+      }
+    }
+  }
+};
+
+
 onMounted(async () => {
   try {
     if (toastRef.value) {
       registerGlobalToast(toastRef.value);
     }
-    const appConfigResponse = await getAppConfig().catch((error => {
-      throw error;
-    }));
+
+    const appConfigResponse = await retryGetAppConfig(25);
+
+    if(!appConfigResponse || !appConfigResponse.data) {
+      throw new Error('Invalid app config response');
+    }
+
     appStateStore.setInitiated(appConfigResponse.data.isSetupComplete);
 
     if (!appStateStore.isInitiated && router.currentRoute.value.path !== '/initial-setup') {
@@ -33,6 +53,8 @@ onMounted(async () => {
     showError('Failed to initialize the application. Please try again later.');
   }
 });
+
+
 </script>
 
 <template>

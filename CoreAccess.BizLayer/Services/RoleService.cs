@@ -8,7 +8,7 @@ public interface IRoleService
 {
     Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default);
     Task<RoleDetailDto> GetRoleByIdAsync(string id, bool includeUsers = false, bool includePermissions = false, CancellationToken cancellationToken = default);
-    Task<RoleDetailDto> CreateRoleAsync(RoleCreateRequest request, CancellationToken cancellationToken = default);
+    Task<RoleDetailDto> CreateRoleAsync(RoleCreateRequest request, bool isSystem = false, CancellationToken cancellationToken = default);
     Task<RoleDetailDto> UpdateRoleAsync(string userId, RoleUpdateRequest user, CancellationToken cancellationToken = default);
     Task<RoleDetailDto> AddPermissionToRoleAsync(string roleId, string permissionId, CancellationToken cancellationToken = default);
     Task<RoleDetailDto> RemovePermissionFromRoleAsync(string roleId, string permissionId, CancellationToken cancellationToken = default);
@@ -19,8 +19,6 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
 {
     public async Task<PagedResult<RoleDto>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default)
     {
-        try
-        {
             var result = await roleRepository.SearchRolesAsync(options, cancellationToken);
             var dto = new PagedResult<RoleDto>
             {
@@ -30,17 +28,10 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 PageSize = options.PageSize
             };
             return dto;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 
     public async Task<RoleDetailDto> GetRoleByIdAsync(string id, bool includeUsers = false, bool includePermissions = false, CancellationToken cancellationToken = default)
     {
-        try
-        {
             var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions() { Id = id, IncludeUsers = includeUsers, IncludePermissions = includePermissions}, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
             if (role == null)
             {
@@ -48,23 +39,17 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             }
 
             return role.ToDetailDto();
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 
-    public async Task<RoleDetailDto> CreateRoleAsync(RoleCreateRequest request, CancellationToken cancellationToken = default)
+    public async Task<RoleDetailDto> CreateRoleAsync(RoleCreateRequest request, bool isSystem = false,  CancellationToken cancellationToken = default)
     {
-        try
-        {
             var newRole = new Role
             {
                 Name = request.Name,
                 Description = request.Description,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
                 UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+                IsSystem = isSystem
             };
 
             var createdRole = await roleRepository.InsertOrUpdateRoleAsync(newRole, cancellationToken);
@@ -73,17 +58,10 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 throw new Exception("Failed to create role");
             }
             return createdRole.ToDetailDto();
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 
-    public async Task<RoleDetailDto> UpdateRoleAsync(string userId, RoleUpdateRequest user, CancellationToken cancellationToken = default)
+    public async Task<RoleDetailDto> UpdateRoleAsync(string userId, RoleUpdateRequest request, CancellationToken cancellationToken = default)
     {
-        try
-        {
             var existingRole = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
             {
                 Id = userId,
@@ -96,9 +74,8 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 throw new Exception("Role not found");
             }
             
-            existingRole.Name = user.Name ?? existingRole.Name;
-            existingRole.Description = user.Description ?? existingRole.Description;
-            existingRole.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            existingRole.Name = request.Name ?? existingRole.Name;
+            existingRole.Description = request.Description ?? existingRole.Description;
 
             var role = await roleRepository.InsertOrUpdateRoleAsync(existingRole, cancellationToken);
             if (role == null)
@@ -106,17 +83,10 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 throw new Exception("Failed to update role");
             }
             return role.ToDetailDto();
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 
     public async Task<RoleDetailDto> AddPermissionToRoleAsync(string roleId, string permissionId, CancellationToken cancellationToken = default)
     {
-        try
-        {
             var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
             {
                 Id = roleId,
@@ -150,17 +120,10 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             var updatedRole = await roleRepository.InsertOrUpdateRoleAsync(role, cancellationToken);
 
             return updatedRole.ToDetailDto();
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 
     public async Task<RoleDetailDto> RemovePermissionFromRoleAsync(string roleId, string permissionId, CancellationToken cancellationToken = default)
     {
-        try
-        {
             var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
             {
                 Id = roleId,
@@ -195,17 +158,10 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             var updatedRole = await roleRepository.InsertOrUpdateRoleAsync(role, cancellationToken);
 
             return updatedRole.ToDetailDto();
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 
     public async Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default)
     {
-        try
-        {
             var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
             {
                 Id = id,
@@ -220,11 +176,9 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             if(role.Users != null && role.Users.Count > 0)
                 throw new Exception($"Cannot delete role with assigned users. Please remove all {role.Users.Count} users.");
             
+            if(role.IsSystem)
+                throw new Exception("Cannot delete system role.");
+            
             await roleRepository.DeleteRoleAsync(id, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 }

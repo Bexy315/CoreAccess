@@ -102,14 +102,14 @@ public async Task RunSetupAsync(InitialSetupRequest request, CancellationToken c
     {
         Name = "CoreAccess.Admin",
         Description = "CoreAccess Admin role for administrative access to CoreAccess"
-    }, cancellationToken);
+    },true, cancellationToken);
     logger.LogInformation("Created role {RoleName} with id {RoleId}.", adminRole.Name, adminRole.Id);
 
     var userRole = await roleService.CreateRoleAsync(new RoleCreateRequest()
     {
         Name = "User",
         Description = "User role for default users"
-    }, cancellationToken);
+    },false, cancellationToken);
     logger.LogInformation("Created role {RoleName} with id {RoleId}.", userRole.Name, userRole.Id);
 
     logger.LogInformation("Creating default system permissions...");
