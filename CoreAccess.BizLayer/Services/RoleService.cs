@@ -217,7 +217,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             if(role == null)
                 throw new Exception("Role not found");
             
-            if(role.Users.Count > 0)
+            if(role.Users != null && role.Users.Count > 0)
                 throw new Exception($"Cannot delete role with assigned users. Please remove all {role.Users.Count} users.");
             
             await roleRepository.DeleteRoleAsync(id, cancellationToken);

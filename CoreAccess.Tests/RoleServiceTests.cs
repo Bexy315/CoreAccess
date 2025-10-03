@@ -135,18 +135,22 @@ namespace CoreAccess.Tests
             Assert.NotNull(result);
             Assert.Contains(result.Permissions, p => p.Name == "CanEdit");
         }
-
+        
         [Fact]
         public async Task DeleteRoleAsync_CallsRepository()
         {
-            // Arrange
-            var roleId = Guid.NewGuid().ToString();
-
-            // Act
-            await _roleService.DeleteRoleAsync(roleId);
-
-            // Assert
-            _roleRepositoryMock.Verify(r => r.DeleteRoleAsync(roleId, It.IsAny<CancellationToken>()), Times.Once);
+           // Arrange
+           var roleId = Guid.NewGuid().ToString();
+           var role = new Role { Id = roleId, Name = "Sales", Permissions = new List<Permission>() };
+           _roleRepositoryMock
+               .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
+               .ReturnsAsync(new List<Role> { role });
+           
+           // Act
+           await _roleService.DeleteRoleAsync(roleId);
+           
+           // Assert
+           _roleRepositoryMock.Verify(r => r.DeleteRoleAsync(roleId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
