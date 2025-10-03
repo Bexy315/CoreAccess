@@ -163,11 +163,11 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {fetchUser, assignRoleToUser, removeRoleFromUser, updateUser} from '../../services/UserService'
-import { type CoreUserUpdateRequest} from '../../model/CoreUserModel'
-import {showError, showSuccess} from '../../utils/toast'
-import type {RoleDto} from "../../model/CoreRoleModel.ts";
-import {fetchRoles} from "../../services/RoleService.ts";
+import {fetchUser, assignRoleToUser, removeRoleFromUser, updateUser} from '../../../services/UserService.ts'
+import { type CoreUserUpdateRequest} from '../../../model/CoreUserModel.ts'
+import {showError, showSuccess} from '../../../utils/toast.ts'
+import type {RoleDto} from "../../../model/CoreRoleModel.ts";
+import {getRoles} from "../../../services/RoleService.ts";
 
 const route = useRoute()
 const router = useRouter()
@@ -200,7 +200,7 @@ onMounted(loadUser)
 onMounted(loadRoles)
 
 function loadRoles() {
-  fetchRoles(true).then(roles => {
+  getRoles({ page: 1, pageSize: 1000 }).then(roles => {
     allRoles.value = roles.items
   }).catch(error => {
     showError(error, 'Failed to load roles. Role management might not work properly.')
@@ -307,7 +307,6 @@ watch(generalForm, () => {
 }, { deep: true })
 
 const saveGeneral = async () => {
-  console.log('Saving general user data...', generalForm.value)
   await updateUser(user.value.id, generalForm.value).catch(e => {
     showError(e, 'Failed to update user details. Please try again.')
   })

@@ -120,7 +120,6 @@ export const isAuthenticatedRef = ref(false)
 
 export function logout() {
 
-    console.log(config.postLogoutRedirectUri)
     localStorage.removeItem("tokens");
 
     const url = new URL(config.authBaseUrl + "/connect/endsession");

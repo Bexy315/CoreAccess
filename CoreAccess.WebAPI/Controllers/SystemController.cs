@@ -10,7 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(CoreAccessDbContext db,IRoleService roleService, ILogger<SystemController> logger) : ControllerBase
+public class SystemController(CoreAccessDbContext db,IRoleService roleService,IApplicationService applicationService, ILogger<SystemController> logger) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
@@ -52,11 +52,12 @@ public class SystemController(CoreAccessDbContext db,IRoleService roleService, I
     {
         logger.LogInformation("Starting debug...");
 
-        await roleService.SearchRolesAsync(new RoleSearchOptions()
+        var apps = await applicationService.GetApplications(new ApplicationSearchOptions()
         {
-            Name = "CoreAccess.Admin"
-        }, cancellationToken);
+            Page = 1,
+            PageSize = 10
+        },cancellationToken);
         
-        return Ok();
+        return Ok(apps);
     }
 }

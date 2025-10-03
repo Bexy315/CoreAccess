@@ -48,6 +48,8 @@ public class RoleSearchOptions
     public string? Name { get; set; }
     public string? Description { get; set; }
     public bool? IsSystem { get; set; }
+    public bool? IncludeUsers { get; set; } = false;
+    public bool? IncludePermissions = false;
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 }

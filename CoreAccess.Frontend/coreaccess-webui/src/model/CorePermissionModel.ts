@@ -12,3 +12,9 @@ export interface PermissionDetailDto extends PermissionDto {
     isSystem: boolean;
     roles: RoleDto[];
 }
+
+export interface PermissionSearchOptions {
+    page: number;
+    pageSize: number;
+    search?: string;
+}

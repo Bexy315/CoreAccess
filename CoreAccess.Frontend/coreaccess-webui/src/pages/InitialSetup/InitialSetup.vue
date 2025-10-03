@@ -50,7 +50,6 @@ const submit = () => {
   sendInitialSetupData(payload)
     .then(() => {
       isLoading.value = false;
-      console.log('Setup completed successfully');
       // Redirect to login or dashboard
       window.location.href = '/'; // Adjust as needed
     })
@@ -59,7 +58,6 @@ const submit = () => {
       console.error('Setup failed:', error);
       // Handle error, show notification, etc.
     });
-  console.log('Submitted payload:', payload)
 }
 
 const isMissing = (val: unknown) => {

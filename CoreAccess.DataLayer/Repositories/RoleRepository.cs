@@ -62,7 +62,15 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
             query = query.Where(r => r.IsSystem == options.IsSystem.Value);
         }
         
-        var totalCount = await query.CountAsync(cancellationToken);
+        if(options.IncludeUsers.HasValue && options.IncludeUsers.Value)
+        {
+            query = query.Include(r => r.Users);
+        }
+        
+        if(options.IncludePermissions.HasValue && options.IncludePermissions.Value)
+        {
+            query = query.Include(r => r.Permissions);
+        }
 
         query = query.OrderBy(r => r.Name).ThenBy(r => r.Id);
 
@@ -84,7 +92,8 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
             
             return newRole.Entity;
         }
-
+        
+        role.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
         context.Entry(existingRole).CurrentValues.SetValues(role);
         context.Entry(existingRole).State = EntityState.Modified;
         await context.SaveChangesAsync(cancellationToken);

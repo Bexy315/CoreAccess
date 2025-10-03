@@ -58,13 +58,14 @@ import Chip from 'primevue/chip';
 import AutoComplete from 'primevue/autocomplete';
 
 
-import AddUserDialog from "./components/dialogs/AddUserDialog.vue";
-import UserDetailDialogWrapper from "./components/dialogs/UserDetailDialogWrapper.vue";
+import AddUserDialog from "./components/dialogs/Users/AddUserDialog.vue";
+import UserDetailDialogWrapper from "./components/dialogs/Users/UserDetailDialogWrapper.vue";
 
 import CoreAccessPreset from "./assets/theme.ts";
 
 import Sidebar from './layouts/Sidebar.vue'
 import Topbar from './layouts/Topbar.vue';
+import AddRoleDialog from "./components/dialogs/Roles/AddRoleDialog.vue";
 
 const app = createApp(App);
 
@@ -127,6 +128,8 @@ app.component('AutoComplete', AutoComplete);
 
 app.component('AddUserDialog', AddUserDialog);
 app.component('UserDetailDialogWrapper', UserDetailDialogWrapper);
+
+app.component('AddRoleDialog', AddRoleDialog);
 
 app.directive('Tooltip', Tooltip);
 

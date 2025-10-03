@@ -3,7 +3,7 @@ import {onMounted, ref, watch} from 'vue';
 import {deleteUser, fetchUsers} from '../services/UserService';
 import type { UserDto } from "../model/CoreUserModel.ts";
 import { CoreUserStatus } from "../model/CoreUserModel.ts";
-import AddUserDialog from "../components/dialogs/AddUserDialog.vue";
+import AddUserDialog from "../components/dialogs/Users/AddUserDialog.vue";
 import {showError, showSuccess} from "../utils/toast.ts";
 import {useConfirm} from "primevue";
 import {router} from "../router";
@@ -168,7 +168,6 @@ const confirmDelete = () => {
       deleteSelectedUsers();
     },
     reject: () => {
-      console.log("rejected");
     }
   });
 };

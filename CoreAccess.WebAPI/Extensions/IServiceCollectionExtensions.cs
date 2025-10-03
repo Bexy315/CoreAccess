@@ -122,6 +122,7 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IOpenIddictService, OpenIddictService>();
         services.AddScoped<IInitialSetupService, InitialSetupService>();
+        services.AddScoped<IApplicationService, ApplicationService>();
         
         services.AddSingleton<ISecretProtector, SecretProtector>();
 

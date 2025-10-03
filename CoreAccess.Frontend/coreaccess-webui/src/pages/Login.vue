@@ -78,7 +78,7 @@ const onSubmit = async () => {
   try {
     await login({ username: email.value, password: password.value })
   } catch (error: any) {
-    console.log(error)
+    console.error(error)
     errorMessage.value = "Bitte überprüfen Sie Ihre Anmeldedaten."
   } finally {
     isLoading.value = false

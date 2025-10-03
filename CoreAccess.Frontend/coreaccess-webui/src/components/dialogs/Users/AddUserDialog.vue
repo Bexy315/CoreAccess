@@ -7,16 +7,15 @@
               <Password v-model="user.password" placeholder="Password" toggleMask />
             </div>
           </div>
-    <Button label="Create" icon="pi pi-check" @click="submit()" severity="success" />
+    <Button label="Create" icon="pi pi-check" @click="submit()" severity="success" :disabled="submitDisabled" />
   </Dialog>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, watch } from 'vue';
-import {type CoreUserCreateRequest, CoreUserStatus} from "../../model/CoreUserModel.ts";
-import {type RoleDto } from "../../model/CoreRoleModel.ts";
-import {createUser} from "../../services/UserService.ts";
-import {showError} from "../../utils/toast.ts";
+import {type CoreUserCreateRequest, CoreUserStatus} from "../../../model/CoreUserModel.ts";
+import {createUser} from "../../../services/UserService.ts";
+import {showError} from "../../../utils/toast.ts";
 
 const visible = defineModel<boolean>();
 
@@ -36,8 +35,6 @@ const user = reactive<CoreUserCreateRequest>({
   country: '',
   status: CoreUserStatus.Active
 });
-
-const selectedRoles = ref([] as RoleDto[]);
 
 const selectedStatus =ref({ label: 'Aktiv', value: CoreUserStatus.Active });
 
@@ -63,16 +60,17 @@ watch(visible, (v) => {
   }
 });
 
+const submitDisabled = ref(true);
+
+watch(user, () => {
+  submitDisabled.value = !user.username || !user.password;
+}, { deep: true });
+
 async function submit() {
   const coreUserCreateRequest: CoreUserCreateRequest = {
     ...user,
     status: selectedStatus.value.value
   };
-  const roles = selectedRoles.value.map(role => role.id);
-  const customFieldsData = Object.entries(customValues).map(([key, value]) => ({ key, value }));
-  console.log('CoreUserCreateRequest:', coreUserCreateRequest);
-  console.log('Selected Roles:', roles);
-  console.log('Custom Fields:', customFieldsData);
 
   await createUser(coreUserCreateRequest).catch((error) => {
     console.error('Error creating user:', error);
