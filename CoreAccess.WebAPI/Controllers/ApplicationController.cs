@@ -14,8 +14,6 @@ public class ApplicationController(IApplicationService applicationService, ILogg
     [Produces(typeof(PagedResult<ApplicationDto>))]
     public async Task<IActionResult> GetApplications([FromQuery]ApplicationSearchOptions options, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Fetching applications with search: {Search}, page: {Page}, pageSize: {PageSize}", options.Search, options.Page, options.PageSize);
-
         var applications = await applicationService.GetApplications(options, cancellationToken);
         
         return Ok(applications);
