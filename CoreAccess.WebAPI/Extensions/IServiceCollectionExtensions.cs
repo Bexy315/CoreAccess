@@ -158,6 +158,7 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
                 options.AllowPasswordFlow();
                 options.AllowRefreshTokenFlow();
                 options.AllowAuthorizationCodeFlow();
+                
 
                 options.UseAspNetCore()
                     .DisableTransportSecurityRequirement()
@@ -183,6 +184,8 @@ public static IServiceCollection AddCoreAccessCors(this IServiceCollection servi
             .AddValidation(options =>
             {
                 options.UseLocalServer();
+                options.EnableAuthorizationEntryValidation();
+                options.EnableTokenEntryValidation();
             });
 
         return services;

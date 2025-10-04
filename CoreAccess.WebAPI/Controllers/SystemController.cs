@@ -10,7 +10,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(CoreAccessDbContext db,IRoleService roleService,IApplicationService applicationService, ILogger<SystemController> logger) : ControllerBase
+public class SystemController(CoreAccessDbContext db,IRoleService roleService,IApplicationService applicationService, ITokenService tokenService, ILogger<SystemController> logger) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
@@ -48,16 +48,15 @@ public class SystemController(CoreAccessDbContext db,IRoleService roleService,IA
     
     [HttpGet]
     [Route("start-debug")]
-    public async Task <IActionResult> StartDebug(CancellationToken cancellationToken = default)
+    public async Task <IActionResult> StartDebug([FromQuery]string? userId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Starting debug...");
 
-        var apps = await applicationService.GetApplications(new ApplicationSearchOptions()
-        {
-            Page = 1,
-            PageSize = 10
-        },cancellationToken);
+        if (userId == null)
+            return Ok();
+
+        var result = await tokenService.RevokeUserTokensAsync(userId, cancellationToken);
         
-        return Ok(apps);
+        return Ok(result);
     }
 }

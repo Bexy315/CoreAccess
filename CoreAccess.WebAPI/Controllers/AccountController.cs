@@ -9,7 +9,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 [Route("account")]
-public class AccountController(IUserService userService) : Controller
+public class AccountController(IUserService userService, ISettingsService settingsService) : Controller
 {
     [HttpGet("login")]
     public IActionResult Login(string? returnUrl = null)
@@ -47,6 +47,9 @@ public class AccountController(IUserService userService) : Controller
 
         var identity = new ClaimsIdentity(claims, "Cookies");
         var principal = new ClaimsPrincipal(identity);
+        
+        var tokenLifetime = await settingsService.GetTokenLifetimeAsync();
+        principal.SetAccessTokenLifetime(TimeSpan.FromSeconds(tokenLifetime));
 
         await HttpContext.SignInAsync("Cookies", principal);
 
