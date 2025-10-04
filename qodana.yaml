@@ -1,0 +1,93 @@
+version: # Qodana configuration for CoreAccess Monorepo
+# ============================================
+# This file configures multiple analyses: .NET backend and JS/TS frontend.
+# Both results are collected into a single report output directory (/qodana/report).
+# Works in Docker, Jenkins, or GitHub Actions.
+
+version: "1.0"
+
+# Optional: specify global report/output directory
+resultsDir: ./qodana/report
+
+# Define the analyses to run
+profiles:
+  # --- Backend: ASP.NET Core (C#) ---
+  - name: backend
+    projectDir: ./src/CoreAccess.Backend
+    linter: jetbrains/qodana-dotnet:latest
+    include:
+      - "**/*.cs"
+    exclude:
+      - "**/bin/**"
+      - "**/obj/**"
+      - "**/Migrations/**"
+    dotnet:
+      solution: CoreAccess.Backend.sln
+      configuration: Release
+      test: true
+    properties:
+      qodana.ignoreFile: qodana-backend-ignore.yaml
+      qodana.showReport: true
+
+  # --- Backend SDK (.NET NuGet Package) ---
+  - name: backend-sdk
+    projectDir: ./src/CoreAccess.SDK
+    linter: jetbrains/qodana-dotnet:latest
+    include:
+      - "**/*.cs"
+    exclude:
+      - "**/bin/**"
+      - "**/obj/**"
+
+  # --- Frontend: Admin UI (Vue 3 + TS) ---
+  - name: admin-ui
+    projectDir: ./src/AdminUI
+    linter: jetbrains/qodana-js:latest
+    include:
+      - "src/**/*.ts"
+      - "src/**/*.vue"
+    exclude:
+      - "dist/**"
+      - "node_modules/**"
+    js:
+      nodeVersion: 20
+      packageManager: npm
+      install: true
+    properties:
+      qodana.ignoreFile: qodana-frontend-ignore.yaml
+      qodana.showReport: true
+
+  # --- NPM SDK: @coreaccess/client ---
+  - name: npm-sdk
+    projectDir: ./packages/client
+    linter: jetbrains/qodana-js:latest
+    include:
+      - "src/**/*.ts"
+    exclude:
+      - "dist/**"
+      - "node_modules/**"
+
+# Run all profiles in sequence
+run:
+  - backend
+  - backend-sdk
+  - admin-ui
+  - npm-sdk
+
+# --- Common exclusions ---
+exclude:
+  - "**/bin/**"
+  - "**/obj/**"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/coverage/**"
+
+# Optional: license or baseline configuration (for CI)
+# baseline: ./qodana-baseline.xml
+# licensePath: ./qodana-license.key
+
+# Optional thresholds (fail CI on too many issues)
+failThresholds:
+  total: 0       # fail build if any issue found (0 = strict)
+  critical: 0
+  high: 5

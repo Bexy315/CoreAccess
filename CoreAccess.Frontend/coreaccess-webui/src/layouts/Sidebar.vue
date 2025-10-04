@@ -20,13 +20,6 @@ const menuItems = [
   { title: 'Roles', icon: 'pi pi-shield', href: '/roles' },
   { title: 'Permissions', icon: 'pi pi-lock', href: '/permissions' },
   { title: 'Applications', icon: 'pi pi-sitemap', href: '/applications' },
-  { title: 'Metrics', icon: 'pi pi-gauge', href: '/metrics',
-    children: [
-      { title: 'System Logs', icon: 'pi pi-file', href: '/metrics/logs/system' },
-      { title: 'Audit Logs', icon: 'pi pi-user', href: '/metrics/logs/audit' },
-    ],
-  },
-  { title: 'App Settings', icon: 'pi pi-cog', href: '/settings' },
 ];
 
 const navigateTo = (href: string) => {
