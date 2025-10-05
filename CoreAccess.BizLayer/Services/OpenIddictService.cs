@@ -6,17 +6,22 @@ namespace CoreAccess.BizLayer.Services;
 
 public interface IOpenIddictService
 {
-    List<Claim> GetUserClaims(UserDetailDto user);
+    Task<List<Claim>> GetUserClaims(UserDetailDto user);
     public Task AddApplicationAsync(OpenIddictApplicationDescriptor application);
 }
 
-public class OpenIddictService(IOpenIddictApplicationManager applicationManager) : IOpenIddictService
+public class OpenIddictService(IOpenIddictApplicationManager applicationManager, ISettingsService settingsService) : IOpenIddictService
 {
-    public List<Claim> GetUserClaims(UserDetailDto user)
+    public async Task<List<Claim>> GetUserClaims(UserDetailDto user)
     {
         List<Claim> claims = new List<Claim>();
         
-        claims.Add(new(OpenIddictConstants.Claims.Subject, user.Id.ToString()));
+        claims.Add(new(OpenIddictConstants.Claims.Subject, user.Id));
+        var issuer = await settingsService.GetAsync(SettingsKeys.JwtIssuer);
+        claims.Add(new(OpenIddictConstants.Claims.Issuer, issuer??"coreaccess"));
+        var audience = await settingsService.GetAsync(SettingsKeys.JwtAudience);
+        claims.Add(new(OpenIddictConstants.Claims.Audience, audience??"coreaccess-audience"));
+        
         claims.Add(new(OpenIddictConstants.Claims.Name, user.Username));
         
         if(!string.IsNullOrWhiteSpace(user.Email))

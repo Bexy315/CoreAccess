@@ -30,7 +30,7 @@ public class AuthController(IUserService userService, IOpenIddictService openIdd
                 return Forbid();
             }
             
-            var claims = openIddictService.GetUserClaims(user);
+            var claims = await openIddictService.GetUserClaims(user);
             
             foreach (var claim in claims)
             {
@@ -86,7 +86,7 @@ public class AuthController(IUserService userService, IOpenIddictService openIdd
                 );
             }
             
-            var freshClaims = openIddictService.GetUserClaims(user);
+            var freshClaims = await openIddictService.GetUserClaims(user);
             foreach (var c in freshClaims)
                 c.SetDestinations(OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken);
 
@@ -123,7 +123,7 @@ public class AuthController(IUserService userService, IOpenIddictService openIdd
         
         var user = await userService.GetUserByIdAsync(userId);
         
-        var claims = openIddictService.GetUserClaims(user);
+        var claims = await openIddictService.GetUserClaims(user);
         var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType);
         identity.AddClaims(claims);
 
