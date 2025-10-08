@@ -11,19 +11,15 @@ namespace CoreAccess.DataLayer.Repositories;
 
 public interface IRoleRepository
 {
-    public Task<List<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<PagedResult<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default);
     public Task<Role> InsertOrUpdateRoleAsync(Role user, CancellationToken cancellationToken = default);
     public Task DeleteRoleAsync(string id, CancellationToken cancellationToken = default);
 }
 public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
 {
-    public async Task<List<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Role>> SearchRolesAsync(RoleSearchOptions options, CancellationToken cancellationToken = default)
     {
         if (options == null) options = new RoleSearchOptions();
-
-        var page = Math.Max(1, options.Page);
-        var pageSize = options.PageSize <= 0 ? 50 : options.PageSize;
-        var skip = (page - 1) * pageSize;
 
         IQueryable<Role> query = context.Roles.AsQueryable();
         
@@ -71,15 +67,23 @@ public class RoleRepository(CoreAccessDbContext context) : IRoleRepository
         {
             query = query.Include(r => r.Permissions);
         }
+        
+        var totalCount = await query.CountAsync(cancellationToken);
 
         query = query.OrderBy(r => r.Name).ThenBy(r => r.Id);
 
         var items = await query
-            .Skip(skip)
-            .Take(pageSize)
+            .Skip((options.Page - 1) * options.PageSize)
+            .Take(options.PageSize)
             .ToListAsync(cancellationToken);
 
-        return items;
+        return new PagedResult<Role>
+        {
+            Items = items,
+            Page = options.Page,
+            PageSize = options.PageSize,
+            TotalCount = totalCount
+        };
     }
     public async Task<Role> InsertOrUpdateRoleAsync(Role role, CancellationToken cancellationToken = default)
     {

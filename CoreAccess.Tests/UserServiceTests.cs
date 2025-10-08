@@ -34,7 +34,7 @@ namespace CoreAccess.Tests
             var user = new User { Id = userId, Username = "testuser", PasswordHash = "hash", Status = UserStatus.Active };
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Id == userId.ToString()), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<User> { user });
+                .ReturnsAsync(new PagedResult<User> { Items = new List<User> { user }, TotalCount = 1 });
 
             // Act
             var result = await _userService.GetUserByIdAsync(userId.ToString());
@@ -51,7 +51,7 @@ namespace CoreAccess.Tests
             var userId = Guid.NewGuid();
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.IsAny<UserSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<User>());
+                .ReturnsAsync(new PagedResult<User> { Items = new List<User>(), TotalCount = 0 });
 
             // Act & Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _userService.GetUserByIdAsync(userId.ToString()));
@@ -96,7 +96,7 @@ namespace CoreAccess.Tests
             var users = new List<User> { new User { Id = Guid.NewGuid().ToString(), Username = username } };
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Username == username), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(users);
+                .ReturnsAsync(new PagedResult<User> { Items = users, TotalCount = users.Count });
 
             // Act
             var result = await _userService.UsernameExistsAsync(username);
@@ -112,7 +112,7 @@ namespace CoreAccess.Tests
             var username = "doesnotexist";
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Username == username), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<User>());
+                .ReturnsAsync(new PagedResult<User> { Items = new List<User>(), TotalCount = 0 });
 
             // Act
             var result = await _userService.UsernameExistsAsync(username);
@@ -132,7 +132,7 @@ namespace CoreAccess.Tests
             var user = new User { Id = Guid.NewGuid().ToString(), Username = username, PasswordHash = hash, Status = UserStatus.Active };
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Username == username), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<User> { user });
+                .ReturnsAsync(new PagedResult<User> { Items = new List<User> { user }, TotalCount = 1 });
 
             // Act
             var result = await _userService.ValidateCredentialsByUsernameAsync(username, password);
@@ -155,7 +155,7 @@ namespace CoreAccess.Tests
             };
             _userRepositoryMock
                 .Setup(r => r.SearchUsersAsync(It.Is<UserSearchOptions>(o => o.Username == username), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<User> { user });
+                .ReturnsAsync(new PagedResult<User> { Items = new List<User> { user }, TotalCount = 1 });
 
             // Act
             var result = await _userService.ValidateCredentialsByUsernameAsync(username, "wrongpassword");

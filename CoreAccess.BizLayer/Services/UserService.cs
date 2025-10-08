@@ -29,10 +29,10 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             var result = await userRepository.SearchUsersAsync(options, cancellationToken);
             var dto = new PagedResult<UserDto>
             {
-                Items = result.Select(x => x.ToDto()).ToList(),
-                TotalCount = result.Count,
-                Page = options.Page,
-                PageSize = options.PageSize
+                Items = result.Items.Select(x => x.ToDto()).ToList(),
+                TotalCount = result.TotalCount,
+                Page = result.Page,
+                PageSize = result.PageSize
             };
             return dto;
         }
@@ -55,9 +55,10 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             var user = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
                 Id = userId,
+                IncludeRoles = true,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (user == null)
             {
@@ -85,9 +86,10 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
             var user = await userRepository.SearchUsersAsync(new UserSearchOptions
             {
                 Username = username,
+                IncludeRoles = true,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (user == null)
             {
@@ -148,7 +150,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Id = userId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (existingUser == null)
             {
@@ -203,7 +205,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Id = userId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
         
             using var memoryStream = new MemoryStream();
             await profilePicture.CopyToAsync(memoryStream, cancellationToken);
@@ -231,7 +233,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Id = userId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (user == null)
             {
@@ -242,7 +244,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Id = roleId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (role == null)
             {
@@ -270,7 +272,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Id = userId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (user == null)
             {
@@ -281,7 +283,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Id = roleId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
             
             if (role == null)
             {
@@ -323,7 +325,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Page = 1,
                 PageSize = 1
             }, cancellationToken);
-            return existingUsers.Any();
+            return existingUsers.Items.Any();
         }
         catch (Exception e)
         {
@@ -346,7 +348,7 @@ public class UserService(IUserRepository userRepository, IRoleRepository roleRep
                 Username = username,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken: cancellationToken);
 
             if (user == null || user.Status != UserStatus.Active || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {

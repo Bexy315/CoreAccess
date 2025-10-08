@@ -33,14 +33,14 @@ namespace CoreAccess.Tests
             };
             _repoMock
                 .Setup(r => r.SearchPermissionsAsync(It.IsAny<PermissionSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(permissions);
+                .ReturnsAsync(new PagedResult<Permission> { Items = permissions, TotalCount = permissions.Count });
 
             // Act
             var result = await _service.SearchPermissionsAsync(new PermissionSearchOptions { Page = 1, PageSize = 10 });
 
             // Assert
             Assert.Equal(2, result.TotalCount);
-            Assert.Equal(2, result.Items.Count);
+            Assert.Equal(2, result.Items.Count());
             Assert.Contains(result.Items, i => i.Name == "Read");
         }
 
@@ -51,7 +51,7 @@ namespace CoreAccess.Tests
             var permission = new Permission { Id = "123", Name = "Admin" };
             _repoMock
                 .Setup(r => r.SearchPermissionsAsync(It.Is<PermissionSearchOptions>(o => o.Id == "123"), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Permission> { permission });
+                .ReturnsAsync(new PagedResult<Permission> { Items = new List<Permission> { permission }, TotalCount = 1 });
 
             // Act
             var result = await _service.GetPermissionByIdAsync("123");
@@ -67,7 +67,7 @@ namespace CoreAccess.Tests
             // Arrange
             _repoMock
                 .Setup(r => r.SearchPermissionsAsync(It.IsAny<PermissionSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Permission>());
+                .ReturnsAsync(new PagedResult<Permission> { Items = new List<Permission>(), TotalCount = 0 });
 
             // Act
             var result = await _service.GetPermissionByIdAsync("unknown");
@@ -114,7 +114,7 @@ namespace CoreAccess.Tests
             var existing = new Permission { Id = "1", Name = "Old" };
             _repoMock
                 .Setup(r => r.SearchPermissionsAsync(It.Is<PermissionSearchOptions>(o => o.Id == "1"), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Permission> { existing });
+                .ReturnsAsync(new PagedResult<Permission> { Items = new List<Permission> { existing }, TotalCount = 1 });
 
             _repoMock
                 .Setup(r => r.InsertOrUpdatePermissionAsync(It.IsAny<Permission>(), It.IsAny<CancellationToken>()))
@@ -135,7 +135,7 @@ namespace CoreAccess.Tests
             // Arrange
             _repoMock
                 .Setup(r => r.SearchPermissionsAsync(It.IsAny<PermissionSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Permission>());
+                .ReturnsAsync(new PagedResult<Permission> { Items = new List<Permission>(), TotalCount = 0 });
 
             var request = new PermissionUpdateRequest { Name = "X" };
 
@@ -173,7 +173,7 @@ namespace CoreAccess.Tests
             };
             _repoMock
                 .Setup(r => r.SearchPermissionsAsync(It.Is<PermissionSearchOptions>(o => o.Roles.Contains("Admin")), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(permissions);
+                .ReturnsAsync(new PagedResult<Permission> { Items = permissions, TotalCount = permissions.Count });
 
             // Act
             var result = await _service.GetPermissionsByRolesAsync(new List<string> { "Admin" });

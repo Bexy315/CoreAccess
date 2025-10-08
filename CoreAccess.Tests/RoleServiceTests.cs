@@ -35,13 +35,13 @@ namespace CoreAccess.Tests
             };
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(roles);
+                .ReturnsAsync(new PagedResult<Role> { Items = roles, TotalCount = roles.Count });
 
             // Act
             var result = await _roleService.SearchRolesAsync(new RoleSearchOptions { Page = 1, PageSize = 10 });
 
             // Assert
-            Assert.Equal(2, result.Items.Count);
+            Assert.Equal(2, result.Items.Count());
             Assert.Contains(result.Items, r => r.Name == "Admin");
         }
 
@@ -53,7 +53,7 @@ namespace CoreAccess.Tests
             var role = new Role { Id = roleId, Name = "Manager" };
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.Is<RoleSearchOptions>(o => o.Id == roleId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync([role]);
+                .ReturnsAsync(new PagedResult<Role> { Items = new List<Role> { role }, TotalCount = 1 });
 
             // Act
             var result = await _roleService.GetRoleByIdAsync(roleId);
@@ -69,7 +69,7 @@ namespace CoreAccess.Tests
             // Arrange
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync([]);
+                .ReturnsAsync(new PagedResult<Role> { Items = new List<Role>(), TotalCount = 0 });
 
             // Act
             var result = await _roleService.GetRoleByIdAsync(Guid.NewGuid().ToString());
@@ -102,7 +102,7 @@ namespace CoreAccess.Tests
             // Arrange
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync([]);
+                .ReturnsAsync(new PagedResult<Role> { Items = new List<Role>(), TotalCount = 0 });
 
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _roleService.UpdateRoleAsync(Guid.NewGuid().ToString(), new RoleUpdateRequest()));
@@ -120,10 +120,10 @@ namespace CoreAccess.Tests
 
             _roleRepositoryMock
                 .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync([role]);
+                .ReturnsAsync(new PagedResult<Role> { Items = new List<Role> { role }, TotalCount = 1 });
             _permissionRepositoryMock
                 .Setup(p => p.SearchPermissionsAsync(It.IsAny<PermissionSearchOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<Permission> { permission });
+                .ReturnsAsync(new PagedResult<Permission> { Items = new List<Permission> { permission }, TotalCount = 1 });
             _roleRepositoryMock
                 .Setup(r => r.InsertOrUpdateRoleAsync(It.IsAny<Role>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(role);
@@ -135,7 +135,7 @@ namespace CoreAccess.Tests
             Assert.NotNull(result);
             Assert.Contains(result.Permissions, p => p.Name == "CanEdit");
         }
-        
+
         [Fact]
         public async Task DeleteRoleAsync_CallsRepository()
         {
@@ -144,11 +144,11 @@ namespace CoreAccess.Tests
            var role = new Role { Id = roleId, Name = "Sales", Permissions = new List<Permission>() };
            _roleRepositoryMock
                .Setup(r => r.SearchRolesAsync(It.IsAny<RoleSearchOptions>(), It.IsAny<CancellationToken>()))
-               .ReturnsAsync(new List<Role> { role });
-           
+               .ReturnsAsync(new PagedResult<Role> { Items = new List<Role> { role }, TotalCount = 1 });
+
            // Act
            await _roleService.DeleteRoleAsync(roleId);
-           
+
            // Assert
            _roleRepositoryMock.Verify(r => r.DeleteRoleAsync(roleId, It.IsAny<CancellationToken>()), Times.Once);
         }

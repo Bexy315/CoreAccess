@@ -27,22 +27,22 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
 
         return new PagedResult<PermissionDto>
         {
-            Items = result.Select(x => x.ToDto()).ToList(),
-            TotalCount = result.Count,
-            Page = options.Page,
-            PageSize = options.PageSize
+            Items = result.Items.Select(x => x.ToDto()).ToList(),
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            PageSize = result.PageSize
         };
     }
 
     public async Task<PermissionDetailDto> GetPermissionByIdAsync(string id,bool includeRoles = false, CancellationToken cancellationToken = default)
     {
         var permission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions(){Id = id, IncludeRoles = includeRoles}, cancellationToken);
-        if (permission == null || permission.Count == 0)
+        if (permission == null || !permission.Items.Any())
         {
             return null;
         }
 
-        return permission.FirstOrDefault().ToDetailDto();
+        return permission.Items.FirstOrDefault().ToDetailDto();
     }
 
     public async Task<PermissionDetailDto> CreatePermissionAsync(PermissionCreateRequest request, CancellationToken cancellationToken = default)
@@ -65,7 +65,7 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
 
     public async Task<PermissionDetailDto> UpdatePermissionAsync(string id, PermissionUpdateRequest request, CancellationToken cancellationToken = default)
     {
-        var existingPermission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions() { Id = id }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
+        var existingPermission = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions() { Id = id }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken);
         if (existingPermission == null)
         {
             throw new Exception("Permission not found");
@@ -103,6 +103,6 @@ public class PermissionService(IPermissionRepository permissionRepository) : IPe
 
         var permissions = await permissionRepository.SearchPermissionsAsync(new PermissionSearchOptions(){Roles = roles}, cancellationToken: cancellationToken);
         
-        return permissions.Select(x => x.ToDto()).ToList();
+        return permissions.Items.Select(x => x.ToDto()).ToList();
     }
 }

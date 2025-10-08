@@ -1,6 +1,7 @@
 using CoreAccess.BizLayer.Decorator;
 using CoreAccess.BizLayer.Services;
 using CoreAccess.DataLayer.DbContext;
+using CoreAccess.DataLayer.Repositories;
 using CoreAccess.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/system")]
-public class SystemController(CoreAccessDbContext db,IRoleService roleService,IApplicationService applicationService, ITokenService tokenService, ILogger<SystemController> logger) : ControllerBase
+public class SystemController(CoreAccessDbContext db,IRoleService roleService, IRoleRepository roleRepository, IApplicationService applicationService, ITokenService tokenService, ILogger<SystemController> logger) : ControllerBase
 {
     [HttpGet("health")]
     [Produces(typeof(HealthCheckResponse))]
@@ -48,15 +49,17 @@ public class SystemController(CoreAccessDbContext db,IRoleService roleService,IA
     
     [HttpGet]
     [Route("start-debug")]
-    public async Task <IActionResult> StartDebug([FromQuery]string? userId, CancellationToken cancellationToken = default)
+    public async Task <IActionResult> StartDebug(CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Starting debug...");
 
-        if (userId == null)
-            return Ok();
-
-        var result = await tokenService.RevokeUserTokensAsync(userId, cancellationToken);
-        
+        var result = await roleRepository.SearchRolesAsync(new RoleSearchOptions()
+        {
+            IncludeUsers = true,
+            IncludePermissions = true,
+            Page = 1,
+            PageSize = 100
+        }, cancellationToken);
         return Ok(result);
     }
 }

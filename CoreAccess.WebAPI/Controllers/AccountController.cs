@@ -9,7 +9,7 @@ namespace CoreAccess.WebAPI.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 [Route("account")]
-public class AccountController(IUserService userService, ISettingsService settingsService) : Controller
+public class AccountController(IUserService userService, ISettingsService settingsService, IOpenIddictService openIddictService) : Controller
 {
     [HttpGet("login")]
     public IActionResult Login(string? returnUrl = null)
@@ -21,11 +21,7 @@ public class AccountController(IUserService userService, ISettingsService settin
     [HttpPost("login")]
     public async Task<IActionResult> Login(string username, string password, string? returnUrl = null)
     {
-        var user = await userService.SearchUsersAsync(new UserSearchOptions()
-        {
-            Username = username,
-            PageSize = 1
-        }).ContinueWith(task => task.Result.Items.FirstOrDefault());
+        var user = await userService.GetUserByUsernameAsync(username);
         
         if (user == null)
         {
@@ -39,11 +35,7 @@ public class AccountController(IUserService userService, ISettingsService settin
             return View();
         }
         
-        var claims = new List<Claim>
-        {
-            new Claim(OpenIddictConstants.Claims.Subject, user.Id.ToString()),
-            new Claim(OpenIddictConstants.Claims.Name, user.Username)
-        };
+        var claims = await openIddictService.GetUserClaims(user);
 
         var identity = new ClaimsIdentity(claims, "Cookies");
         var principal = new ClaimsPrincipal(identity);

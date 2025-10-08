@@ -52,7 +52,7 @@ watch(
       search.value = String(q.search || "");
       page.value = Number(q.page || 1);
       pageSize.value = Number(q.pageSize || 10);
-      loadRoles();
+      loadRoles(page.value, pageSize.value);
     }
 );
 
@@ -75,13 +75,6 @@ function onSearchChange() {
   page.value = 1;
   updateQuery({});
 }
-
-/** function onPageChange(event: any) {
-  page.value = event.page + 1;
-  pageSize.value = event.rows;
-  updateQuery({});
-} **/
-
 const confirmDelete = () => {
   if (selectedRoles.value.length !== 1) {
     console.warn("Please select exactly one role to delete.");
@@ -129,6 +122,11 @@ function addedRole(){
   addRoleDialogVisible.value = false;
   loadRoles(page.value / pageSize.value, pageSize.value);
 }
+function onPageChange(event: any) {
+  page.value = event.page + 1
+  pageSize.value = event.rows
+  updateQuery({})
+}
 </script>
 
 <template>
@@ -145,6 +143,7 @@ function addedRole(){
         :rows="pageSize"
         :rowsPerPageOptions="rowsPerPageOptions"
         :loading="loading"
+        @page="onPageChange"
         stripedRows
         responsiveLayout="scroll"
         removableSort

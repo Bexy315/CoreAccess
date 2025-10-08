@@ -7,13 +7,13 @@ namespace CoreAccess.DataLayer.Repositories;
 
 public interface IPermissionRepository
 {
-    public Task<List<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<PagedResult<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default);
     public Task<Permission> InsertOrUpdatePermissionAsync(Permission permission, CancellationToken cancellationToken = default);
     public Task DeletePermissionAsync(string id, CancellationToken cancellationToken = default);
 }
 public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepository
 {
-    public async Task<List<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Permission>> SearchPermissionsAsync(PermissionSearchOptions options, CancellationToken cancellationToken = default)
     {
         var query = context.Permissions.AsQueryable();
         
@@ -50,10 +50,22 @@ public class PermissionRepository(CoreAccessDbContext context) : IPermissionRepo
             query = query.Where(p => p.IsSystem == options.IsSystem.Value);
         }
         
-        return await query
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        query = query.OrderBy(r => r.Name).ThenBy(r => r.Id);
+
+        var items = await query
             .Skip((options.Page - 1) * options.PageSize)
             .Take(options.PageSize)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<Permission>
+        {
+            Items = items,
+            Page = options.Page,
+            PageSize = options.PageSize,
+            TotalCount = totalCount
+        };
     }
     public async Task<Permission> InsertOrUpdatePermissionAsync(Permission permission, CancellationToken cancellationToken = default)
     {

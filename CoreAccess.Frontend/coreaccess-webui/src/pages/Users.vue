@@ -60,7 +60,7 @@ watch(
         statuses.value = []
       }
 
-      loadUsers()
+      loadUsers(page.value, pageSize.value)
     }
 )
 

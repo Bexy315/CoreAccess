@@ -22,17 +22,17 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
             var result = await roleRepository.SearchRolesAsync(options, cancellationToken);
             var dto = new PagedResult<RoleDto>
             {
-                Items = result.Select(x => x.ToDto()).ToList(),
-                TotalCount = result.Count,
-                Page = options.Page,
-                PageSize = options.PageSize
+                Items = result.Items.Select(x => x.ToDto()).ToList(),
+                TotalCount = result.TotalCount,
+                Page = result.Page,
+                PageSize = result.PageSize
             };
             return dto;
     }
 
     public async Task<RoleDetailDto> GetRoleByIdAsync(string id, bool includeUsers = false, bool includePermissions = false, CancellationToken cancellationToken = default)
     {
-            var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions() { Id = id, IncludeUsers = includeUsers, IncludePermissions = includePermissions}, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
+            var role = await roleRepository.SearchRolesAsync(new RoleSearchOptions() { Id = id, IncludeUsers = includeUsers, IncludePermissions = includePermissions}, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken);
             if (role == null)
             {
                 return null;
@@ -67,7 +67,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 Id = userId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken);
             
             if (existingRole == null)
             {
@@ -92,7 +92,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 Id = roleId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken);
             
             if (role == null)
             {
@@ -104,7 +104,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 Id = permissionId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(x => x.Result.FirstOrDefault() ?? null, cancellationToken);
+            }, cancellationToken).ContinueWith(x => x.Result.Items.FirstOrDefault() ?? null, cancellationToken);
             
             if (permission == null)
             {
@@ -130,7 +130,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 IncludePermissions = true,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken);
             
             if (role == null)
             {
@@ -142,7 +142,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 Id = permissionId,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(x => x.Result.FirstOrDefault() ?? null, cancellationToken);
+            }, cancellationToken).ContinueWith(x => x.Result.Items.FirstOrDefault() ?? null, cancellationToken);
             
             if (permission == null)
             {
@@ -168,7 +168,7 @@ public class RoleService(IRoleRepository roleRepository, IPermissionRepository p
                 IncludeUsers = true,
                 Page = 1,
                 PageSize = 1
-            }, cancellationToken).ContinueWith(t => t.Result.FirstOrDefault() ?? null, cancellationToken);
+            }, cancellationToken).ContinueWith(t => t.Result.Items.FirstOrDefault() ?? null, cancellationToken);
             
             if(role == null)
                 throw new Exception("Role not found");

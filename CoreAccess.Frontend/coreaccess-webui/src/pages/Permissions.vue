@@ -41,6 +41,7 @@ const permissions = ref<PermissionDto[]>([]);
 const selectedPermissions = ref<PermissionDto[]>([]);
 const totalRecords = ref(0);
 const loading = ref(false);
+const first = ref(0)
 
 // ---- Data Loading ----
 const loadPermissions = async (page = 0, pageSize = 10) => {
@@ -74,7 +75,7 @@ watch(
       search.value = String(q.search || "");
       page.value = Number(q.page || 1);
       pageSize.value = Number(q.pageSize || 10);
-      loadPermissions();
+      loadPermissions(page.value, pageSize.value);
     }
 );
 
@@ -146,6 +147,12 @@ function addedPermission() {
   addPermissionDialogVisible.value = false;
   loadPermissions(page.value / pageSize.value, pageSize.value);
 }
+
+function onPageChange(event: any) {
+  page.value = event.page + 1
+  pageSize.value = event.rows
+  updateQuery({})
+}
 </script>
 
 <template>
@@ -157,11 +164,13 @@ function addedPermission() {
         :value="permissions"
         :lazy="true"
         v-model:selection="selectedPermissions"
+        :first="first"
         :totalRecords="totalRecords"
         paginator
         :rows="pageSize"
         :rowsPerPageOptions="rowsPerPageOptions"
         :loading="loading"
+        @page="onPageChange"
         stripedRows
         responsiveLayout="scroll"
         removableSort

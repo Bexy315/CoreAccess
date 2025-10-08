@@ -11,17 +11,15 @@ namespace CoreAccess.DataLayer.Repositories;
 
 public interface IUserRepository
 {
-    public Task<List<User>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
+    public Task<PagedResult<User>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default);
     public Task<User> InsertOrUpdateUserAsync(User user, CancellationToken cancellationToken = default);
     public Task DeleteUserAsync(string id, CancellationToken cancellationToken = default);
 }
 public class UserRepository(CoreAccessDbContext context) : IUserRepository
 {
-    public async Task<List<User>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<User>> SearchUsersAsync(UserSearchOptions options, CancellationToken cancellationToken = default)
     {
-        var users = await context.Users.Include(u => u.Roles).ToListAsync(cancellationToken);
-            
-        var query = users.AsQueryable();
+        var query = context.Users.AsQueryable();
 
         if (!string.IsNullOrEmpty(options.Search))
         {
@@ -85,11 +83,28 @@ public class UserRepository(CoreAccessDbContext context) : IUserRepository
         {
             query = query.Where(u => u.Status != null && options.Status.Contains(u.Status));
         }
-
-        var skip = (options.Page - 1) * options.PageSize;
-        var result = query.Skip(skip).Take(options.PageSize).ToList();
         
-        return result;
+        if(options.IncludeRoles == true)
+        {
+            query = query.Include(u => u.Roles);
+        }
+        
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        query = query.OrderBy(r => r.Username).ThenBy(r => r.Id);
+
+        var items = await query
+            .Skip((options.Page - 1) * options.PageSize)
+            .Take(options.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<User>
+        {
+            Items = items,
+            Page = options.Page,
+            PageSize = options.PageSize,
+            TotalCount = totalCount
+        };
     }
     public async Task<User> InsertOrUpdateUserAsync(User user, CancellationToken cancellationToken = default)
     {
