@@ -182,8 +182,11 @@ const confirmDelete = () => {
                :lazy="true"
                v-model:selection="selectedUsers"
                :first="first"
-               @page="onPageChange"
+               :last="first + pageSize - 1"
                :totalRecords="totalRecords"
+               paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+               currentPageReportTemplate="{first} to {last} of {totalRecords}"
+               @page="onPageChange"
                paginator
                :rows="pageSize"
                :rowsPerPageOptions="rowsPerPageOptions"

@@ -12,6 +12,7 @@ const route = useRoute();
 const search = ref<string>(String(route.query.search || ""));
 const page = ref<number>(Number(route.query.page || 1));
 const pageSize = ref<number>(Number(route.query.pageSize || 10));
+const first = ref(0)
 
 const roles = ref<RoleDto[]>([]);
 const selectedRoles = ref<RoleDto[]>([]);
@@ -138,7 +139,11 @@ function onPageChange(event: any) {
         :value="roles"
         :lazy="true"
         v-model:selection="selectedRoles"
+        :first="first"
+        :last="first + pageSize - 1"
         :totalRecords="totalRecords"
+        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        currentPageReportTemplate="{first} to {last} of {totalRecords}"
         paginator
         :rows="pageSize"
         :rowsPerPageOptions="rowsPerPageOptions"

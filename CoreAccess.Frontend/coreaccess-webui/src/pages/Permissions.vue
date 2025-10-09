@@ -165,7 +165,10 @@ function onPageChange(event: any) {
         :lazy="true"
         v-model:selection="selectedPermissions"
         :first="first"
+        :last="first + pageSize - 1"
         :totalRecords="totalRecords"
+        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        currentPageReportTemplate="{first} to {last} of {totalRecords}"
         paginator
         :rows="pageSize"
         :rowsPerPageOptions="rowsPerPageOptions"
