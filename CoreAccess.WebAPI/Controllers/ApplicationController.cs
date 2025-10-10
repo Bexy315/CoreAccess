@@ -32,4 +32,37 @@ public class ApplicationController(IApplicationService applicationService, ILogg
 
         return Ok(application);
     }
+    
+    [HttpPut]
+    [Route("{id}")]
+    [Produces(typeof(ApplicationDetailDto))]
+    public async Task<IActionResult> UpdateApplication([FromRoute] string id, [FromBody] ApplicationUpdateRequest request, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(id))
+            return BadRequest("Application ID cannot be null or empty.");
+
+        if (request == null)
+            return BadRequest("Request body cannot be null.");
+
+        try
+        {
+            await applicationService.UpdateApplicationAsync(id, request, cancellationToken);
+            var updatedApplication = await applicationService.GetApplication(id, cancellationToken);
+            return Ok(updatedApplication);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound($"Application with ID {id} not found.");
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating application with ID {ApplicationId}", id);
+            return StatusCode(500, "An error occurred while updating the application.");
+        }
+    }
+    
 }

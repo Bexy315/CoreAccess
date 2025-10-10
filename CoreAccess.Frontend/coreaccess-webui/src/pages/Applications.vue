@@ -4,13 +4,7 @@ import { useConfirm } from "primevue";
 import { router } from "../router";
 import { useRoute } from "vue-router";
 import {getApplications} from "../services/ApplicationService.ts";
-
-type ApplicationDto = {
-  id: string;
-  name: string;
-  clientId: string;
-  description?: string;
-};
+import type {ApplicationDto} from "../model/ApplicationModel.ts";
 
 const route = useRoute();
 
@@ -24,18 +18,18 @@ const rowsPerPageOptions = ref([5, 10, 20, 50]);
 const totalRecords = ref(0);
 const loading = ref(false);
 const confirm = useConfirm();
+const first = ref(0)
 
 async function fetchApplications(opts: {
   page: number;
   pageSize: number;
   search?: string;
 }) {
-  const response = await getApplications({
+  return await getApplications({
     page: opts.page,
     pageSize: opts.pageSize,
     search: opts.search,
   });
-  return response;
 }
 
 async function deleteApplication(id: string) {
@@ -89,11 +83,11 @@ function onSearchChange() {
   updateQuery({});
 }
 
-/** function onPageChange(event: any) {
+ function onPageChange(event: any) {
   page.value = event.page + 1;
   pageSize.value = event.rows;
   updateQuery({});
-} **/
+}
 
 const confirmDelete = () => {
   if (selectedApplications.value.length !== 1) {
@@ -157,10 +151,15 @@ function createNewApplication() {
         v-model:selection="selectedApplications"
         :totalRecords="totalRecords"
         paginator
+        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        currentPageReportTemplate="{first} to {last} of {totalRecords}"
+        :first="first"
+        :last="first + pageSize - 1"
         :rows="pageSize"
         :rowsPerPageOptions="rowsPerPageOptions"
         :loading="loading"
         stripedRows
+        @page="onPageChange"
         responsiveLayout="scroll"
         removableSort
     >

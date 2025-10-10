@@ -6,14 +6,12 @@ import {useRoute} from "vue-router";
 import {showError} from "../utils/toast.ts";
 import {deletePermission, getPermissions} from "../services/PermissionService.ts";
 
-// ---- Typen ----
 interface PermissionDto {
   id: string;
   name: string;
   description?: string;
 }
 
-// ---- Dummy Services ----
 async function fetchPermissions(opts: { page: number; pageSize: number; search?: string }) {
   console.log("Fetching permissions...", opts);
   return await getPermissions({
@@ -31,7 +29,6 @@ async function fetchPermissions(opts: { page: number; pageSize: number; search?:
 const route = useRoute();
 const confirm = useConfirm();
 
-// ---- Table State ----
 const search = ref<string>(String(route.query.search || ""));
 const page = ref<number>(Number(route.query.page || 1));
 const pageSize = ref<number>(Number(route.query.pageSize || 10));
@@ -43,7 +40,6 @@ const totalRecords = ref(0);
 const loading = ref(false);
 const first = ref(0)
 
-// ---- Data Loading ----
 const loadPermissions = async (page = 0, pageSize = 10) => {
   loading.value = true;
   try {
@@ -99,7 +95,6 @@ function onSearchChange() {
   updateQuery({});
 }
 
-// ---- Actions ----
 const confirmDelete = () => {
   if (selectedPermissions.value.length !== 1) {
     console.warn("Please select exactly one permission to delete.");

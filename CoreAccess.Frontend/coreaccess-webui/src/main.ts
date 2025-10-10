@@ -56,6 +56,7 @@ import PickList from 'primevue/picklist';
 import Toolbar from 'primevue/toolbar';
 import Chip from 'primevue/chip';
 import AutoComplete from 'primevue/autocomplete';
+import Listbox from 'primevue/listbox';
 
 
 import AddUserDialog from "./components/dialogs/Users/AddUserDialog.vue";
@@ -127,6 +128,7 @@ app.component('PickList', PickList);
 app.component('Toolbar', Toolbar);
 app.component('Chip', Chip);
 app.component('AutoComplete', AutoComplete);
+app.component('Listbox', Listbox);
 
 app.component('AddUserDialog', AddUserDialog);
 app.component('UserDetailDialogWrapper', UserDetailDialogWrapper);

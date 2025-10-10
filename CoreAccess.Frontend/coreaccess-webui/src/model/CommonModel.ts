@@ -4,3 +4,8 @@ export interface PagedResult<T> {
     page: number;
     pageSize: number;
 }
+export interface IFlaggedItem {
+    value: string;
+    isNew?: boolean;
+    isToDelete?: boolean;
+}
